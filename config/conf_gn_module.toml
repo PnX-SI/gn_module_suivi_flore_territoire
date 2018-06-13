@@ -1,3 +1,5 @@
 #Parametres de configuration du module occtax
 
 
+api_url = '/suivi_flore_territoire'
+id_application = 19

@@ -15,45 +15,41 @@ SET default_with_oids = false;
 --TABLES AND SEQUENCES--
 ------------------------
 
-CREATE TABLE infos_site (
+CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
     cd_nom integer NOT NULL  
 );
-COMMENT ON TABLE pr_monitoring_flora_territory.infos_site IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
+COMMENT ON TABLE pr_monitoring_flora_territory.t_infos_site IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
 
 
-CREATE TABLE cor_visit_grids (
+CREATE TABLE cor_visit_grid (
     id_area integer NOT NULL,
     id_base_visit integer NOT NULL,
     presence boolean NOT NULL     
 );
-COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_grids IS 'Enregistrer la présence/absence d\une espèce dans une maille définie lors d\une visite';
+COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_grid IS 'Enregistrer la présence/absence d\une espèce dans une maille définie lors d\une visite';
 
 
 CREATE TABLE cor_visit_perturbation (
     id_base_visit integer NOT NULL,
-    id_nomenclature integer NOT NULL   
+    id_nomenclature_perturbation integer NOT NULL   
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_perturbation IS 'Extension de t_base_visit de gn_monitoring, enregistrer les perturbations constatées lors d\une visite';
 
-
-CREATE TABLE zp_import(
-    id integer
-)
 
 ---------------
 --PRIMARY KEY--
 ---------------
 
-ALTER TABLE ONLY infos_site 
-    ADD CONSTRAINT pk_id_infos_site PRIMARY KEY (id_infos_site);
+ALTER TABLE ONLY t_infos_site 
+    ADD CONSTRAINT pk_id_t_infos_site PRIMARY KEY (id_infos_site);
 
-ALTER TABLE ONLY cor_visit_grids 
-    ADD CONSTRAINT pk_cor_visit_grids PRIMARY KEY (id_area, id_base_visit);
+ALTER TABLE ONLY cor_visit_grid
+    ADD CONSTRAINT pk_cor_visit_grid PRIMARY KEY (id_area, id_base_visit);
 
 ALTER TABLE ONLY cor_visit_perturbation 
-    ADD CONSTRAINT pk_cor_visit_perturbation PRIMARY KEY (id_base_visit, id_nomenclature);
+    ADD CONSTRAINT pk_cor_visit_perturbation PRIMARY KEY (id_base_visit, id_nomenclature_perturbation);
 
 
 
@@ -61,25 +57,25 @@ ALTER TABLE ONLY cor_visit_perturbation
 --FOREIGN KEY--
 ---------------
 
-ALTER TABLE ONLY infos_site 
+ALTER TABLE ONLY t_infos_site 
     ADD CONSTRAINT fk_infos_site_id_base_site FOREIGN KEY (id_base_site) REFERENCES gn_monitoring.t_base_sites (id_base_site) ON UPDATE CASCADE ON DELETE CASCADE; 
 
-ALTER TABLE ONLY infos_site
+ALTER TABLE ONLY t_infos_site
     ADD CONSTRAINT fk_infos_site_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
 
 
-ALTER TABLE ONLY cor_visit_grids 
-    ADD CONSTRAINT fk_cor_visit_grids_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY cor_visit_grid
+    ADD CONSTRAINT fk_cor_visit_grid_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE ONLY cor_visit_grids 
-    ADD CONSTRAINT fk_cor_visit_grids_id_area FOREIGN KEY (id_area) REFERENCES ref_geo.l_areas (id_area);
+ALTER TABLE ONLY cor_visit_grid
+    ADD CONSTRAINT fk_cor_visit_grid_id_area FOREIGN KEY (id_area) REFERENCES ref_geo.l_areas (id_area);
 
 
 ALTER TABLE ONLY cor_visit_perturbation 
     ADD CONSTRAINT fk_cor_visit_perturbation_id_base_visit FOREIGN KEY (id_base_visit) REFERENCES gn_monitoring.t_base_visits (id_base_visit) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY cor_visit_perturbation 
-    ADD CONSTRAINT fk_cor_visit_perturbation_id_nomenclature FOREIGN KEY (id_nomenclature) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_cor_visit_perturbation_id_nomenclature_perturbation FOREIGN KEY (id_nomenclature_perturbation) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
 
 
 ------------
@@ -102,7 +98,7 @@ INSERT INTO gn_monitoring.t_base_sites
 SELECT 1, 1, 503, 'zp', '', id, '01-01-2018', ST_TRANSFORM(ST_SetSRID(geom, 2154), 4326)
 FROM pr_monitoring_flora_territory.zp_tmp;
 
-INSERT INTO pr_monitoring_flora_territory.infos_site (id_base_site, cd_nom)
+INSERT INTO pr_monitoring_flora_territory.t_infos_site (id_base_site, cd_nom)
 SELECT id_base_site, zp.cd_nom
 FROM gn_monitoring.t_base_sites bs
 JOIN pr_monitoring_flora_territory.zp_tmp zp ON zp.id::character varying = bs.base_site_code;
@@ -130,7 +126,7 @@ WHERE id_type=203;
 
 -- TODO Mettre en paramètre l'id du module
 INSERT INTO gn_monitoring.cor_site_application
-SELECT  bs.id_base_site, 19
+SELECT  bs.id_base_site, MY_ID_MODULE
 FROM gn_monitoring.t_base_sites bs
 JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;
 
