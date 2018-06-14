@@ -1,0 +1,27 @@
+
+<div class="row row-0">
+  <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+      <pnx-map height="80vh">
+          <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+          </pnx-geojson>
+        </pnx-map>
+  </div>
+
+
+  <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+    <h3> Zone de prospection</h3>
+    <pre>
+      {{currentZp | json}}
+    </pre>
+    
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
