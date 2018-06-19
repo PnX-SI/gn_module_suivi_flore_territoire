@@ -18,6 +18,17 @@ def get_sites_zp():
     return FeatureCollection([d.get_geofeature() for d in data])
 
 
+@blueprint.route('/site/<id_zp>', methods=['GET'])
+@json_resp
+def get_ont_zp(id_zp):
+    '''
+    Retourne la liste des ZP
+    '''
+    data = DB.session.query(TInfoSite).get(id_zp)
+    return data.as_dict()
+
+
+
 
 
 
