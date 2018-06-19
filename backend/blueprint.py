@@ -28,14 +28,16 @@ def get_one_zp():
     q = DB.session.query(TInfoSite)
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-    data = DB.session.query(TInfoSite).one()
-    return data.as_dict()
+    data = q.first()
+    if data:
+        return data.as_dict()
+    return None
 
 @blueprint.route('/site/<id_base_site>', methods=['GET'])
 @json_resp
 def get_one_zp_id(id_info_site):
     '''
-    Retourne une ZP à partir de l'id_infi_site
+    Retourne une ZP à partir de l'id_info_site
     '''
     data = DB.session.query(TInfoSite).get(id_info_site)
     return data.as_dict()
