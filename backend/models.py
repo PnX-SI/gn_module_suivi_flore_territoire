@@ -7,9 +7,10 @@ from geonature.utils.utilssqlalchemy import (
         geoserializable,
         GenericQuery
 )
-from geonature.core.gn_monitoring.models import TBaseSites
+from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisitObserver
 from geonature.core.ref_geo.models import LAreas
 from pypnnomenclature.models import TNomenclatures
+from geonature.core.users.models import TRoles
 
 @serializable
 @geoserializable
@@ -38,12 +39,12 @@ class TInfoSite(DB.Model):
         )
 
 @serializable
-@geoserializable
+# @geoserializable
 class CorVisitGrids(DB.Model):
     '''
     Corespondance entre une maille et une visite
     '''
-    __tablename__ = 'infos_site'
+    __tablename__ = 'cor_visit_grid'
     __table_args__ = {'schema': 'pr_monitoring_flora_territory'}
 
     id_area = DB.Column(
@@ -53,9 +54,9 @@ class CorVisitGrids(DB.Model):
       )
     id_base_visit = DB.Column(
       DB.Integer,
-      ForeignKey(TBaseSites.id_base_site),
+      ForeignKey(TBaseVisits.id_base_visit),
       primary_key=True
-      )
+    )
     presence = DB.Column(DB.Boolean)
 
 
@@ -70,7 +71,7 @@ class CorVisitPerturbation(DB.Model):
 
     id_base_visit = DB.Column(
       DB.Integer,
-      ForeignKey(TBaseSites.id_base_site),
+      ForeignKey(TBaseVisits.id_base_site),
       primary_key=True,
       )
     id_nomenclature_perturbation = DB.Column(
@@ -78,3 +79,38 @@ class CorVisitPerturbation(DB.Model):
       ForeignKey(TNomenclatures.id_nomenclature),
       primary_key=True
       )
+
+
+@serializable
+class TVisiteSFT(TBaseVisits):
+    '''
+    Visite sur une ZP
+    et corespondance avec ses mailles
+    '''
+    __tablename__ = 't_base_visits'
+    __table_args__ = {
+        'schema': 'gn_monitoring',
+        'extend_existing': True
+        }
+    cor_visit_grid = DB.relationship(
+        'CorVisitGrids',
+        primaryjoin=(
+            CorVisitGrids.id_base_visit == TBaseVisits.id_base_visit
+        ),
+        foreign_keys=[
+            CorVisitGrids.id_base_visit,
+        ]
+    )
+    cor_visit_perturbation = DB.relationship(
+        'CorVisitPerturbation',
+        primaryjoin=(
+            CorVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit
+        ),
+        foreign_keys=[
+            CorVisitPerturbation.id_base_visit,
+        ]
+    )
+
+
+
+

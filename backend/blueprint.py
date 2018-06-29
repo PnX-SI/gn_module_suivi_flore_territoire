@@ -1,9 +1,9 @@
 from flask import Blueprint, request
 from geojson import FeatureCollection
 
-from geonature.utils.utilssqlalchemy import json_resp, GenericQuery
+from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
-from .models import TInfoSite
+from .models import TInfoSite, TVisiteSFT
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
 
@@ -45,9 +45,30 @@ def get_one_zp_id(id_infos_site):
     return data.as_dict()
 
 
+@blueprint.route('/visits', methods=['GET'])
+@json_resp
+def get_visits():
+    '''
+    Retourne toutes les visites du module
+    '''
+    data = DB.session.query(TVisiteSFT).all()
+    return [d.as_dict(True) for d in data]
 
 
+@blueprint.route('/visit/<id_visit>', methods=['GET'])
+@json_resp
+def get_visit(id_visit):
+    '''
+    Retourne une visite
+    '''
+    data = DB.session.query(TVisiteSFT).get(id_visit)
+    return data.as_dict()
 
+@blueprint.route('/visit', methods=['POST'])
+@json_resp
+def post_visit():
+    #TODO
+    return None
 
 
 
