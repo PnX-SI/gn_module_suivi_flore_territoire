@@ -3,7 +3,9 @@ from geojson import FeatureCollection
 
 from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
-from .models import TInfoSite, TVisiteSFT
+from .models import TInfoSite, TVisiteSFT, CorVisitPerturbation, CorVisitGrids
+from geonature.core.gn_monitoring.models import corVisitObserver
+from geonature.core.users.models import TRoles
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
 
@@ -14,8 +16,15 @@ def get_sites_zp():
     '''
     Retourne la liste des ZP
     '''
-    data = DB.session.query(TInfoSite).all()
+    parameters = request.args 
+    q = DB.session.query(TInfoSite)
+
+    if 'cd_nom' in parameters:
+        q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
+    print(q)
+    data = q.all()
     return FeatureCollection([d.get_geofeature() for d in data])
+
 
 
 @blueprint.route('/site', methods=['GET'])
@@ -67,8 +76,31 @@ def get_visit(id_visit):
 @blueprint.route('/visit', methods=['POST'])
 @json_resp
 def post_visit():
-    #TODO
-    return None
+    data = dict(request.get_json())
+    tab_perturbation = data.pop('cor_visit_perturbation')
+    tab_visit_grid = data.pop('cor_visit_grid')
+    tab_observer = data.pop('cor_visit_observer')
+    visit = TVisiteSFT(**data)
+    # print(data)
+    print(visit)
+    for per in tab_perturbation:
+        pertur = CorVisitPerturbation(id_nomenclature_perturbation = per)
+        visit.cor_visit_perturbation.append(pertur)
+    for v in tab_visit_grid:
+        visit_grid = CorVisitGrids(**v)
+        visit.cor_visit_grid.append(visit_grid)
+        print(visit_grid)
+    observers = DB.session.query(TRoles).filter(
+        TRoles.id_role.in_(tab_observer)
+        ).all()
+    print(observers)
+    for o in observers:
+        print(o.as_dict())
+        visit.observers.append(o)
+    print(visit.as_dict(recursif=True))
+    DB.session.add(visit)
+    DB.session.commit()
+    return visit.as_dict(recursif=True)
 
 
 

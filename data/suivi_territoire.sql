@@ -132,3 +132,84 @@ JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::char
 
 DROP TABLE pr_monitoring_flora_territory.zp_tmp;
 DROP TABLE pr_monitoring_flora_territory.maille_tmp;
+
+-- Créer la nomenclature des perturbations
+INSERT INTO ref_nomenclatures.bib_nomenclatures_types (id_type, mnemonique, label_default, definition_default, label_fr, definition_fr)
+VALUES (118, 'TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.');
+
+
+
+INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, id_broader, hierarchy) VALUES 
+(118, 'GeF', 'Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 0, '118.001'),
+(118, 'Bru', 'Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', 503 , '118.503.001'),
+(118, 'Inc', 'Incendie', 'Incendie (naturel ou incontrôlé)', 'Gestion par le feu: Incendie (naturel ou incontrôlé)', 'Incendie (naturel ou incontrôlé)', 'Gestion par le feu: Incendie (naturel ou incontrôlé)', 503, '118.503.002'),
+(118, 'AcL', 'Activité de loisirs', 'Activité de loisirs', 'Type de perturbation: Activité de loisirs', 'Activité de loisirs', 'Type de perturbation: Activité de loisirs', 0, '118.002'),
+(118, 'Rec', 'Récolte des fleurs', 'Récolte des fleurs', 'Activité de loisirs: Récolte des fleurs', 'Récolte des fleurs', 'Activité de loisirs: Récolte des fleurs', 523  , '118.506.001'),
+(118, 'Arr', 'Arrachage des pieds', 'Arrachage des pieds', 'Activité de loisirs: Arrachage des pieds', 'Arrachage des pieds', 'Activité de loisirs: Arrachage des pieds', 523, '118.506.002'),
+(118, 'Pie', 'Piétinement pédestre', 'Piétinement pédestre', 'Activité de loisirs: Piétinement pédestre', 'Piétinement pédestre', 'Activité de loisirs: Piétinement pédestre', 523, '118.506.003'),
+(118, 'Veh', 'Véhicules à moteur', 'Véhicules à moteur', 'Activité de loisirs: Véhicules à moteur', 'Véhicules à moteur', 'Activité de loisirs: Véhicules à moteur', 523, '118.506.004'),
+(118, 'Plo', 'Plongée dans un lac', 'Plongée dans un lac', 'Activité de loisirs: Plongée dans un lac', 'Plongée dans un lac', 'Activité de loisirs: Plongée dans un lac', 523, '118.506.005'),
+(118, 'GeE', 'Gestion de l''eau', 'Gestion de l''eau', 'Type de perturbation: Gestion de l''eau', 'Gestion de l''eau', 'Type de perturbation: Gestion de l''eau', 0, '118.003'),
+(118, 'Pom', 'Pompage', 'Pompage', 'Gestion de l''eau: Pompage', 'Pompage', 'Gestion de l''eau: Pompage', 529, '118.003'),
+(118, 'Drn', 'Drainage', 'Drainage', 'Gestion de l''eau: Drainage', 'Drainage', 'Gestion de l''eau: Drainage', 529, '118.529.001'),
+(118, 'Irg', 'Irrigation par gravité', 'Irrigation par gravité', 'Gestion de l''eau: Irrigation par gravité', 'Irrigation par gravité', 'Gestion de l''eau: Irrigation par gravité', 529, '118.529.002'),
+(118, 'Ira', 'Irrigation par aspersion', 'Irrigation par aspersion', 'Gestion de l''eau: Irrigation par aspersion', 'Irrigation par aspersion', 'Gestion de l''eau: Irrigation par aspersion', 529, '118.529.003'),
+(118, 'Cur', 'Curage', 'Curage', 'Gestion de l''eau: Curage (fossé, mare, serve)', 'Curage', 'Gestion de l''eau: Curage (fossé, mare, serve)', 529, '118.529.004'),
+(118, 'Ext', 'Extraction de granulats', 'Extraction de granulats', 'Gestion de l''eau: Extraction de granulats', 'Extraction de granulats', 'Gestion de l''eau: Extraction de granulats', 529, '118.529.005'),
+(118, 'AcA', 'Activités agricoles', 'Activités agricoles', 'Type de perturbation: Activités agricoles', 'Activités agricoles', 'Type de perturbation: Activités agricoles', 0, '118.004'),
+(118, 'Lab', 'Labour', 'Labour', 'Activités agricoles: Labour', 'Labour', 'Activités agricoles: Labour', 536, '118.536.001'),
+(118, 'Fer', 'Fertilisation', 'Fertilisation', 'Activités agricoles: Fertilisation', 'Fertilisation', 'Activités agricoles: Fertilisation', 536, '118.536.002'),
+(118, 'Prp', 'Produits phyosanitaires', 'Produits phyosanitaires', 'Activités agricoles: Produits phyosanitaires (épandage)', 'Produits phyosanitaires', 'Activités agricoles: Produits phyosanitaires (épandage)', 536, '118.536.003'),
+(118, 'Fau', 'Fauchaison', 'Fauchaison', 'Activités agricoles: Fauchaison', 'Fauchaison', 'Activités agricoles: Fauchaison', 536, '118.536.004'),
+(118, 'Apb', 'Apport de blocs', 'Apport de blocs', 'Activités agricoles: Apport de blocs (déterrés par le labour)', 'Apport de blocs', 'Activités agricoles: Apport de blocs (déterrés par le labour)', 536, '118.536.005'),
+(118, 'Gyr', 'Gyrobroyage', 'Gyrobroyage', 'Activités agricoles: Gyrobroyage', 'Gyrobroyage', 'Activités agricoles: Gyrobroyage', 536, '118.536.006'),
+(118, 'Reg', 'Revégétalisation', 'Revégétalisation', 'Activités agricoles: Revégétalisation (sur semis)', 'Revégétalisation', 'Activités agricoles: Revégétalisation (sur semis)', 536, '118.536.007'),
+(118, 'AcF', 'Activités forestières', 'Activités forestières', 'Type de perturbation: Activités forestières', 'Activités forestières', 'Type de perturbation: Activités forestières', 0, '118.005'),
+(118, 'Jpf', 'Jeune plantation de feuillus', 'Jeune plantation de feuillus', 'Activités forestières: Jeune plantation de feuillus', 'Jeune plantation de feuillus', 'Activités forestières: Jeune plantation de feuillus', 544, '118.544.001'),
+(118, 'Jpm', 'Jeune plantation mixte', 'Jeune plantation mixte', 'Activités forestières: Jeune plantation mixte', 'Jeune plantation mixte', 'Activités forestières: Jeune plantation mixte', 544, '118.544.002'),
+(118, 'Jpr', 'Jeune plantation de résineux', 'Jeune plantation de résineux', 'Activités forestières: Jeune plantation de résineux', 'Jeune plantation de résineux', 'Activités forestières: Jeune plantation de résineux', 544, '118.544.003'),
+(118, 'Ela', 'Elagage', 'Elagage', 'Activités forestières: Elagage (haie et bord de route)', 'Elagage', 'Activités forestières: Elagage (haie et bord de route)', 544, '118.544.004'),
+(118, 'Cec', 'Coupe d''éclaircie', 'Coupe d''éclaircie', 'Activités forestières: Coupe d''éclaircie', 'Coupe d''éclaircie', 'Activités forestières: Coupe d''éclaircie', 544, '118.544.005'),
+(118, 'Cbl', 'Coupe à blanc', 'Coupe à blanc', 'Activités forestières: Coupe à blanc', 'Coupe à blanc', 'Activités forestières: Coupe à blanc', 544, '118.544.006'),
+(118, 'Bcl', 'Bois coupé et laissé', 'Bois coupé et laissé', 'Activités forestières: Bois coupé et laissé sur place', 'Bois coupé et laissé', 'Activités forestières: Bois coupé et laissé sur place', 544, '118.544.007'),
+(118, 'Opf', 'Ouverture de piste forestière', 'Ouverture de piste forestière', 'Activités forestières: Ouverture de piste forestière', 'Ouverture de piste forestière', 'Activités forestières: Ouverture de piste forestière', 544, '118.544.008'),
+(118, 'CpA', 'Comportement des animaux', 'Comportement des animaux', 'Type de perturbation: Comportement des animaux', 'Comportement des animaux', 'Type de perturbation: Comportement des animaux', 0, '118.006'),
+(118, 'Jas', 'Jas', 'Jas', 'Comportement des animaux: Jas (couchades nocturnes des animaux domestiques)', 'Jas', 'Comportement des animaux: Jas (couchades nocturnes des animaux domestiques)', 553, '118.553.001'),
+(118, 'Cha', 'Chaume', 'Chaume', 'Comportement des animaux: Chaume (couchades aux heures chaudes des animaux domestiques)', 'Chaume', 'Comportement des animaux: Chaume (couchades aux heures chaudes des animaux domestiques)', 553, '118.553.002'),
+(118, 'Fau', 'Faune sauvage', 'Faune sauvage', 'Comportement des animaux: Faune sauvage (reposoir)', 'Faune sauvage', 'Comportement des animaux: Faune sauvage (reposoir)', 553, '118.553.003'),
+(118, 'Psa', 'Piétinement sans déjection', 'Piétinement sans déjection', 'Comportement des animaux: Piétinement, sans apports de déjection', 'Piétinement sans déjection', 'Comportement des animaux: Piétinement, sans apports de déjection', 553, '118.553.004'),
+(118, 'Pat', 'Pâturage', 'Pâturage', 'Comportement des animaux: Pâturage (sur herbacées exclusivement)', 'Pâturage', 'Comportement des animaux: Pâturage (sur herbacées exclusivement)', 553, '118.553.005'),
+(118, 'Acl', 'Abroutissement et écorçage ', 'Abroutissement et écorçage ', 'Comportement des animaux: Abroutissement et écorçage (sur ligneux)', 'Abroutissement et écorçage ', 'Comportement des animaux: Abroutissement et écorçage (sur ligneux)', 553, '118.553.006'),
+(118, 'San', 'Sangliers labours grattis', 'Sangliers labours grattis', 'Comportement des animaux: Sangliers-labours et grattis', 'Sangliers labours grattis', 'Comportement des animaux: Sangliers-labours et grattis', 553, '118.553.007'),
+(118, 'Mar', 'Marmottes terriers', 'Marmottes terriers', 'Comportement des animaux: Marmottes-terriers', 'Marmottes terriers', 'Comportement des animaux: Marmottes-terriers', 553, '118.553.008'),
+(118, 'Che', 'Chenilles défoliation', 'Chenilles défoliation', 'Comportement des animaux: Chenilles-défoliation', 'Chenilles défoliation', 'Comportement des animaux: Chenilles-défoliation', 553, '118.553.009'),
+(118, 'PnE', 'Processus naturels d''érosion', 'Processus naturels d''érosion', 'Type de perturbation: Processus naturels d''érosion', 'Processus naturels d''érosion', 'Type de perturbation: Processus naturels d''érosion', 0, '118.007'),
+(118, 'Sub', 'Submersion temporaire', 'Submersion temporaire', 'Processus naturels d''érosion: Submersion temporaire', 'Submersion temporaire', 'Processus naturels d''érosion: Submersion temporaire', 563, '118.563.001'),
+(118, 'Env', 'Envasement', 'Envasement', 'Processus naturels d''érosion: Envasement', 'Envasement', 'Processus naturels d''érosion: Envasement', 563, '118.563.002'),
+(118, 'Eng', 'Engravement', 'Engravement', 'Processus naturels d''érosion: Engravement (laves torrentielles et divagation d''une rivière)', 'Engravement', 'Processus naturels d''érosion: Engravement (laves torrentielles et divagation d''une rivière)', 563, '118.563.003'),
+(118, 'Aam', 'Avalanche apport matériaux', 'Avalanche apport matériaux', 'Processus naturels d''érosion: Avalanche (apport de matériaux non triés)', 'Avalanche', 'Processus naturels d''érosion: Avalanche (apport de matériaux non triés)', 563, '118.563.004'),
+(118, 'Evs', 'Erosion vastes surfaces', 'Erosion vastes surfaces', 'Processus naturels d''érosion:Erosion s''exerçant sur de vastes surfaces', 'Erosion vastes surfaces', 'Processus naturels d''érosion:Erosion s''exerçant sur de vastes surfaces', 563, '118.563.005'),
+(118, 'Sbe', 'Sapement berge', 'Sapement berge', 'Processus naturels d''érosion: Sapement de la berge d''un cours d''eau', 'Sapement berge', 'Processus naturels d''érosion: Sapement de la berge d''un cours d''eau', 563, '118.563.006'),
+(118, 'Art', 'Avalanche ramonage terrain', 'Avalanche ramonage terrain', 'Processus naturels d''érosion: Avalanche-ramonage du terrain', 'Avalanche ramonage terrain', 'Processus naturels d''érosion: Avalanche-ramonage du terrain', 563, '118.563.007'),
+(118, 'Ebr', 'Eboulement récent', 'Eboulement récent', 'Processus naturels d''érosion: Eboulement récent', 'Eboulement récent', 'Processus naturels d''érosion: Eboulement récent', 563, '118.563.008'),
+(118, 'AmL', 'Aménagements lourds', 'Aménagements lourds', 'Type de perturbation: Aménagements lourds', 'Aménagements lourds', 'Type de perturbation: Aménagements lourds', 0, '118.008'),
+(118, 'Car', 'Carrière en roche dure', 'Carrière en roche dure', 'Aménagements lourds: Carrière en roche dure', 'Carrière en roche dure', 'Aménagements lourds: Carrière en roche dure', 572, '118.572.001'),
+(118, 'Fos', 'Fossé pare-blocs', 'Fossé pare-blocs', 'Aménagements lourds: Fossé pare-blocs', 'Fossé pare-blocs', 'Aménagements lourds: Fossé pare-blocs', 572, '118.572.002'),
+(118, 'End', 'Endiguement', 'Endiguement', 'Aménagements lourds: Endiguement', 'Endiguement', 'Aménagements lourds: Endiguement', 572, '118.572.003'),
+(118, 'Ter', 'Terrassement aménagements lourds', 'Terrassement aménagements lourds', 'Aménagements lourds: Terrassement pour aménagements lourds', 'Terrassement aménagements lourds', 'Aménagements lourds: Terrassement pour aménagements lourds', 572, '118.572.004'),
+(118, 'Deb', 'Déboisement avec désouchage', 'Déboisement avec désouchage', 'Aménagements lourds: Déboisement avec désouchage', 'Déboisement avec désouchage', 'Aménagements lourds: Déboisement avec désouchage', 572, '118.572.005'),
+(118, 'Beg', 'Béton-goudron:revêtement', 'Béton-goudron:revêtement', 'Aménagements lourds: Béton, goudron-revêtement abiotique', 'Béton-goudron:revêtement', 'Aménagements lourds: Béton, goudron-revêtement abiotique', 572, '118.572.006'),
+(118, 'GeI', 'Gestion des invasives', 'Gestion des invasives', 'Type de perturbation: Gestion des invasives', 'Gestion des invasives', 'Type de perturbation: Gestion des invasives', 0, '118.009'),
+(118, 'Arg', 'Arrachage', 'Arrachage', 'Gestion des invasives: Arrachage', 'Arrachage', 'Gestion des invasives: Arrachage', 579, '118.879.001'),
+(118, 'Fag', 'Fauchage', 'Fauchage', 'Gestion des invasives: Fauchage', 'Fauchage', 'Gestion des invasives: Fauchage', 579, '118.879.002'),
+(118, 'Dbs', 'Débroussaillage', 'Débroussaillage', 'Gestion des invasives: Débroussaillage', 'Débroussaillage', 'Gestion des invasives: Débroussaillage', 579, '118.879.003'),
+(118, 'Reb', 'Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives: Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives:Recouvrement avec bâches', 579, '118.879.004')
+
+
+
+
+
+
+
+
+;

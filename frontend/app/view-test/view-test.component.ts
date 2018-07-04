@@ -33,9 +33,14 @@ export class ViewTestComponent implements OnInit, AfterViewInit {
   constructor(public mapService: MapService) {}
 
   ngOnInit() {
-    console.log(this.mapService.map);
-    console.log(this.myGeojson);
-
+    // console.log(this.mapService.map);
+    // console.log(this.myGeojson);
+    // this.mapService.getZP().subscribe(
+    //   data => {
+    //     this.myGeojson = data.values; 
+    //   }
+    // );
+    
     // this._http
     //   .get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`)
     //   .subscribe(data => {

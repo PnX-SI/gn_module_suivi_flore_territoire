@@ -1,7 +1,8 @@
-
 <div class="row row-0">
   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
-      <pnx-map height="80vh">
+      <pnx-map height="80vh"
+      [center]= "[44.982667966765845, 6.062455200884894]"
+      [zoom]="12">
           <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
           </pnx-geojson>
         </pnx-map>
@@ -13,6 +14,7 @@
     <pre>
       {{currentZp | json}}
     </pre>
+    
     
   </div>
 
