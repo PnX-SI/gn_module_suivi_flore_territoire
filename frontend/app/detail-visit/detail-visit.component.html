@@ -1,0 +1,26 @@
+<div class="row row-0">
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+      <pnx-map height="80vh">
+         <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+         </pnx-geojson>
+      </pnx-map>
+   </div>
+
+       
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+      <h5> <i class="fa fa-binoculars"> <b> Informations pratiques de cette visite </b></i></h5>
+      <div class="modal-body">
+         <ul class="list-group">
+            <li class="list-group-item">  <i class="fa fa-map-marker" style="font-size:21px" >
+               Zone de prospection:  <span class="info"> {{ idSite }}  </span>   </i> </li>
+            <li class="list-group-item"> <i class="fa fa-leaf" style="font-size:21px"> 
+               Espèce prospectée : <span class="info"> {{nomTaxon}} </span> </i> </li> 
+            <li class="list-group-item"> <i class="fa fa-tags" style="font-size:21px">  
+               Identifiant de la visite : <span class="info"> {{idVisit}} </span> </i></li> 
+            <li class="list-group-item"><i class="fa fa-hourglass-2" style="font-size:21px">  
+               Date de la visite : <span class="info"> {{date}} </span> </i> </li>
+         </ul>
+      </div>
+   </div>
+</div>
+               

@@ -10,7 +10,7 @@ export class DataService {
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`);
   }
 
-  getMaille(id_base_site) {
+  getMaille(id_base_site: number) {
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/gn_monitoring/siteareas/${id_base_site}`);
   }
 
@@ -19,11 +19,32 @@ export class DataService {
 
   }
 
-  postVisit(data) {
+  postVisit(data: any) {
     console.log('et ici');
     console.log(data);
     
     return this._http.post<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit`, data)  ;
   }
+
+  getVisits(params:any) {
+    let myParams = new HttpParams();
+    console.log("ici", params);
+    
+    for (let key in params) {
+      myParams = myParams.set(key, params[key])
+      
+    } 
+    
+
+    
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visits`, {params: myParams});
+    
+    
+  }
   
+
+  getOneVisit(id_visit) {
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit/${id_visit}`);
+
+  }
 }

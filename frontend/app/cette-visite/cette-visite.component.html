@@ -1,0 +1,112 @@
+<div class="row row-0">
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+      <pnx-map height="80vh">
+            <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+            </pnx-geojson>
+      </pnx-map>
+   </div>
+
+
+   <div class="card-block">
+      <ul class="nav nav-tabs" role="tablist">
+         <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab"> 
+            <i class="fa fa-info-circle"> Informations générales </i></a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#details" role="tab">
+            <i class="fa fa-search"> Détails </i></a>
+         </li>
+      </ul>
+
+      <div class="tab-content">
+         <div class="tab-pane active modal-header" id="infoGen" role="tabpanel">  
+            <p> <span class="strong"> Code site : </span>  <span> {{idSite}} </span></p>
+            <p> <span class="strong"> Type site : </span>  <span>  </span></p>
+            <p> <span class="strong"> Commune : </span>  <span>  </span></p>
+            <p> <span class="strong"> Site actif : </span>  <span> </span></p>
+         </div>
+                        
+         <div class="tab-pane modal-header" id="details" role="tabpanel">
+            <p> <span class="strong"> Description du site : </span>  <span> </span></p>
+            <p> <span class="strong"> Fréquentation : </span>  <span>  </span></p>
+            <p> <span class="strong"> Aménagements: </span>  <span>  </span></p>
+         </div>
+      </div>
+
+        
+      <div>
+         <ngx-datatable
+         class="material"
+         [rows]="rows"
+         [columnMode]="'force'"
+         [headerHeight]="50"
+         [footerHeight]="50"
+         [rowHeight]="'auto'">
+        
+         <ngx-datatable-column name="Visualiser"  width="50">
+            <ng-template  let-row="row" ngx-datatable-cell-template>
+                <button type="button" class="btn btn-info fa fa-info-circle" (click)="onInfo(row.id_base_visit)">
+                </button>
+            </ng-template>
+        </ngx-datatable-column>
+ 
+             <ngx-datatable-column name="Editer" width="50">
+                   <ng-template  let-row="row" ngx-datatable-cell-template>
+                         <button type="button" class="btn btn-success fa fa-pencil" (click)="onEdit(row.id_base_visit)">
+                             
+                         </button>
+    
+                   </ng-template>
+            
+                </ngx-datatable-column> 
+            
+         <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop">
+            
+        </ngx-datatable-column>
+     <!-- <ngx-datatable-column name="Identifiant de la visite" width="200" prop='identifiant'>
+               <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+                  {{column.name}}
+               </ng-template>
+               <ng-template let-row="row" ngx-datatable-cell-template *ngFor="let i of rows">
+                 
+               </ng-template>
+            </ngx-datatable-column>
+        
+            <ngx-datatable-column name="Date de la visite" width="200" prop="date">
+               <ng-template let-column="column" ngx-datatable-header-template >
+                  {{column.name}}
+               </ng-template>
+               <ng-template let-row="row" ngx-datatable-cell-template *ngFor="let j of rows">
+                  
+               </ng-template>
+            </ngx-datatable-column>
+      
+            <ngx-datatable-column name="Observateur" >
+               <ng-template let-column="column" ngx-datatable-header-template>
+                  {{column.name}}
+               </ng-template>
+               <ng-template let-value="value" ngx-datatable-cell-template>
+                           
+               </ng-template>
+            </ngx-datatable-column> -->
+
+
+         </ngx-datatable>
+                        
+                              
+      </div>
+      
+      <div class="modal-footer">
+                  <div>
+                     <button type="button" class="btn btn-primary btn-sm" (click)="onAdd()"> Rajouter une nouvelle visite  </button>
+                  </div>
+                  
+      </div>
+            
+
+   </div>  
+        
+            
+</div>
+
