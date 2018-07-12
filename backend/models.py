@@ -92,6 +92,7 @@ class TVisiteSFT(TBaseVisits):
         'schema': 'gn_monitoring',
         'extend_existing': True
         }
+
     cor_visit_grid = DB.relationship(
         'CorVisitGrids',
         primaryjoin=(
@@ -101,6 +102,7 @@ class TVisiteSFT(TBaseVisits):
             CorVisitGrids.id_base_visit,
         ]
     )
+    
     cor_visit_perturbation = DB.relationship(
         'CorVisitPerturbation',
         primaryjoin=(
@@ -108,6 +110,19 @@ class TVisiteSFT(TBaseVisits):
         ),
         foreign_keys=[
             CorVisitPerturbation.id_base_visit,
+        ]
+    )
+
+    observers = DB.relationship(
+        'TRoles',
+        secondary=corVisitObserver,
+        primaryjoin=(
+            corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
+        ),
+        secondaryjoin=(corVisitObserver.c.id_role == TRoles.id_role),
+        foreign_keys=[
+            corVisitObserver.c.id_base_visit,
+            corVisitObserver.c.id_role
         ]
     )
 

@@ -4,7 +4,8 @@ from geojson import FeatureCollection
 from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
 from .models import TInfoSite, TVisiteSFT, CorVisitPerturbation, CorVisitGrids
-from geonature.core.gn_monitoring.models import corVisitObserver
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites
+
 from geonature.core.users.models import TRoles
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
@@ -19,8 +20,11 @@ def get_sites_zp():
     parameters = request.args 
     q = DB.session.query(TInfoSite)
 
-    if 'cd_nom' in parameters:
-        q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
+    # if 'cd_nom' in parameters:
+    #     q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
+    if 'id_base_site' in parameters:
+        q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
+
     print(q)
     data = q.all()
     return FeatureCollection([d.get_geofeature() for d in data])
@@ -54,16 +58,30 @@ def get_one_zp_id(id_infos_site):
     return data.as_dict()
 
 
+
+
 @blueprint.route('/visits', methods=['GET'])
 @json_resp
 def get_visits():
     '''
     Retourne toutes les visites du module
     '''
-    data = DB.session.query(TVisiteSFT).all()
+    parameters = request.args
+    q = DB.session.query(TVisiteSFT)
+    if 'id_base_site' in parameters:
+        q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
+    data = q.all()
+   
     return [d.as_dict(True) for d in data]
+    
+    # mydata = []
+    # for d in dat:
+    #     mydata.append(d.as_dict(True))
+    # return mydata
 
 
+
+    
 @blueprint.route('/visit/<id_visit>', methods=['GET'])
 @json_resp
 def get_visit(id_visit):
@@ -71,7 +89,8 @@ def get_visit(id_visit):
     Retourne une visite
     '''
     data = DB.session.query(TVisiteSFT).get(id_visit)
-    return data.as_dict()
+    return data.as_dict(recursif=True)
+
 
 @blueprint.route('/visit', methods=['POST'])
 @json_resp
