@@ -1,0 +1,100 @@
+<div class="row row-0">
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+      <pnx-map height="80vh">
+         <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+
+         </pnx-geojson>
+      </pnx-map>
+   </div>
+
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+
+      <h5>
+         <i class="fa fa-pencil"> </i>
+
+         <b> Ajouter une nouvelle visite </b>
+      </h5>
+
+      <div class="form-group row row-0">
+         <div class="col-xs-10 col-sm-10 col-md-4 col-lg-4 padding-sm">
+
+            <pnx-date [parentFormControl]="visitGrid.controls.visit_date" label="Date de la visite" aria-required="true"> </pnx-date>
+         </div>
+         <br/>
+         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm">
+            <pnx-observers [parentFormControl]="visitGrid.controls.cor_visit_observer" idMenu="10" label="Observateur"> </pnx-observers>
+         </div>
+      </div>
+
+      <div>
+
+         Veuillez enregistrer les type(s) de perturbations observé(s) (s'il existe) :
+         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm">
+            <!-- <pnx-nomenclature [parentFormControl]="visitGrid.controls.cor_visit_perturbation" idTypeNomenclature="118"></pnx-nomenclature> -->
+            <pnx-nomenclature-multi-select [parentFormControl]="visitGrid.controls.cor_visit_perturbation" idTypeNomenclature="118">
+            </pnx-nomenclature-multi-select>
+         </div>
+
+      </div>
+      <br/>
+
+
+      <button type="button" class="btn btn-default btn-sm" (click)="afficheInst()">
+         <span class="fa fa-info-circle"></span> Instructions
+      </button>
+
+      <div class="modal-title" id="infoHide" style="display:none">
+         Veuillez enregistrer votre visite sur cette ZP :
+         <ul>
+            <li class="col-list">
+               <span id="left" class="strong"> Clique gauche </span>: L'espèce suivie est présente sur cette maille. </li>
+            <li class="col-list">
+               <span id="right" class="strong"> Clique droite </span> : L'espèce suivie est absente sur cette maille. </li>
+            <li class="col-list">
+               <span id="dbcl" class="strong"> Double clique </span> : Cette maille n'est pas encore visitée. </li>
+         </ul>
+      </div>
+
+
+
+
+      <div>
+
+         Sur cette zone:
+
+         <li class="col-list"> Il y en a {{comptePresent}} maille(s) présente(s) d'espèce suivie. </li>
+         <li class="col-list"> Il y en a {{compteAbsent}} maille(s) absente(s) d'espèce suivie. </li>
+         <li class="col-list"> Il en reste {{rest}} maille(s) pas encore visitée(s). </li>
+
+      </div>
+
+      <br/>
+      <div class="row row-0">
+         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4 padding-0">
+            <button id="comment" class="btn btn-sm btn-secondary input-alignment-xs" data-toggle="collapse" data-target="#collapseContexteCommentaire"
+               aria-expanded="false" aria-controls="contexte">
+               <i class="fa fa-comment-o" aria-hidden="true"></i> Ajouter un commentaire
+            </button>
+         </div>
+      </div>
+      <div class="row row-0 collapse" id="collapseContexteCommentaire">
+         <div class="col-xs-5 col-sm-6 col-md-6 col-lg-6 padding-sm">
+            <div class="form-group">
+               <textarea class="form-control" rows="2" id="commentaire"></textarea>
+            </div>
+         </div>
+      </div>
+
+      <div class="modal-footer">
+         <div>
+            <button type="button" class="btn btn-primary btn-sm" (click)="onSave()"> Enregistrer cette visite </button>
+         </div>
+         <div>
+            <button class="btn btn-success btn-sm" (click)="onVisual()"> Visualiser les visites précédentes</button>
+         </div>
+      </div>
+   </div>
+
+   {{visitGrid.value |json}}
+
+</div>
