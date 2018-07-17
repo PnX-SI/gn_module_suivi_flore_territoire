@@ -23,7 +23,8 @@
     [draggable]="false" 
     [selected]="mapListService.selectedRow"
     [externalPaging]="false" 
-    [selectionType]="'single'" >
+    [selectionType]="'single'"
+    (select)="mapListService.onRowSelect($event)" >
     <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop">
             
     </ngx-datatable-column>
