@@ -69,7 +69,6 @@ constructor(public mapService: MapService,
           id_base_site: this.idSite,
         }
         this._api.getVisits(param).subscribe(data => {
-        console.log( " donnée visite ", data );
         
          data.forEach( visit => {
             let fullName; 
@@ -94,9 +93,7 @@ constructor(public mapService: MapService,
             id_base_site: this.idSite,
           }
         this.activatedRoute.params.subscribe(params => {
-   
-                                    
-              
+        
             this._api.getZp(parametre).subscribe(data => {
                 
                 this.zps = data;
@@ -125,7 +122,7 @@ constructor(public mapService: MapService,
     }
 
     onAdd() {
-        this.router.navigate(['suivi_flore_territoire/afficheMaille', this.idSite]);        
+        this.router.navigate(['suivi_flore_territoire/addVisit', this.idSite]);        
     }
    
 }

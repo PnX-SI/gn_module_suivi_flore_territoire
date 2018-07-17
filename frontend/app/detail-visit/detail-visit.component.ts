@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from "@angular/core";
-import { FormControl, FormGroup, FormBuilder } from "@angular/forms";
 import { AppConfig } from "@geonature_config/app.config";
 import { MapService } from "@geonature_common/map/map.service";
 import { maille } from "./mailleGeojson";
@@ -12,8 +11,6 @@ import { ActivatedRoute} from '@angular/router';
 import { StoreService } from '../services/store.service'
 import { DataFormService} from "@geonature_common/form/data-form.service"; 
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService, ToastrConfig } from 'ngx-toastr';
-import { CommonService } from '@geonature_common/service/common.service';
 @Component({
     selector: 'selector-detail-visit',
     templateUrl: 'detail-visit.component.html',
@@ -22,77 +19,112 @@ import { CommonService } from '@geonature_common/service/common.service';
 })
 
 
+export class DetailVisitComponent implements OnInit, AfterViewInit {
+   public zps;
+   public compteAbsent = 0; 
+   public comptePresent = 0; 
+   public codeTaxon; 
+   public nomTaxon;
+   public date;
+   public idVisit;
+   public idSite; 
+   public tabPertur = []; 
+   public visitGrid = [];
+   public observer; 
 
-export class DetailVisitComponent implements OnInit {
-    public zps;
-    public currentZp = {};
-    public compteAbsent = 0; 
-    public comptePresent = 0; 
-    public visitGrid : FormGroup; 
-    public visit_boo = false;
-    public idMaille; 
-    public visits = {};
-    public codeTaxon; 
-    public nomTaxon;
-    public date;
-    public idVisit;
-    public idSite;   
+   @ViewChild('geojson') geojson: GeoJsonComponent
     
-    @ViewChild('geojson') geojson: GeoJsonComponent
-    
-    constructor(public mapService: MapService, 
+      constructor(public mapService: MapService, 
         public _api: DataService, 
         public activatedRoute: ActivatedRoute, 
         public storeService: StoreService, 
         public router: Router, 
         public dataFormService: DataFormService,
-        private _fb: FormBuilder,
-        private toastr: ToastrService,
-        private _commonService: CommonService,) { }
+       
+      ) { }
     
     
-    ngOnInit() {
+      ngOnInit() {
         this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
-    }
+      }
         
     
-    ngAfterViewInit(){
+      ngAfterViewInit(){
         this.mapService.map.doubleClickZoom.disable();
         this.activatedRoute.params.subscribe(params => {
-            this._api.getOneVisit(params.idVisit).subscribe( element => {
-                this.date = element.visit_date;
-                this.idSite = element.id_base_site
-                
-                this._api.getMaille(this.idSite).subscribe(data => {
-                
-                    this.zps = data;
-                        this.geojson.currentGeoJson$.subscribe(currentLayer => {
-                            this.mapService.map.fitBounds(currentLayer.getBounds()); 
-                        });
-                })   
-                
-                this._api.getInfoSite(this.idSite).subscribe(info => {
-                    this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
-                        this.codeTaxon = taxon.cd_nom;              
-                        this.nomTaxon = taxon.nom_valide;   
-                    }) 
-
             
-                });
+            this._api.getOneVisit(params.idVisit).subscribe( element => {
+              console.log("coucou ", element);
+              
+               this.visitGrid = element.cor_visit_grid;
+
+               this.visitGrid.forEach( grid => {
+                  if (grid.presence == true) {
+                     this.comptePresent += 1;
+                  } else {
+                     this.compteAbsent += 1;
+                  }
+                    
+               })
+
+               element.cor_visit_perturbation.forEach(per => {
+                  const typePer = per.label_fr + ', ';
+                  this.tabPertur.push(typePer);
+                  console.log("je teste ici ", this.tabPertur);
+                  
+               })
+              
+               this.date = element.visit_date;
+               this.idSite = element.id_base_site
+               const parametre = {
+                  id_base_site: this.idSite,
+               }
+                
+               this._api.getMaille(this.idSite).subscribe(data => {
+                  this.zps = data;
+                  this.geojson.currentGeoJson$.subscribe(currentLayer => {
+                     this.mapService.map.fitBounds(currentLayer.getBounds());
+                     let objLayer =  this.mapService.map._targets;
+
+                  });
+
+               })
+                
+               this._api.getInfoSite(this.idSite).subscribe(info => { 
+                  this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
+                     this.nomTaxon = taxon.nom_valide;  
+                  });
+               });
             
             })   
 
-        })
-    
-    }
-    
-    
-    onEachFeature(feature, layer) {
-        this.currentZp = feature.id;
-        this.idMaille = feature.id;
-        feature.state = 0; 
-            
+            this._api.getVisits(this.idSite).subscribe(data => {
         
-    }
+              data.forEach( visit => {
+                visit.observers.forEach( obs => {
+                  this.observer = obs.nom_role + " " + obs.prenom_role;                    
+                })
+                  
+              });
+             
+              
+           
+            })
+         })
+    
+      }
+    
+    
+      onEachFeature(feature, layer) {
+         this.visitGrid.forEach( maille => {
+            if(maille.id_area == feature.id) {
+               if (maille.presence) {
+                  layer.setStyle(this.storeService.myStylePresent);
+               } else {
+                  layer.setStyle(this.storeService.myStyleAbsent);
+               }
+            }
+         })
+      }
 
-    }
+}
