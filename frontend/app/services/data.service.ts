@@ -6,8 +6,14 @@ import { AppConfig } from "@geonature_config/app.config";
 export class DataService {
   constructor(private _http: HttpClient) {}
 
-  getZp() {
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`);
+  getZp(params?) {
+    let myParams = new HttpParams();
+    
+    for (let key in params) {
+      myParams = myParams.set(key, params[key])
+      
+    } 
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`, {params: myParams});
   }
 
   getMaille(id_base_site: number) {
@@ -20,15 +26,18 @@ export class DataService {
   }
 
   postVisit(data: any) {
-    console.log('et ici');
     console.log(data);
+    console.log("déjà post ! ");
+    
     
     return this._http.post<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit`, data)  ;
+
+    
+    
   }
 
   getVisits(params:any) {
     let myParams = new HttpParams();
-    console.log("ici", params);
     
     for (let key in params) {
       myParams = myParams.set(key, params[key])
