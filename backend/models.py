@@ -38,9 +38,29 @@ class TInfoSite(DB.Model):
             recursif
         )
 
+'''
+Corespondance entre une maille et une visite
+'''
+corVisitPerturbation = DB.Table(
+    'cor_visit_perturbation',
+    DB.MetaData(schema='pr_monitoring_flora_territory'),
+    DB.Column(
+      'id_base_visit',
+      DB.Integer,
+      ForeignKey(TBaseVisits.id_base_visit),
+      primary_key=True,
+      ),
+    DB.Column(
+      'id_nomenclature_perturbation',   
+      DB.Integer,
+      ForeignKey(TNomenclatures.id_nomenclature),
+      primary_key=True
+      )
+)
+
 @serializable
 # @geoserializable
-class CorVisitGrids(DB.Model):
+class CorVisitGrid(DB.Model):
     '''
     Corespondance entre une maille et une visite
     '''
@@ -61,27 +81,6 @@ class CorVisitGrids(DB.Model):
 
 
 @serializable
-@geoserializable
-class CorVisitPerturbation(DB.Model):
-    '''
-    Corespondance entre une maille et une visite
-    '''
-    __tablename__ = 'cor_visit_perturbation'
-    __table_args__ = {'schema': 'pr_monitoring_flora_territory'}
-
-    id_base_visit = DB.Column(
-      DB.Integer,
-      ForeignKey(TBaseVisits.id_base_site),
-      primary_key=True,
-      )
-    id_nomenclature_perturbation = DB.Column(
-      DB.Integer,
-      ForeignKey(TNomenclatures.id_nomenclature),
-      primary_key=True
-      )
-
-
-@serializable
 class TVisiteSFT(TBaseVisits):
     '''
     Visite sur une ZP
@@ -94,24 +93,28 @@ class TVisiteSFT(TBaseVisits):
         }
 
     cor_visit_grid = DB.relationship(
-        'CorVisitGrids',
+        'CorVisitGrid',
         primaryjoin=(
-            CorVisitGrids.id_base_visit == TBaseVisits.id_base_visit
+            CorVisitGrid.id_base_visit == TBaseVisits.id_base_visit
         ),
         foreign_keys=[
-            CorVisitGrids.id_base_visit,
+            CorVisitGrid.id_base_visit,
         ]
     )
     
+
     cor_visit_perturbation = DB.relationship(
-        'CorVisitPerturbation',
+        TNomenclatures,
+        secondary=corVisitPerturbation,
         primaryjoin=(
-            CorVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit
+            corVisitPerturbation.c.id_base_visit == TBaseVisits.id_base_visit
         ),
+        secondaryjoin=(corVisitPerturbation.c.id_nomenclature_perturbation == TNomenclatures.id_nomenclature),
         foreign_keys=[
-            CorVisitPerturbation.id_base_visit,
+            corVisitPerturbation.c.id_base_visit,
+            corVisitPerturbation.c.id_nomenclature_perturbation,
         ]
-    )
+    )   
 
     observers = DB.relationship(
         'TRoles',
@@ -122,7 +125,7 @@ class TVisiteSFT(TBaseVisits):
         secondaryjoin=(corVisitObserver.c.id_role == TRoles.id_role),
         foreign_keys=[
             corVisitObserver.c.id_base_visit,
-            corVisitObserver.c.id_role
+            corVisitObserver.c.id_role,
         ]
     )
 

@@ -3,7 +3,7 @@ from geojson import FeatureCollection
 
 from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
-from .models import TInfoSite, TVisiteSFT, CorVisitPerturbation, CorVisitGrids
+from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid
 from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites
 
 from geonature.core.users.models import TRoles
@@ -71,7 +71,7 @@ def get_visits():
     if 'id_base_site' in parameters:
         q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
     data = q.all()
-   
+    # return data.as_dict()
     return [d.as_dict(True) for d in data]
     
     # mydata = []
@@ -103,10 +103,10 @@ def post_visit():
     # print(data)
     print(visit)
     for per in tab_perturbation:
-        pertur = CorVisitPerturbation(id_nomenclature_perturbation = per)
+        pertur = corVisitPerturbation(id_nomenclature_perturbation = per)
         visit.cor_visit_perturbation.append(pertur)
     for v in tab_visit_grid:
-        visit_grid = CorVisitGrids(**v)
+        visit_grid = corVisitGrids(**v)
         visit.cor_visit_grid.append(visit_grid)
         print(visit_grid)
     observers = DB.session.query(TRoles).filter(
