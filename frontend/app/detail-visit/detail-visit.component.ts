@@ -11,6 +11,7 @@ import { ActivatedRoute} from '@angular/router';
 import { StoreService } from '../services/store.service'
 import { DataFormService} from "@geonature_common/form/data-form.service"; 
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+
 @Component({
     selector: 'selector-detail-visit',
     templateUrl: 'detail-visit.component.html',
@@ -54,7 +55,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
         this.activatedRoute.params.subscribe(params => {
             
             this._api.getOneVisit(params.idVisit).subscribe( element => {
-              console.log("coucou ", element);
               
                this.visitGrid = element.cor_visit_grid;
 
@@ -70,7 +70,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                element.cor_visit_perturbation.forEach(per => {
                   const typePer = per.label_fr + ', ';
                   this.tabPertur.push(typePer);
-                  console.log("je teste ici ", this.tabPertur);
                   
                })
               
@@ -84,8 +83,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                   this.zps = data;
                   this.geojson.currentGeoJson$.subscribe(currentLayer => {
                      this.mapService.map.fitBounds(currentLayer.getBounds());
-                     let objLayer =  this.mapService.map._targets;
-
                   });
 
                })

@@ -31,19 +31,24 @@
          Veuillez enregistrer les type(s) de perturbations observé(s) (s'il existe) :
          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm">
             <!-- <pnx-nomenclature [parentFormControl]="visitGrid.controls.cor_visit_perturbation" idTypeNomenclature="118"></pnx-nomenclature> -->
-            <pnx-nomenclature-multi-select [parentFormControl]="visitGrid.controls.cor_visit_perturbation" idTypeNomenclature="118">
+            <pnx-nomenclature-multi-select 
+            [parentFormControl]="visitGrid.controls.cor_visit_perturbation" 
+            codeNomenclatureType="118">
             </pnx-nomenclature-multi-select>
          </div>
 
       </div>
       <br/>
-
-
-      <button type="button" class="btn btn-default btn-sm" (click)="afficheInst()">
-         <span class="fa fa-info-circle"></span> Instructions
+     
+      <button data-toggle="collapse" class="btn btn-info btn-sm fa fa-info-circle" 
+         id="buttonHelp"
+         data-target="#infoHide" aria-expanded="false" aria-controls="contexte"
+         title="Cliquez pour plus d'informations">
+            <i aria-hidden="true" style="font-size:18px"> Instructions </i>  
       </button>
-
-      <div class="modal-title" id="infoHide" style="display:none">
+      
+      
+      <div class="modal-title collapse" id="infoHide">
          Veuillez enregistrer votre visite sur cette ZP :
          <ul>
             <li class="col-list">
@@ -55,16 +60,26 @@
          </ul>
       </div>
 
+      <br/>
 
-
+      <br/>
 
       <div>
+      
+         <h5>
+            <i class="fa fa-flag"> </i>
+            <b> Statut des mailles </b>
+         </h5>
+         <dl class="row" > 
+         <dd class="col-sm-5"> Maille(s) présente(s) d'espèce suivie </dd>  
+         <dt class="col-sm-3" >  {{comptePresent}} </dt>
 
-         Sur cette zone:
-
-         <li class="col-list"> Il y en a {{comptePresent}} maille(s) présente(s) d'espèce suivie. </li>
-         <li class="col-list"> Il y en a {{compteAbsent}} maille(s) absente(s) d'espèce suivie. </li>
-         <li class="col-list"> Il en reste {{rest}} maille(s) pas encore visitée(s). </li>
+         <dd class="col-sm-5"> Maille(s) absente(s) d'espèce suivie  </dd>
+         <dt class="col-sm-3"> {{compteAbsent}} </dt>
+       
+         <dd class="col-sm-5"> Maille(s) pas encore visitée(s)  </dd>
+         <dt class="col-sm-3"> {{rest}} </dt>
+         </dl>
 
       </div>
 
