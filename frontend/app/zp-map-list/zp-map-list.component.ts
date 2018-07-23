@@ -79,8 +79,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onInfo(id_base_site) {
-    this.router.navigate(['suivi_flore_territoire/detailVisit',  id_base_site])
+    this.router.navigate(['suivi_flore_territoire/listVisit',  id_base_site])
     
-
   }
 }

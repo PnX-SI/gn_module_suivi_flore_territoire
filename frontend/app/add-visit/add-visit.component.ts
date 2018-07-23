@@ -239,19 +239,10 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
   }
 
   onVisual() {
-    this.router.navigate(['suivi_flore_territoire/afficheVisit', this.idSite]);
+    this.router.navigate(['suivi_flore_territoire/listVisit', this.idSite]);
 
   }
 
 
-  afficheInst() {
-    let divInfo = document.getElementById("infoHide");
-    if (divInfo.style.display == 'none') {
-      divInfo.style.display = 'block';
-
-    } else {
-      divInfo.style.display = 'none';
-
-    }
-  }
+ 
 }

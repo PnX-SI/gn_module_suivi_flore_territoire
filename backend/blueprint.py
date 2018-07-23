@@ -5,6 +5,8 @@ from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid
 from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites
+from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
+
 
 from geonature.core.users.models import TRoles
 
@@ -80,6 +82,11 @@ def get_visits():
     # return mydata
 
 
+@blueprint.route('/test', methods=['GET'])
+@json_resp
+def test():
+    data = DB.session.query(TNomenclatures).all()
+    return [d.as_dict(True) for d in data]
 
     
 @blueprint.route('/visit/<id_visit>', methods=['GET'])
@@ -102,23 +109,29 @@ def post_visit():
     visit = TVisiteSFT(**data)
     # print(data)
     print(visit)
-    for per in tab_perturbation:
-        pertur = corVisitPerturbation(id_nomenclature_perturbation = per)
-        visit.cor_visit_perturbation.append(pertur)
+    perturs = DB.session.query(TNomenclatures).filter(
+        TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()    
+    for per in perturs:
+        visit.cor_visit_perturbation.append(per)
+        print(per.as_dict())
     for v in tab_visit_grid:
-        visit_grid = corVisitGrids(**v)
+        visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
-        print(visit_grid)
+        # print(visit_grid)
     observers = DB.session.query(TRoles).filter(
         TRoles.id_role.in_(tab_observer)
         ).all()
-    print(observers)
+    # print(observers)
     for o in observers:
         print(o.as_dict())
         visit.observers.append(o)
-    print(visit.as_dict(recursif=True))
-    DB.session.add(visit)
+    if visit.id_base_visit:
+        DB.session.merge(visit)
+    else:    
+        DB.session.add(visit)
     DB.session.commit()
+    print(visit.as_dict(recursif=True))
+
     return visit.as_dict(recursif=True)
 
 
