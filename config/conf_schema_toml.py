@@ -3,9 +3,9 @@
 '''
 
 from marshmallow import Schema, fields
+from geonature.utils.config_schema import GnModuleProdConf
 
 
-class GnModuleSchemaConf(Schema):
+class GnModuleSchemaConf(GnModuleProdConf):
     pass
-    
 
