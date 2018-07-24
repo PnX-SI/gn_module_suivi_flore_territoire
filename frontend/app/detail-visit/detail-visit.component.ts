@@ -31,7 +31,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
    public idSite; 
    public tabPertur = []; 
    public visitGrid = [];
-   public observer; 
+   public tabObserver = []; 
 
    @ViewChild('geojson') geojson: GeoJsonComponent
     
@@ -72,7 +72,12 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                   this.tabPertur.push(typePer);
                   
                })
-              
+               let fullNameObs;
+               element.observers.forEach( obs => {
+                  fullNameObs = obs.nom_complet + ", ";
+                  this.tabObserver.push(fullNameObs);
+               });
+               
                this.date = element.visit_date;
                this.idSite = element.id_base_site
                const parametre = {
@@ -95,18 +100,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
             
             })   
 
-            this._api.getVisits(this.idSite).subscribe(data => {
-        
-              data.forEach( visit => {
-                visit.observers.forEach( obs => {
-                  this.observer = obs.nom_role + " " + obs.prenom_role;                    
-                })
-                  
-              });
-             
-              
-           
-            })
+          
          })
     
       }

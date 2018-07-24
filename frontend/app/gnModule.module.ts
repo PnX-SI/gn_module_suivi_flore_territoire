@@ -13,6 +13,7 @@ import { ZpMapListComponent } from "./zp-map-list/zp-map-list.component";
 import { ListVisitComponent } from "./list-visit/list-visit.component";
 import { EditVisitComponent } from "./edit-visit/edit-visit.component";
 import { AddVisitComponent } from "./add-visit/add-visit.component";
+import { FormService } from "./services/form.service";
 
 // my module routing
 const routes: Routes = 
@@ -33,7 +34,7 @@ const routes: Routes =
     HttpClientModule,
     CommonModule
   ],
-  providers: [HttpClient, DataService, StoreService],
+  providers: [HttpClient, DataService, StoreService, FormService],
   bootstrap: []
 })
 

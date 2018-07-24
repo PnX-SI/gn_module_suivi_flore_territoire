@@ -32,8 +32,6 @@ export class DataService {
     
     return this._http.post<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit`, data)  ;
 
-    
-    
   }
 
   getVisits(params:any) {
@@ -43,8 +41,6 @@ export class DataService {
       myParams = myParams.set(key, params[key])
       
     } 
-    
-
     
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visits`, {params: myParams});
     

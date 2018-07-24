@@ -13,6 +13,8 @@ import { DataFormService } from "@geonature_common/form/data-form.service";
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService, ToastrConfig } from 'ngx-toastr';
 import { CommonService } from '@geonature_common/service/common.service';
+import { FormService } from "../services/form.service";
+import { ModuleConfig} from '../module.config';
 
 @Component({
   selector: 'selector-add-visit',
@@ -29,7 +31,7 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
   public comptePresent = 0;
   public rest;
   public infoSite;
-  public visitGrid: FormGroup;
+  public newVisitGrid: FormGroup;
   public visit_boo = false;
   public idMaille;
   public visits = {};
@@ -53,26 +55,24 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
     public dateParser: NgbDateParserFormatter,
     private toastr: ToastrService,
     private _commonService: CommonService,
-
-  ) { }
+    public formService: FormService
+  ) { 
+    
+  }
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
 
-    this.visitGrid = this._fb.group({
-      id_base_site: this.idSite,
-      id_base_visit: null,
-      visit_date: null,
-      cor_visit_observer: new Array(),
-      cor_visit_perturbation: new Array(),
-      cor_visit_grid: new Array()
-    })
+    this.newVisitGrid = this.formService.visitGridForm;
 
-
-
+    
+    
   }
 
   ngAfterViewInit() {
+ 
+    // this.newVisitGrid.controls.id_base_site = this.idSite
+    
     this.mapService.map.doubleClickZoom.disable();
 
     this.activatedRoute.params.subscribe(params => {
@@ -194,10 +194,12 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
 
     const formVisit = Object.assign(
       {},
-      this.visitGrid.value
+      this.newVisitGrid.value
     )
 
-    formVisit['visit_date'] = this.dateParser.format(this.visitGrid.controls.visit_date.value);
+    formVisit['id_base_site'] = this.idSite;
+
+    formVisit['visit_date'] = this.dateParser.format(this.newVisitGrid.controls.visit_date.value);
     let tableauVisit = [];
 
     for (const key in this.visits) {
@@ -209,22 +211,29 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
 
     }
     formVisit['cor_visit_grid'] = tableauVisit;
+
+    console.log("teste cor_visit_grid", formVisit['cor_visit_grid'] );
+    
+
+
     formVisit['cor_visit_observer'] = formVisit['cor_visit_observer'].map(
       obs => {
-        console.log("test ", obs);
+        console.log("test ici ", obs);
 
         return obs.id_role;
+
       }
 
     )
 
     formVisit['cor_visit_perturbation'] = formVisit['cor_visit_perturbation'].map(pertu => pertu.id_nomenclature);
 
+    console.log("et cette forme visite? ", formVisit);
 
     this._api.postVisit(formVisit).subscribe(
       data => {
         this.toastr.success('Visite enregistrée', '', { positionClass: 'toast-top-center' });
-        setTimeout(() => this.router.navigate(['suivi_flore_territoire']), 2000);
+        setTimeout(() => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]), 2000);
       },
       error => {
         if (error.status === 403) {
@@ -239,7 +248,7 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
   }
 
   onVisual() {
-    this.router.navigate(['suivi_flore_territoire/listVisit', this.idSite]);
+    this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]);
 
   }
 

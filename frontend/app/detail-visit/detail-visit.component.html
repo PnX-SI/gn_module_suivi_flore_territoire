@@ -18,7 +18,7 @@
             <li class="list-group-item"> <i class="fa fa-tags" style="font-size:21px">  
                Identifiant de la visite : <span class="info"> {{idVisit}} </span> </i></li>
             <li class="list-group-item"> <i class="fa fa-group" style="font-size:21px">  
-               Observateur : <span class="info"> {{observer}} </span> </i></li>  
+               Observateur : <span class="info" *ngFor="let obs of tabObserver"> {{obs}} </span> </i></li>  
             <li class="list-group-item"><i class="fa fa-calendar" style="font-size:21px">  
                Date de la dernière visite : <span class="info"> {{date}} </span> </i> </li>
             <li class="list-group-item"><i class="fa fa-warning" style="font-size:21px">  

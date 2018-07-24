@@ -113,7 +113,6 @@ def post_visit():
         TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()    
     for per in perturs:
         visit.cor_visit_perturbation.append(per)
-        print(per.as_dict())
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
@@ -121,7 +120,7 @@ def post_visit():
     observers = DB.session.query(TRoles).filter(
         TRoles.id_role.in_(tab_observer)
         ).all()
-    # print(observers)
+        # print(observers)
     for o in observers:
         print(o.as_dict())
         visit.observers.append(o)
