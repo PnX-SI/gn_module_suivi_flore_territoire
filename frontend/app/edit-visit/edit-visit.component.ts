@@ -14,6 +14,8 @@ import { DataFormService} from "@geonature_common/form/data-form.service";
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService, ToastrConfig } from 'ngx-toastr';
 import { CommonService } from '@geonature_common/service/common.service';
+import { FormService } from '../services/form.service';
+import { ModuleConfig } from '../module.config';
 
 
 @Component({
@@ -28,7 +30,7 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
    public zps;
    public compteAbsent = 0; 
    public comptePresent = 0; 
-   public modifGrid: FormGroup; 
+   public modifGrid; 
    public nomTaxon;
    public date;
    public idVisit;
@@ -36,7 +38,7 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
    public namePertur = []; 
    public codePertur = [];
    public visitGrid = []; // tableau de l'objet maille visité : [{id_area: qqc, presence: true/false}]
-   public observer;
+   public tabObserver = [];
    public visitModif = {}; // l'objet maille visité (modifié)
         
    @ViewChild('geojson') geojson: GeoJsonComponent
@@ -51,6 +53,7 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
          public dateParser: NgbDateParserFormatter,
          private toastr: ToastrService,
          private _commonService: CommonService,
+         public formService: FormService
 
       ) { }
         
@@ -59,24 +62,19 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
       ngOnInit() {
          this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
 
-         this.modifGrid = this._fb.group({
-            id_base_visit: this.idVisit,
-            visit_date: null,
-            cor_visit_observer: new Array(),
-            cor_visit_perturbation: new Array(),
-            cor_visit_grid: new Array()
-            })
-        
-         }
+         this.modifGrid = this.formService.visitGridForm; 
+      }
             
         
       ngAfterViewInit(){
+        
          this.mapService.map.doubleClickZoom.disable();
 
          this.activatedRoute.params.subscribe(params => {
                
             this._api.getOneVisit(params.idVisit).subscribe( element => {
                this.visitGrid = element.cor_visit_grid;
+               console.log( "et élément ", element);
                
                // compter l'absence/présence des mailles déjà existant
                this.visitGrid.forEach( grid => {
@@ -98,13 +96,22 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
                   
                  
                this.date = element.visit_date;
+               
                this.idSite = element.id_base_site;
-                      
+               let fullNameObserver;
+               
+               element.observers.forEach(
+                  name => {
+                     fullNameObserver = name.nom_complet + ", "
+                  }
+               )
+               this.tabObserver.push(fullNameObserver);
+               
+
                this._api.getMaille(this.idSite).subscribe(data => {
                   this.zps = data;
                   this.geojson.currentGeoJson$.subscribe(currentLayer => {
                      this.mapService.map.fitBounds(currentLayer.getBounds());
-
                   });
     
                })
@@ -116,19 +123,19 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
     
                });
                 
-            });
+               this.modifGrid.patchValue({
+                  id_base_site: this.idSite,
+                  id_base_visit: this.idVisit,
+                  visit_date: this.dateParser.parse(this.date),
+                  cor_visit_observer:  element.observers,
+                  cor_visit_perturbation: element.cor_visit_perturbation,
+                  cor_visit_grid: this.visitGrid,
+               })
                
-            this._api.getVisits(this.idSite).subscribe(data => {
-        
-               data.forEach( visit => {
-                  visit.observers.forEach( obs => {
-                     this.observer = obs.nom_role + " " + obs.prenom_role;                    
-                  })
-                    
-               });
             });
-    
-         })
+
+        })
+        
       }
         
       
@@ -151,7 +158,8 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
          layer.on({
             click: (event1 => {
                layer.setStyle(this.storeService.myStylePresent);
-         
+               console.log("cette maille porte id ", );
+               
                   if (feature.state == 2) {
                      this.compteAbsent -= 1;
                      this.comptePresent += 1;
@@ -162,6 +170,12 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
                    this.comptePresent += 1;
                  }
                feature.state = 1;
+               this.visitGrid.forEach( dataG => {
+                 if (feature.id == dataG.id_area) {
+                    dataG.presence = true;
+                 }
+                  
+               });
                this.visitModif[feature.id] = true;  
                        
             }),
@@ -178,6 +192,12 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
                      this.compteAbsent += 1;
                   }
                feature.state = 2;
+               this.visitGrid.forEach( dataG => {
+                  if (feature.id == dataG.id_area) {
+                     dataG.presence = false;
+                  }
+                   
+                });
                this.visitModif[feature.id] = false;
       
             }),
@@ -191,16 +211,21 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
                      this.compteAbsent -= 1;
                   }
                feature.state = 0;
-         
+               this.visitGrid.forEach( dataG => {
+                  if (feature.id == dataG.id_area) {
+                     dataG.presence = false;
+                  }
+                   
+                });
+               this.visitModif[feature.id] = false;
+
             })
 
          });
                
       }
 
-      onDelDate() {
-         document.getElementById("ancienDate").innerHTML = "";
-      }
+      
 
         
       onDeletePer(item) {
@@ -208,26 +233,36 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
          this.codePertur.splice(item, 1)
       }
 
+      onDeleteObs(item) {
+        this.tabObserver.splice(item, 1);
+      }
 
       onVisual() {
-        this.router.navigate(['suivi_flore_territoire/listVisit', this.idSite]);
+        this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]);
       }
 
 
       onModif() {
+       
          const formModif = Object.assign(
             {},
             this.modifGrid.value
          )
+      console.log("le form Modif", formModif);
       
-         
-         formModif['visit_date'] = this.dateParser.format(formModif['visit_date']);
-      
+         // formModif['id_base_site'] = this.idSite;
+         // formModif['id_base_visit'] = this.idVisit;
+        //  formModif['visit_date'] = this.dateParser.format(formModif['visit_date']);
+         formModif['visit_date'] = this.dateParser.format(this.modifGrid.controls.visit_date.value);
+
+
          for (let key in this.visitModif) {
             this.visitGrid.push (
                {
+                  id_base_visit: this.idVisit,
+                  presence: this.visitModif[key],
                   id_area: key,
-                  presence: this.visitModif[key]
+                  
                }
             )
          }
@@ -244,12 +279,16 @@ export class EditVisitComponent implements OnInit, AfterViewInit {
      
       
 
-      console.log("test modifGrid ", formModif['cor_visit_perturbation']  );
       
       this.codePertur.forEach( elem => {
+        console.log( "élément ", elem);
+        
          formModif['cor_visit_perturbation'].push(elem);
       }
       )
+
+      console.log("et finalement cette form Modif ", formModif);
+      
 
       this._api.postVisit(formModif).subscribe(
          data => {

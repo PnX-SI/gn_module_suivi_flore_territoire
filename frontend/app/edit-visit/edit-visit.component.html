@@ -28,21 +28,22 @@
                <div class="info" id="ancienDate"> {{date}}   </div>
                <button id="modifDate" data-toggle="collapse" class="btn btn-outline-warning btn-sm fa fa-edit"
                data-target="#newDate"
-               aria-expanded="false" aria-controls="contexte"
-               (click)="onDelDate()">
+               aria-expanded="false" aria-controls="contexte">
                   <i aria-hidden="true">Modifier la date</i> 
                </button>
          </div>
          <div class="row row-0 collapse" id="newDate">
             <div class="col-xs-5 col-sm-6 col-md-6 col-lg-6 padding-sm">
                <pnx-date [parentFormControl]="modifGrid.controls.visit_date" 
-               label="Date de la visite" aria-required="true"> </pnx-date>
+               label="Date de la visite"> </pnx-date>
             </div>
          </div>
 
          <div class=" list-group-item modif">
                <div> <i class="fa fa-group" style="font-size:18px"> Observateur :  </i> </div>
-               <div class="info" id="ancienObs"> {{observer}}   </div>
+               <div class="info" id="ancienObs" *ngFor="let obs of tabObserver, let j=index"> {{obs}}
+                        <button  class="btn btn-outline-secondary btn-sm" (click)="onDeleteObs(j)"> 
+                                    <i class="fa fa-remove" style="font-size:10px"> </i> </button>   </div>
                <button id="modifObs" data-toggle="collapse" class="btn btn-outline-warning btn-sm fa fa-edit"
                data-target="#newObserver"
                aria-expanded="false" aria-controls="contexte">
@@ -101,6 +102,7 @@
       </div> 
       
       
+      {{modifGrid.value | json}}
     </div>
  </div>
                 
