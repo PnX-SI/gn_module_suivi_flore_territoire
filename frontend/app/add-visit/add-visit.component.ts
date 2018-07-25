@@ -30,9 +30,7 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
   public compteAbsent = 0;
   public comptePresent = 0;
   public rest;
-  public infoSite;
   public newVisitGrid: FormGroup;
-  public visit_boo = false;
   public idMaille;
   public visits = {};
 
@@ -40,17 +38,13 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
   @ViewChild('geojson') geojson: GeoJsonComponent
  
 
-  public codeTaxon;
 
-  public nomTaxon;
-  public testTaxon;
 
   constructor(public mapService: MapService,
     public _api: DataService,
     public activatedRoute: ActivatedRoute,
     public storeService: StoreService,
     public router: Router,
-    public dataFormService: DataFormService,
     private _fb: FormBuilder,
     public dateParser: NgbDateParserFormatter,
     private toastr: ToastrService,
@@ -65,14 +59,10 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
 
     this.newVisitGrid = this.formService.visitGridForm;
 
-    
-    
   }
 
   ngAfterViewInit() {
  
-    // this.newVisitGrid.controls.id_base_site = this.idSite
-    
     this.mapService.map.doubleClickZoom.disable();
 
     this.activatedRoute.params.subscribe(params => {
@@ -95,18 +85,9 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
 
       })
 
-      this._api.getInfoSite(params.idSite).subscribe(info => {
-        this.infoSite = info;
-        this.nomTaxon = this.dataFormService.getTaxonInfo(this.infoSite.cd_nom).subscribe(taxon => {
-
-          this.codeTaxon = taxon.cd_nom;
-          this.nomTaxon = taxon.nom_valide;
-
-        });
-
-
-      })
+      
     })
+
 
   }
 
@@ -189,68 +170,66 @@ export class AddVisitComponent implements OnInit, AfterViewInit {
 
   }
 
+   
   onSave() {
 
 
-    const formVisit = Object.assign(
-      {},
-      this.newVisitGrid.value
-    )
-
-    formVisit['id_base_site'] = this.idSite;
-
-    formVisit['visit_date'] = this.dateParser.format(this.newVisitGrid.controls.visit_date.value);
-    let tableauVisit = [];
-
-    for (const key in this.visits) {
-      tableauVisit.push({
-        id_area: key,
-        presence: this.visits[key]
-      }
+      const formVisit = Object.assign(
+         {},
+         this.newVisitGrid.value
       )
 
-    }
-    formVisit['cor_visit_grid'] = tableauVisit;
+      formVisit['id_base_site'] = this.idSite;
 
-    console.log("teste cor_visit_grid", formVisit['cor_visit_grid'] );
+      formVisit['visit_date'] = this.dateParser.format(this.newVisitGrid.controls.visit_date.value);
+      let tableauVisit = [];
+
+      for (const key in this.visits) {
+         tableauVisit.push({
+            id_area: key,
+            presence: this.visits[key]
+         })
+      }
     
+      formVisit['cor_visit_grid'] = tableauVisit;
 
-
-    formVisit['cor_visit_observer'] = formVisit['cor_visit_observer'].map(
-      obs => {
-        console.log("test ici ", obs);
-
-        return obs.id_role;
-
+    
+      formVisit['cor_visit_observer'] = formVisit['cor_visit_observer'].map(
+         obs => {
+            return obs.id_role;
+         }
+      )
+    
+      if ( formVisit['cor_visit_perturbation'] !== null) {
+         formVisit['cor_visit_perturbation'] = formVisit['cor_visit_perturbation'].map(pertu => pertu.id_nomenclature);
+      
+      } else {
+         console.log( " rien du tout, je suis là");
+         formVisit['cor_visit_perturbation'] = [];
       }
 
-    )
+    
+      this._api.postVisit(formVisit).subscribe(
+         data => {
+            this.toastr.success('Visite enregistrée', '', { positionClass: 'toast-top-center' });
+            setTimeout(() => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]), 2000);
+         },
+         error => {
+            if (error.status === 403) {
+               this._commonService.translateToaster('error', 'NotAllowed');
 
-    formVisit['cor_visit_perturbation'] = formVisit['cor_visit_perturbation'].map(pertu => pertu.id_nomenclature);
-
-    console.log("et cette forme visite? ", formVisit);
-
-    this._api.postVisit(formVisit).subscribe(
-      data => {
-        this.toastr.success('Visite enregistrée', '', { positionClass: 'toast-top-center' });
-        setTimeout(() => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]), 2000);
-      },
-      error => {
-        if (error.status === 403) {
-          this._commonService.translateToaster('error', 'NotAllowed');
-
-        } else {
-          this._commonService.translateToaster('error', 'ErrorMessage');
-        }
-      }
-    )
+            } else {
+               this._commonService.translateToaster('error', 'ErrorMessage');
+            }
+         }
+      )
 
   }
 
-  onVisual() {
-    this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]);
+   onVisual() {
+      this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]);
 
-  }
+   }
 
 
  
