@@ -1,10 +1,12 @@
 from flask import Blueprint, request
+from sqlalchemy.sql.expression import func
 from geojson import FeatureCollection
 
 from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
-from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid
+from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie
 from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites
+
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 
 
@@ -20,18 +22,31 @@ def get_sites_zp():
     Retourne la liste des ZP
     '''
     parameters = request.args 
-    q = DB.session.query(TInfoSite)
-
-    # if 'cd_nom' in parameters:
-    #     q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
+   
+   
+    q = DB.session.query(TInfoSite, func.max(TBaseVisits.visit_date), Taxonomie.nom_complet).join(
+        TBaseVisits, TInfoSite.id_base_site == TBaseVisits.id_base_site).join(
+        Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom).group_by(TInfoSite, Taxonomie.nom_complet)
+    # q = DB.session.query(TInfoSite, func.max(TBaseVisits.visit_date)).join(
+    #     TBaseVisits, TInfoSite.id_base_site == TBaseVisits.id_base_site).group_by(TInfoSite)
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-
-    print(q)
+        
     data = q.all()
-    return FeatureCollection([d.get_geofeature() for d in data])
+    print(q)
+        # print("je print id_base_site ", TInfoSite.id_base_site == parameters['id_base_site'])
+    features = []
+    for d in data:
+        print (d)
+        feature = d[0].get_geofeature()
+        feature['properties']['date_max'] = str(d[1])
+        feature['properties']['nom_taxon'] = str(d[2])
+        features.append(feature)
+    return FeatureCollection(features)
+    # return "here"
 
-
+  
+    # return FeatureCollection([d.get_geofeature() for d in data])
 
 @blueprint.route('/site', methods=['GET'])
 @json_resp

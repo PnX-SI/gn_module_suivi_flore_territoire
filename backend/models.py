@@ -129,6 +129,14 @@ class TVisiteSFT(TBaseVisits):
         ]
     )
 
+@serializable
+class Taxonomie(DB.Model):
+    __tablename__ = 'taxref'
+    __table_args__ = {'schema': 'taxonomie'}
 
-
+    cd_nom = DB.Column(
+      DB.Integer,
+      primary_key=True
+      )
+    nom_complet = DB.Column(DB.Unicode)
 
