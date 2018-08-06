@@ -11,9 +11,10 @@ import { ActivatedRoute} from '@angular/router';
 import { StoreService } from '../services/store.service'
 import { DataFormService} from "@geonature_common/form/data-form.service"; 
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { ModuleConfig } from '../module.config';
 
 @Component({
-    selector: 'selector-detail-visit',
+    selector: 'pnx-detail-visit',
     templateUrl: 'detail-visit.component.html',
     styleUrls: ['./detail-visit.component.scss'],
 
@@ -33,6 +34,20 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
    public visitGrid = [];
    public tabObserver = []; 
 
+   public rows = [];
+
+   public columns = [
+    { name: 'Date', prop: 'visit_date'}, 
+    { name: 'Observateur(s)', prop: "observers" },
+    { name: 'Présence/ Absence ? ', prop: "state"},
+    { name: 'Identifiant ? ', prop: "id_base_visit"}
+
+    // { name: 'Actions' }
+  ];
+
+  public message = { emptyMessage: "Aucune visite sur ce site ", totalMessage: "visite(s) au total" }  
+  public dataListVisit = []; 
+
    @ViewChild('geojson') geojson: GeoJsonComponent
     
       constructor(public mapService: MapService, 
@@ -46,18 +61,25 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     
     
       ngOnInit() {
+          console.log("INIT");
+          
         this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
+        
       }
         
     
       ngAfterViewInit(){
         this.mapService.map.doubleClickZoom.disable();
+       
+
         this.activatedRoute.params.subscribe(params => {
+            this.idVisit = params.idVisit;
             
             this._api.getOneVisit(params.idVisit).subscribe( element => {
               
                this.visitGrid = element.cor_visit_grid;
-
+               this.comptePresent = 0;
+               this.compteAbsent = 0;
                this.visitGrid.forEach( grid => {
                   if (grid.presence == true) {
                      this.comptePresent += 1;
@@ -67,24 +89,38 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                     
                })
 
-               element.cor_visit_perturbation.forEach(per => {
-                  const typePer = per.label_fr + ', ';
+               let typePer;
+               let tabVisitPerturb = element.cor_visit_perturbation;
+               this.tabPertur = [];
+
+               tabVisitPerturb.forEach(per => {
+                
+                  if (per == tabVisitPerturb[tabVisitPerturb.length-1] ) {
+                     typePer = per.label_fr + '. ';
+                  } else {
+                     typePer = per.label_fr + ', ';
+                  }
                   this.tabPertur.push(typePer);
                   
                })
+
                let fullNameObs;
+               this.tabObserver = [];
                element.observers.forEach( obs => {
-                  fullNameObs = obs.nom_complet + ", ";
+                  if (obs == element.observers[element.observers.length-1]) {
+                     fullNameObs = obs.nom_complet + ". ";   
+                  } else {
+                     fullNameObs = obs.nom_complet + ", ";   
+                  }
                   this.tabObserver.push(fullNameObs);
                });
                
                this.date = element.visit_date;
                this.idSite = element.id_base_site
-               const parametre = {
-                  id_base_site: this.idSite,
-               }
+              
                 
                this._api.getMaille(this.idSite).subscribe(data => {
+                   console.log(data)
                   this.zps = data;
                   this.geojson.currentGeoJson$.subscribe(currentLayer => {
                      this.mapService.map.fitBounds(currentLayer.getBounds());
@@ -97,12 +133,86 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                      this.nomTaxon = taxon.nom_valide;  
                   });
                });
-            
+       
+               const parametre = {
+                  id_base_site: this.idSite,
+               }
+              
+               // ne cherger que si datalisVisit est undefinned
+               this._api.getVisits(parametre).subscribe(donnee => {
+                  let tabTest = [];
+                  donnee.forEach ( visit => {
+                     let fullName; 
+                     visit.observers.forEach( obs => {
+                        fullName = obs.nom_role + " " + obs.prenom_role; 
+                         
+                     })
+                     visit.observers = fullName;
+                     let tabPres = [];
+                     let tabAbs = [];
+                     let pres = 0;
+                     let abs = 0;
+                     
+                     visit.cor_visit_grid.forEach( maille => {
+                         if (maille.presence ) {
+                             pres += 1;
+                             tabPres.push(pres);
+                         } else {
+                             abs += 1; 
+                             tabAbs.push( abs);
+                         }
+                     
+                         
+                     });
+         
+                     visit.state = tabPres.length + "P / " + tabAbs.length + "A ";
+                    
+                  });
+
+                //   tabTest = []
+                  this.dataListVisit = donnee ; 
+                //   tabTest = donnee.slice();
+                  
+                //   console.log('passe la')
+                 
+                //   tabTest.forEach( test => {
+                    
+                //     if (test.id_base_visit == this.idVisit) {
+                //        console.log("index de test ", tabTest.indexOf(test) );
+                       
+                //        tabTest.splice(tabTest.indexOf(test) , 1 );
+                                
+                //     } 
+                //   })
+                console.log('laaaaaaaaaaaa')
+                console.log(this.idVisit);
+                
+                  this.rows = this.dataListVisit.filter(
+                      visit => {
+                        console.log(visit.id_base_visit);
+                        console.log(params.idVisit);
+                        
+                        return visit.id_base_visit.toString() !==   params.idVisit
+                       
+                                                     
+                        
+                      }
+                  )
+                  console.log("cette table " , this.dataListVisit);
+                
+                   
+                     
+                    //  this.rows = tabTest;
+                     
+                     
+               })
+
             })   
 
-          
+           
          })
     
+
       }
     
     
@@ -118,4 +228,19 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
          })
       }
 
+      onNavigue() {
+         this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idVisit]);
+   
+      }
+
+      onEdit(id_visit) {
+         this.router.navigate([`${ModuleConfig.api_url}/editVisit`,  id_visit])
+   
+      }
+
+   
+      onInfo(id_visit) {
+         this.router.navigate([`${ModuleConfig.api_url}/infoVisit`,  id_visit])
+   
+      }
 }

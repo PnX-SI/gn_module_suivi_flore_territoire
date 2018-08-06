@@ -8,15 +8,13 @@
 
        
    <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
-      <h5> <i class="fa fa-binoculars"> <b> Informations pratiques de cette visite </b></i></h5>
+      <h5> <i class="fa fa-binoculars"> <b> Informations de la visite </b></i></h5>
       <div class="modal-body">
          <ul class="list-group">
             <li class="list-group-item">  <i class="fa fa-map-marker" style="font-size:21px" >
                Zone de prospection:  <span class="info"> {{ idSite }}  </span>   </i> </li>
             <li class="list-group-item"> <i class="fa fa-leaf" style="font-size:21px"> 
                Espèce prospectée : <span class="info"> {{nomTaxon}} </span> </i> </li> 
-            <li class="list-group-item"> <i class="fa fa-tags" style="font-size:21px">  
-               Identifiant de la visite : <span class="info"> {{idVisit}} </span> </i></li>
             <li class="list-group-item"> <i class="fa fa-group" style="font-size:21px">  
                Observateur : <span class="info" *ngFor="let obs of tabObserver"> {{obs}} </span> </i></li>  
             <li class="list-group-item"><i class="fa fa-calendar" style="font-size:21px">  
@@ -24,10 +22,59 @@
             <li class="list-group-item"><i class="fa fa-warning" style="font-size:21px">  
                Type de perturbation : <span class="info" *ngFor="let per of tabPertur" > {{per}} </span> </i> </li>              
             <li class="list-group-item"><i class="fa fa-paw" style="font-size:21px">  
-               Maille(s) présente(s) d'espèce : <span class="info"> {{comptePresent}} </span> </i> </li>
+               Maille(s) de présence : <span class="info"> {{comptePresent}} </span> </i> </li>
             <li class="list-group-item"><i class="fa fa-ban" style="font-size:21px">  
-               Maille(s) absente(s) d'espèce : <span class="info"> {{compteAbsent}} </span> </i> </li>
+               Maille(s) d'absence : <span class="info"> {{compteAbsent}} </span> </i> </li>
          </ul>
+      </div>
+
+      <div class="modal-footer">
+            <div>
+               <button type="button" class="btn btn-primary btn-sm " (click)="onNavigue()"> Editer cette visite </button>
+            </div>
+            
+      </div>
+
+      <h5> <i class="fa fa-search-plus"> <b> Les autres visites </b></i></h5>
+      <!-- <selector-list-visit> </selector-list-visit> -->
+      <div>
+            <ngx-datatable
+            class="material"
+            [rows]="rows"
+            [columnMode]="'force'"
+            [headerHeight]="50"
+            [footerHeight]="50"
+            [rowHeight]="'auto'"
+            [limit]="6"
+            [messages]="message"
+            >
+           
+               <ngx-datatable-column maxWidth="100">
+                  <ng-template  let-row="row" ngx-datatable-cell-template >
+                     <button type="button" class="btn btn-info fa fa-info-circle" 
+                     (click)="onInfo(row.id_base_visit)" title="Visualiser">
+                     </button>
+                  </ng-template>
+               </ngx-datatable-column>
+    
+               <ngx-datatable-column maxWidth="100">
+                  <ng-template  let-row="row" ngx-datatable-cell-template >
+                     <button type="button" class="btn btn-success fa fa-edit" 
+                     (click)="onEdit(row.id_base_visit)" title="Editer">
+                     </button>
+                  </ng-template>
+               </ngx-datatable-column> 
+               
+               <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" 
+               [prop]="col.prop" maxWidth="220" >
+               
+               </ngx-datatable-column>
+   
+              
+       
+            </ngx-datatable>
+                           
+                                 
       </div>
    </div>
 </div>
