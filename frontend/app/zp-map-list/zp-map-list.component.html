@@ -1,45 +1,85 @@
 <div class="row row-0">
-  <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
       <pnx-map
-        height="80vh"
-        [center]= "[44.982667966765845, 6.062455200884894]"
-        [zoom]="12">
-          <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
-          </pnx-geojson>
-    </pnx-map>
-  </div>
+         height="95vh"
+         [center]= "[44.982667966765845, 6.062455200884894]"
+         [zoom]="12">
+            <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+            </pnx-geojson>
+      </pnx-map>
+   </div>
 
-
-  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-">
-    <h3> Zone de prospection</h3>
-    <ngx-datatable
-    class="material"
-    [rows]="mapListService.tableData"
-    [columnMode]="'force'"
-    [headerHeight]="50"
-    [footerHeight]="50"
-    [rowHeight]="'auto'"
-    [scrollbarV]="false"
-    [draggable]="false" 
-    [selected]="mapListService.selectedRow"
-    [externalPaging]="false" 
-    [selectionType]="'single'"
-    (select)="mapListService.onRowSelect($event)" >
-    <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop">
-            
-    </ngx-datatable-column>
-    
-    <ngx-datatable-column name="Visualiser"  width="50">
-         <ng-template  let-row="row" ngx-datatable-cell-template>
-             <button type="button" class="btn btn-info fa fa-eye" (click)="onInfo(row.id_base_site)">
-             </button>
-         </ng-template>
-     </ngx-datatable-column>
-    
-     
    
-</ngx-datatable>
-  </div>
+
+
+
+   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+      <h3> Zones de prospection</h3>
+      
+      <!-- <input type="number" placeholder="Rechercher une ZP" id="inputSearch"
+      (change)="updateFilter($event)">  -->
+
+      <input [(ngModel)]="search" (ngModelChange)="updateFilter($event)" placeholder="Rechercher une ZP" id="inputSearch" >
+      
+
+      <ngx-datatable
+      class="material"
+      [rows]="mapListService.tableData"
+      [headerHeight]="50"
+      [footerHeight]="50"
+      [rowHeight]="'auto'"
+      [scrollbarV]="false"
+      [draggable]="false" 
+      [columnMode]="'force'" 
+      [selected]="mapListService.selectedRow"
+      [externalPaging]="false" 
+      [selectionType]="'single'"
+      (select)="mapListService.onRowSelect($event)"
+      [limit]="6"
+      [messages]="message"
+      (sort)="onSort($event)"
+      [rowClass]="mapListService.getRowClass"
+
+      >
+
+         <!-- <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop" > 
+            
+         </ngx-datatable-column> -->
+         <ngx-datatable-column name="Identifiant" maxWidth="100">
+            <ng-template  let-row="row" ngx-datatable-cell-template  >
+                {{row.id_base_site}}
+            </ng-template>
+         </ngx-datatable-column>
+
+         <ngx-datatable-column name="Taxon" maxWidth="320">
+            <ng-template  let-row="row" ngx-datatable-cell-template  >
+                {{row.nom_taxon}}
+            </ng-template>
+         </ngx-datatable-column>
+         
+         <ngx-datatable-column name="Nombre de visites" maxWidth="130">
+            <ng-template  let-row="row" ngx-datatable-cell-template  >
+                {{row.base_site.t_base_visits.length}}
+            </ng-template>
+         </ngx-datatable-column>
+
+         <ngx-datatable-column name="Date de la dernière visite" maxWidth="200" >
+            <ng-template  let-row="row" ngx-datatable-cell-template >
+                {{row.date_max}}
+            </ng-template>
+         </ngx-datatable-column>
+
+         <ngx-datatable-column maxWidth="100">
+            <ng-template  let-row="row" ngx-datatable-cell-template>
+               <button type="button" class="btn btn-info fa fa-eye" (click)="onInfo(row.id_base_site)" title="Visualiser">
+               </button>
+            </ng-template>
+         </ngx-datatable-column>
+       
+         
+      </ngx-datatable>
+  
+   </div>
 
 </div>
 

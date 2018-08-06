@@ -2,3 +2,21 @@
     max-height: 79vh!important;
     overflow-y: scroll;
 }
+
+#inputSearch {
+    padding:8px;
+    margin:15px auto;
+    width:35%;
+    background-color: transparent; 
+    border:none; 
+    border-bottom: solid 1px rgb(154, 217, 247); 
+    // border-bottom: 1px #181818 
+}
+
+
+
+
+:host /deep/ .single-selection .datatable-body-row.active  .datatable-row-group {
+    background-color: rgb(154, 217, 247) !important;
+   }
+
