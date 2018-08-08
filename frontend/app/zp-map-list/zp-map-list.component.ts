@@ -25,13 +25,13 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
    
    public id_ZP;
   
-
+   public rows; 
 
   
    public columns = [
        { name: 'Identifiant', prop:'id_base_site' },
        { name: 'Taxon', prop: 'nom_taxon'}, 
-       { name: 'Nombre de visites', prop: 'base_site.t_base_visits.length'},
+       { name: 'Nombre de visites', prop: 'nb_visit'},
        { name: 'Date de la dernière visite', prop: 'date_max'}
               // { name: 'Actions' }
      ];
@@ -41,16 +41,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
    public dateIci; 
    public tabDate = [];
    public message = { emptyMessage: "Aucune zone à afficher ", totalMessage: "zone(s) de prospection au total" }  
-   public sort = [
-    {
-      prop: 'identifiant',
-      dir: 'desc'
-    },
-    // {
-    //   prop: 'age',
-    //   dir: 'asc'
-    // }
-  ]  
+   public filteredData = []; 
 
 
    constructor(public mapService: MapService, public _api: DataService, public router: Router, public storeService: StoreService,
@@ -63,13 +54,19 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       this.mapListService.idName = 'id_infos_site';
       let nomTaxon;  
       
-      this._api.getZp().subscribe(data => {
+      let app = 
+      {
+        id_application: ModuleConfig.id_application
+      }
+
+      this._api.getZp(app).subscribe(data => {
          
          this.zps = data; 
-         console.log("mes data ", data);
-         
+         console.log("mes data ", data.features);
+
          this.mapListService.loadTableData(data);
        
+         this.filteredData = this.mapListService.tableData;
       });
     
       
@@ -81,6 +78,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
    ngAfterViewInit() {
       this.mapListService.enableMapListConnexion(this.mapService.getMap()); 
+
    }
 
    onEachFeature(feature, layer) {
@@ -104,74 +102,56 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
    }
 
-   updateFilter (event) {
-      console.log("mon event ", event)
-   //  let valSearch = event.target.value.toLowerCase();
-
-    // console.log("et quel key ici ", event.target.value);
-    
-   //      console.log('change')
-    let result = this.mapListService.tableData.filter(
+   onUpdateFilter (event) {
+   
+      let trans = event.toLowerCase();
+     this.filteredData = this.mapListService.tableData.filter(
       ligne => {
-         console.log('valeur ', event);
-         console.log('correspond à l\'index', ligne.nom_taxon.toLowerCase().indexOf(event));
+         console.log('valeur ', event.toLowerCase());
+         console.log('correspond à l\'index', ligne.nom_taxon.toLowerCase().indexOf(trans));
          
-         
-         return (ligne.nom_taxon.toLowerCase().indexOf(event) !== -1) || 
-         (ligne.date_max.toLowerCase().indexOf(event) !== -1)  ;
-    }
-    )
-    this.mapListService.tableData = result;
+       
+         return (ligne.nom_taxon.toLowerCase().indexOf(trans) !== -1) || !trans; 
 
-    // console.log("resultat ici ", this.mapListService.tableData);
-    // this.mapListService.tableData.forEach( ligne => {
-    //     console.log("chaque ligne" , ligne );
-        
-    // })
+     }
+    )
+    
+    // console.log("je log tableData" , this.mapListService.tableData);
+
+   //  this.filteredData =  result; 
+
+    
   
   }
 
    onSort(event) {
-      
-      // let tab = [2, 9 ,8 , 6, 7]
-      // tab.sort((a, b) => {
-      //    console.log('je veux a ', a);
-      //    console.log("je veux b ", b );
-         
-         
-      //    return a-b;
-      // })
-      
-      console.log("sort event ", event);
-      // console.log("rows ", rows);
-      // console.log("tous event ", event.sorts);
-      
       const sort = event.sorts[0];
-      console.log("mon prop de sort ", sort.prop);
-      
-      // console.log("je veux ce constant  ", sort );
-      
-      // console.log("tableau trié ", sort.prop);
-      // rows.sort() ;
-      // console.log("je log rows ", rows);
-      
-     this.mapListService.tableData.sort((a, b) => {
-      //   console.log("mon sort prop", sort.prop);
-        
-      //   console.log("je veux a", a.id_infos_site)
-        console.log('je veux b ', b);
-        ;
-        
-         // console.log(a[sort.prop].localeCompare(b[sort.prop] * (sort.dir === 'desc' ? -1 : 1)));
-         // return a[sort.prop].localeCompare(b[sort.prop] * (sort.dir === 'desc' ? -1 : 1))
-         // console.log([sort.prop]);
-         console.log('je compare ', a.id_infos_site - b.id_infos_site  );
-         
-         return (a.id_infos_site - b.id_infos_site) || (a.nom_taxon.local.localeCompare(b.nom_taxon))  ;
 
+  
+      const test = event.column.prop;
+    
+      this.mapListService.tableData.sort((a, b) => {
+        console.log("je veux sort.dir ", sort.dir);
+        
+         return a[test].toString().localeCompare(b[test].toString() * (sort.dir === 'desc' ? -1 : 1),  undefined,  {numeric: true})   ;
+         // if (sort.dir === 'desc') {
+         //    sort.dir = 'asc'; 
+         //    console.log("maintenant c' depuis petit à grand");
+            
+         //    // return a[test].toString().localeCompare(b[test].toString() * (-1), undefined, {numeric: true}) ;
+            
+         // } else {
+         //    sort.dir = 'desc';
+         //    console.log("et là c' grn");
+            
+            // return a[test].toString().localeCompare(b[test].toString(), undefined, {numeric: true}) ;
+            
+            // }
       });
 
-      // this.loading = false; 
+   
+      
+      
    }
   
 }

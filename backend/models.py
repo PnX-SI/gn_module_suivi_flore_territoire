@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
 
+
 from geonature.utils.env import DB
 from geonature.utils.utilssqlalchemy import (
         serializable,

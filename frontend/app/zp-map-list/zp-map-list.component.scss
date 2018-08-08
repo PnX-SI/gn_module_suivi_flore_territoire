@@ -1,5 +1,6 @@
 .ngx-datatable.material {
     max-height: 79vh!important;
+    box-shadow: none!important;
     overflow-y: scroll;
 }
 
@@ -20,3 +21,8 @@
     background-color: rgb(154, 217, 247) !important;
    }
 
+
+   .tab-container {
+    max-height: 81vh;
+    height: 80vh;
+  }

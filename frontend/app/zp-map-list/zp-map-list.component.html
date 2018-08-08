@@ -1,5 +1,5 @@
 <div class="row row-0">
-   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
+   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
       <pnx-map
          height="95vh"
          [center]= "[44.982667966765845, 6.062455200884894]"
@@ -13,18 +13,19 @@
 
 
 
-   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
       <h3> Zones de prospection</h3>
       
       <!-- <input type="number" placeholder="Rechercher une ZP" id="inputSearch"
       (change)="updateFilter($event)">  -->
 
-      <input [(ngModel)]="search" (ngModelChange)="updateFilter($event)" placeholder="Rechercher une ZP" id="inputSearch" >
+      <input [(ngModel)]="search" (ngModelChange)="onUpdateFilter($event)" placeholder="Rechercher une ZP" id="inputSearch" >
       
 
       <ngx-datatable
+      #table
       class="material"
-      [rows]="mapListService.tableData"
+      [rows]="filteredData"
       [headerHeight]="50"
       [footerHeight]="50"
       [rowHeight]="'auto'"
@@ -35,17 +36,22 @@
       [externalPaging]="false" 
       [selectionType]="'single'"
       (select)="mapListService.onRowSelect($event)"
-      [limit]="6"
       [messages]="message"
-      (sort)="onSort($event)"
       [rowClass]="mapListService.getRowClass"
-
+      [externalSorting]="true"
+      [offset]="mapListService.page.pageNumber"
+      [limit]="mapListService.page.size"
+      [rowClass]="mapListService.getRowClass"
+      [sortType]="single" 
+      (sort)=onSort($event)
       >
+      <!-- [sorts]="sort" -->
 
-         <!-- <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop" > 
+         <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop" >
+               
             
-         </ngx-datatable-column> -->
-         <ngx-datatable-column name="Identifiant" maxWidth="100">
+         </ngx-datatable-column>
+         <!-- <ngx-datatable-column name="Identifiant" maxWidth="100">
             <ng-template  let-row="row" ngx-datatable-cell-template  >
                 {{row.id_base_site}}
             </ng-template>
@@ -67,14 +73,14 @@
             <ng-template  let-row="row" ngx-datatable-cell-template >
                 {{row.date_max}}
             </ng-template>
-         </ngx-datatable-column>
+         </ngx-datatable-column>-->
 
          <ngx-datatable-column maxWidth="100">
             <ng-template  let-row="row" ngx-datatable-cell-template>
                <button type="button" class="btn btn-info fa fa-eye" (click)="onInfo(row.id_base_site)" title="Visualiser">
                </button>
             </ng-template>
-         </ngx-datatable-column>
+         </ngx-datatable-column> 
        
          
       </ngx-datatable>

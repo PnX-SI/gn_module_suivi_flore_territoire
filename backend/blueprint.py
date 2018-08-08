@@ -1,14 +1,18 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, session, current_app
 from sqlalchemy.sql.expression import func
 from geojson import FeatureCollection
 
 from geonature.utils.utilssqlalchemy import json_resp
 from geonature.utils.env import DB
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie
-from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites
-
+from .repositories import check_user_cruved_visit
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
-
+from pypnusershub.db.tools import (
+    InsufficientRightsError,
+    get_or_fetch_user_cruved,
+)
+from pypnusershub import routes as fnauth
 
 from geonature.core.users.models import TRoles
 
@@ -22,25 +26,45 @@ def get_sites_zp():
     Retourne la liste des ZP
     '''
     parameters = request.args 
+#    , TBaseVisits.id_base_visit
    
+    # t = DB.session.query(func.count(TBaseVisits.id_base_visit))
+    # print("je veux ici ", t.all())
+    q = (
+        DB.session.query(
+            TInfoSite,
+            func.max(TBaseVisits.visit_date),
+            Taxonomie.nom_complet,
+            func.count(TBaseVisits.id_base_visit)
+        ).join(
+            TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
+        ).join(
+            Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
+        .group_by(TInfoSite, Taxonomie.nom_complet)
+    )
    
-    q = DB.session.query(TInfoSite, func.max(TBaseVisits.visit_date), Taxonomie.nom_complet).join(
-        TBaseVisits, TInfoSite.id_base_site == TBaseVisits.id_base_site).join(
-        Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom).group_by(TInfoSite, Taxonomie.nom_complet)
     # q = DB.session.query(TInfoSite, func.max(TBaseVisits.visit_date)).join(
     #     TBaseVisits, TInfoSite.id_base_site == TBaseVisits.id_base_site).group_by(TInfoSite)
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-        
+    if 'id_application' in parameters:
+        q = q.join(
+            corSiteApplication, corSiteApplication.c.id_base_site == TInfoSite.id_base_site
+        ).filter(corSiteApplication.c.id_application == parameters['id_application'])
+        # q = q.filter(TInfoSite.base_site.applications.any(id_application=parameters['id_application']))
+    
+
+    # print(q)
+    print(current_app.config)
     data = q.all()
-    print(q)
-        # print("je print id_base_site ", TInfoSite.id_base_site == parameters['id_base_site'])
+
     features = []
     for d in data:
         print (d)
         feature = d[0].get_geofeature()
         feature['properties']['date_max'] = str(d[1])
         feature['properties']['nom_taxon'] = str(d[2])
+        feature['properties']['nb_visit'] = str(d[3])
         features.append(feature)
     return FeatureCollection(features)
     # return "here"
@@ -114,16 +138,19 @@ def get_visit(id_visit):
     return data.as_dict(recursif=True)
 
 
+
 @blueprint.route('/visit', methods=['POST'])
+@fnauth.check_auth_cruved('C', True)
 @json_resp
-def post_visit():
+def post_visit(info_role):
+    # print(info_role)
     data = dict(request.get_json())
     tab_perturbation = data.pop('cor_visit_perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
     visit = TVisiteSFT(**data)
     # print(data)
-    print(visit)
+    # print(visit)
     perturs = DB.session.query(TNomenclatures).filter(
         TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()    
     for per in perturs:
@@ -137,14 +164,21 @@ def post_visit():
         ).all()
         # print(observers)
     for o in observers:
-        print(o.as_dict())
+        # print(o.as_dict())
         visit.observers.append(o)
     if visit.id_base_visit:
+        user_cruved = get_or_fetch_user_cruved(
+            session=session,
+            id_role=user.id_role,
+            id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
+        )
+        update_cruved = user_cruved['U']
+        check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)
     else:    
         DB.session.add(visit)
     DB.session.commit()
-    print(visit.as_dict(recursif=True))
+    # print(visit.as_dict(recursif=True))
 
     return visit.as_dict(recursif=True)
 
