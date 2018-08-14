@@ -1,69 +1,76 @@
 <div class="row row-0">
-   <div class="col-xs-10 col-sm-6 col-md-6 col-lg-6">
-      <pnx-map height="80vh">
+   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+      <pnx-map height="95vh">
             <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
             </pnx-geojson>
       </pnx-map>
    </div>
 
 
-   <div class="card-block">
+   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm  tab-container"> 
       <ul class="nav nav-tabs" role="tablist">
          <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab"> 
-            <i class="fa fa-info-circle"> Informations générales </i></a>
+            <i class="fa fa-info-circle"> </i>  Informations générales </a>
          </li>
          <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#details" role="tab">
-            <i class="fa fa-search"> Détails </i></a>
+            <i class="fa fa-search police">  </i> Détails </a>
          </li>
       </ul>
 
       <div class="tab-content">
-         <div class="tab-pane active modal-header" id="infoGen" role="tabpanel">  
-            <p> <span class="strong"> Code site : </span>  <span> {{idSite}} </span></p>
-            <p> <span class="strong"> Type site : </span>  <span>  </span></p>
-            <p> <span class="strong"> Commune : </span>  <span>  </span></p>
-            <p> <span class="strong"> Site actif : </span>  <span> </span></p>
+         <div class="tab-pane active modal-header  list-group-item" id="infoGen" role="tabpanel">  
+            <p> <span class="strong "> Code site : </span>  <span> {{idSite}} </span></p>
+            <p> <span class="strong"> Nom de l'espèce suivie : </span> {{nomTaxon}}  <span>  </span></p>
+            <p> <span class="strong "> Commune : </span>  <span>  </span></p>
          </div>
-                        
-         <div class="tab-pane modal-header" id="details" role="tabpanel">
+            
+         <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
+            <p> <span class="strong"> Nom du site : </span>  <span>  </span></p>
             <p> <span class="strong"> Description du site : </span>  <span> </span></p>
-            <p> <span class="strong"> Fréquentation : </span>  <span>  </span></p>
-            <p> <span class="strong"> Aménagements: </span>  <span>  </span></p>
          </div>
       </div>
 
-        
+       <br/> 
+      
       <div>
+
+
          <ngx-datatable
          class="material"
+         [columnMode]="'force'" 
          [rows]="rows"
-         [columnMode]="'force'"
          [headerHeight]="50"
          [footerHeight]="50"
-         [rowHeight]="'auto'">
+         [rowHeight]="'auto'"
+         [messages]="message"
+         [offset]="mapListService.page.pageNumber"
+         [limit]="mapListService.page.size"
+         >
         
-         <ngx-datatable-column name="Visualiser"  width="50">
-            <ng-template  let-row="row" ngx-datatable-cell-template>
-                <button type="button" class="btn btn-info fa fa-info-circle" (click)="onInfo(row.id_base_visit)">
-                </button>
-            </ng-template>
-        </ngx-datatable-column>
+            <ngx-datatable-column maxWidth="90">
+               <ng-template  let-row="row" ngx-datatable-cell-template>
+                  <button type="button" class="btn btn-info fa fa-info-circle" 
+                  (click)="onInfo(row.id_base_visit)" title="Visualiser">
+                  </button>
+               </ng-template>
+            </ngx-datatable-column>
  
-             <ngx-datatable-column name="Editer" width="50">
-                   <ng-template  let-row="row" ngx-datatable-cell-template>
-                         <button type="button" class="btn btn-success fa fa-edit" (click)="onEdit(row.id_base_visit)">
-                             
-                         </button>
-    
-                   </ng-template>
+            <ngx-datatable-column maxWidth="90">
+               <ng-template  let-row="row" ngx-datatable-cell-template>
+                  <button type="button" class="btn btn-success fa fa-edit" 
+                  (click)="onEdit(row.id_base_visit)" title="Editer">
+                  </button>
+               </ng-template>
+            </ngx-datatable-column> 
             
-                </ngx-datatable-column> 
+            <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" 
+            [prop]="col.prop" maxWidth="220" >
             
-         <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop">
-            
-        </ngx-datatable-column>
+            </ngx-datatable-column>
+
+           
      <!-- <ngx-datatable-column name="Identifiant de la visite" width="200" prop='identifiant'>
                <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
                   {{column.name}}
@@ -97,16 +104,46 @@
                               
       </div>
       
-      <div class="modal-footer">
-                  <div>
-                     <button type="button" class="btn btn-primary btn-sm" (click)="onAdd()"> Rajouter une nouvelle visite  </button>
-                  </div>
+      <div id="end-btn">
+      
+         <button type="button" class="btn btn-primary btn-sm box-shadow" id="download-btn"
+         (click)="storeService.openIntesectionModal(loadContent)"> 
+                  <i class="fa fa-download" aria-hidden="true"> </i>
+                  Télécharger ces visites 
+         </button>
+
+         <button type="button" id="add-btn" class="btn btn-success btn-sm" (click)="onAdd()"> 
+            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+            Ajouter une nouvelle visite  </button>
                   
       </div>
-            
+           
+      <ng-template #loadContent id="modal-download" let-c="close" let-d="dismiss">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalLabel"> Télécharger les données </h5>
+              <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+                  <span aria-hidden="true">&times;</span> 
+               </button>
+            </div>
+            <div class="modal-body">
+              <span > <b> Attention: </b> </span> <br>
+              <span> Vous vous apprêter à télécharger les données de  <b> toutes les visites </b> sur cette zone . </span><br>
+              <br><br><br>
+      
+              <div class="export-button">
+               <button *ngFor="let format of storeService.exportFormat" class="buttonLoad"
+                  (click)="onDownload(format)"
+                 type="button"
+                 class="btn btn-success format-btn">
+                  Format {{format}}
+                </button>
+              </div>
+      
+            </div>
+      </ng-template>
 
    </div>  
-        
+     
             
 </div>
 

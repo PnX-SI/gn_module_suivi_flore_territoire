@@ -2,4 +2,35 @@
     font-weight: bold;
 }
 
+.box-shadow {
+    box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
 
+.list-group-item {
+    background-color: #FFF;
+    color: #181818;
+    border: none; 
+}
+
+#end-btn {
+    margin-top: 15px;
+    margin-bottom: 30px
+}
+
+#download-btn {
+    margin-top: 5px;
+    padding: 5px;
+  }
+  
+
+#add-btn {
+    float: right;
+    margin-top: 5px;
+    margin-right: 5px;
+    padding: 5px;
+}
+
+
+.format-btn {
+    margin-left: 5px;
+  }
