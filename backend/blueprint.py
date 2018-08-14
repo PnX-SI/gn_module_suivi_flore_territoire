@@ -1,23 +1,30 @@
-from flask import Blueprint, request, session, current_app
-from sqlalchemy.sql.expression import func
-from geojson import FeatureCollection
+import datetime
 
-from geonature.utils.utilssqlalchemy import json_resp
-from geonature.utils.env import DB
-from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie
+from flask import Blueprint, request, session, current_app, send_from_directory
+from sqlalchemy.sql.expression import func
+from geojson import FeatureCollection, Feature
+from geoalchemy2.shape import to_shape
+
+from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
+from geonature.utils.env import DB, ROOT_DIR
+from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
 from .repositories import check_user_cruved_visit
-from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
+from geonature.core.ref_geo.models import LAreas
+
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 from pypnusershub.db.tools import (
     InsufficientRightsError,
     get_or_fetch_user_cruved,
+)
+from geonature.utils.utilsgeometry import(
+    ShapeService
 )
 from pypnusershub import routes as fnauth
 
 from geonature.core.users.models import TRoles
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
-
 
 @blueprint.route('/sites', methods=['GET'])
 @json_resp
@@ -181,6 +188,103 @@ def post_visit(info_role):
     # print(visit.as_dict(recursif=True))
 
     return visit.as_dict(recursif=True)
+
+
+
+@blueprint.route('/export_visit', methods=['GET'])
+def export_visit():
+
+    parameters = request.args
+        # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
+
+    export_format = parameters['export_format'] if 'export_format' in request.args else 'shapefile'
+
+    file_name = datetime.datetime.now().strftime('%Y_%m_%d_%Hh%Mm%S')
+    q =  (DB.session.query(ExportVisits))
+    
+    if 'id_base_visit' in parameters:
+
+        q = (DB.session.query(ExportVisits)
+            .filter(ExportVisits.id_base_visit == parameters['id_base_visit'])
+        )
+    elif 'id_base_site' in parameters:
+        q = (DB.session.query(ExportVisits)
+            .filter(ExportVisits.id_base_site == parameters['id_base_site'])
+        )
+    
+        
+    data = q.all()
+    features = []
+    
+    if export_format == 'geojson':
+
+        for d in data:
+            feature = d.as_geofeature('geom', 'id_area', False)
+            features.append(feature)
+        result = FeatureCollection(features)
+
+        return to_json_resp(
+            result,
+            as_file=True,
+            filename=file_name,
+            indent=4
+    )
+
+    elif export_format == 'csv':
+        tab_visit = []
+
+        for d in data:
+            visit =  d.as_dict()
+            geom_wkt = to_shape(d.geom)
+            visit['geom'] = geom_wkt
+            
+            tab_visit.append(visit)
+        
+
+        return to_csv_resp(
+            file_name,
+            tab_visit,
+            tab_visit[0].keys(),
+            ';'
+
+        )
+    
+    else:
+        print('LAAA')
+        # db_cols = [db_col for db_col in ExportVisits.__mapper__.c]
+        # #TODO: mettre en parametre le srid
+        # shape_service = ShapeService(db_cols, srid=2154)
+        # shape_service.create_shape_struct()
+        dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
+
+        # for d in data:
+        #     visit_list = d[0].as_list()
+        #     visit_list.append(d[2])
+        #     visit_list.append(d[3].label_default)
+        #     shape_service.create_features(visit_list, d[1])
+        # shape_service.save_shape(dir_path, file_name)
+        # shape_service.zip_it(dir_path, file_name)
+
+        ExportVisits.as_shape(
+            geom_col='geom',
+            dir_path=dir_path,
+            srid=2154,
+            data=data,
+            file_name=file_name
+        )
+
+        return send_from_directory(
+            dir_path,
+            file_name+'.zip',
+            as_attachment=True
+        )
+
+
+
+
+
+
+
 
 
 
