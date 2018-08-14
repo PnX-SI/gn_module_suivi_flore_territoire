@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Layer } from 'leaflet';
+import { NgbDateParserFormatter, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Injectable()
 export class StoreService {
@@ -21,10 +22,13 @@ public myStyleAbsent = {
     weight: 3
 };
 
+public exportFormat = ['geojson', 'csv', 'shapefile'];
+
     
-    constructor() { } 
+    constructor(private _modalService: NgbModal) { } 
    
    
-    
-    
+    openIntesectionModal(content) {
+        this._modalService.open(content);
+      }
 }

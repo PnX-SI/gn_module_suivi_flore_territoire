@@ -13,6 +13,7 @@ export class DataService {
       myParams = myParams.set(key, params[key])
       
     } 
+    
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`, {params: myParams});
   }
 
@@ -52,4 +53,16 @@ export class DataService {
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit/${id_visit}`);
 
   }
+
+  downloadData(params:any) {
+    let myParams = new HttpParams();
+    
+    for (let key in params) {
+      myParams = myParams.set(key, params[key])
+      
+    } 
+    
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/export_visit`, {params: myParams});
+  }
+  
 }
