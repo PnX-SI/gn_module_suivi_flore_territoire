@@ -44,8 +44,13 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
    public filteredData = []; 
 
 
-   constructor(public mapService: MapService, public _api: DataService, public router: Router, public storeService: StoreService,
-   public mapListService:MapListService, public dataFormService: DataFormService,
+   constructor
+   (public mapService: MapService, 
+    private _api: DataService, 
+    public router: Router, 
+    public storeService: StoreService,
+    public mapListService:MapListService, 
+    public dataFormService: DataFormService,
 
    ) {}
 
@@ -102,56 +107,60 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
    }
 
-   onUpdateFilter (event) {
+   onSearchTaxon (event) {
    
       let trans = event.toLowerCase();
      this.filteredData = this.mapListService.tableData.filter(
       ligne => {
-         console.log('valeur ', event.toLowerCase());
-         console.log('correspond à l\'index', ligne.nom_taxon.toLowerCase().indexOf(trans));
-         
-       
          return (ligne.nom_taxon.toLowerCase().indexOf(trans) !== -1) || !trans; 
 
      }
     )
     
-    // console.log("je log tableData" , this.mapListService.tableData);
-
-   //  this.filteredData =  result; 
-
     
-  
   }
 
-   onSort(event) {
-      const sort = event.sorts[0];
-
-  
-      const test = event.column.prop;
-    
-      this.mapListService.tableData.sort((a, b) => {
-        console.log("je veux sort.dir ", sort.dir);
-        
-         return a[test].toString().localeCompare(b[test].toString() * (sort.dir === 'desc' ? -1 : 1),  undefined,  {numeric: true})   ;
-         // if (sort.dir === 'desc') {
-         //    sort.dir = 'asc'; 
-         //    console.log("maintenant c' depuis petit à grand");
-            
-         //    // return a[test].toString().localeCompare(b[test].toString() * (-1), undefined, {numeric: true}) ;
-            
-         // } else {
-         //    sort.dir = 'desc';
-         //    console.log("et là c' grn");
-            
-            // return a[test].toString().localeCompare(b[test].toString(), undefined, {numeric: true}) ;
-            
-            // }
-      });
-
+  onSearchDate (event) {
    
-      
-      
+    let trans = event.toLowerCase();
+   this.filteredData = this.mapListService.tableData.filter(
+    ligne => {
+       return (ligne.date_max.toLowerCase().indexOf(trans) !== -1) || !trans; 
+
    }
+  )
+  
+  
+}
+   onSort(event) {
+      // const sort = event.sorts[0];
+      console.log("my event ", event );
+      let prop = event.column.prop; 
+  
+      this.filteredData = this.mapListService.tableData.sort((a, b) => {
+        
+          return a[prop].toString().localeCompare(b[prop].toString(),  undefined,  {numeric: true}) * (event.newValue === 'desc' ? -1 : 1)  ;
+
+      
+    })
+
+     
+   }
+
+   onDownload(format) {
+
+    // const param = {
+    //   export_format: format
+
+    // }
+    // this._api.downloadData(param).subscribe(); 
+    const url = `${
+      AppConfig.API_ENDPOINT}${ModuleConfig.api_url}/export_visit?export_format=${format}`;
+
+      document.location.href = url;
+    
+      
+}
+   
   
 }

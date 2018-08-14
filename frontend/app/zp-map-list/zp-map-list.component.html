@@ -13,14 +13,30 @@
 
 
 
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
+   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container ">
       <h3> Zones de prospection</h3>
       
       <!-- <input type="number" placeholder="Rechercher une ZP" id="inputSearch"
       (change)="updateFilter($event)">  -->
+      <div id="blocSearch" class="row row-0 "> 
+         <div class="searchZP"> 
+               <small> Rechercher selon taxon </small>
+               <input 
+               [(ngModel)]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch" >
+         </div>
+         
+         <div class="searchZP"> 
+               <small> Rechercher selon l'année </small>
+               <input [(ngModel)]="searchDate" (ngModelChange)="onSearchDate($event)" class="inputSearch" >
+         </div>
 
-      <input [(ngModel)]="search" (ngModelChange)="onUpdateFilter($event)" placeholder="Rechercher une ZP" id="inputSearch" >
-      
+         <div class="searchZP"> 
+               <small> Rechercher selon l'organisme </small>
+               <input [(ngModel)]="searchOrga" (ngModelChange)="onUpdateFilter($event)" class="inputSearch" >
+         </div>
+
+      </div>
+ 
 
       <ngx-datatable
       #table
@@ -44,10 +60,12 @@
       [rowClass]="mapListService.getRowClass"
       [sortType]="single" 
       (sort)=onSort($event)
+      [reorderable]="true"
+     
       >
       <!-- [sorts]="sort" -->
 
-         <ngx-datatable-column *ngFor="let col of columns" [name]="col.name" [prop]="col.prop" >
+         <ngx-datatable-column *ngFor="let col of columns"  [sortable]="true" [name]="col.name" [prop]="col.prop" >
                
             
          </ngx-datatable-column>
@@ -85,6 +103,40 @@
          
       </ngx-datatable>
   
+      <div id="end-btn">
+      
+            <button type="button" class="btn btn-primary btn-sm box-shadow" id="download-btn"
+            (click)="storeService.openIntesectionModal(loadContent)"> 
+                     <i class="fa fa-download" aria-hidden="true"> </i>
+                     Télécharger ces visites 
+            </button>
+         
+      </div>
+
+      <ng-template #loadContent id="modal-download" let-c="close" let-d="dismiss">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalLabel"> Télécharger les données </h5>
+              <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+                  <span aria-hidden="true">&times;</span> 
+               </button>
+            </div>
+            <div class="modal-body">
+              <span > <b> Attention: </b> </span> <br>
+              <span> Vous vous apprêter à télécharger les données de  <b> toutes les visites </b>. </span><br>
+              <br><br><br>
+      
+              <div class="export-button">
+               <button *ngFor="let format of storeService.exportFormat" class="buttonLoad"
+                  (click)="onDownload(format)"
+                 type="button"
+                 class="btn btn-success format-btn">
+                  Format {{format}}
+                </button>
+              </div>
+      
+            </div>
+      </ng-template>
+
    </div>
 
 </div>
