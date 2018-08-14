@@ -6,8 +6,8 @@ from pypnusershub.db.tools import get_or_fetch_user_cruved
 def check_user_cruved_visit(user, visit, cruved_level):
     """
     Check if user have right on a visit object, related to his cruved
+    if not, raise 403 error
     """
-    print(visit.observers)
     
     is_allowed = False
     if cruved_level == '1':
