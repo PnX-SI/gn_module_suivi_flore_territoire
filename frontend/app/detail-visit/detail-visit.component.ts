@@ -10,8 +10,10 @@ import { GeojsonComponent } from '@geonature_common/map/geojson.component';
 import { ActivatedRoute} from '@angular/router';
 import { StoreService } from '../services/store.service'
 import { DataFormService} from "@geonature_common/form/data-form.service"; 
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateParserFormatter, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModuleConfig } from '../module.config';
+import { MapListService } from '@geonature_common/map-list/map-list.service';
+
 
 @Component({
     selector: 'pnx-detail-visit',
@@ -48,15 +50,17 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   public message = { emptyMessage: "Aucune visite sur ce site ", totalMessage: "visite(s) au total" }  
   public dataListVisit = []; 
 
+
    @ViewChild('geojson') geojson: GeoJsonComponent
     
       constructor(public mapService: MapService, 
-        public _api: DataService, 
+        private _api: DataService, 
         public activatedRoute: ActivatedRoute, 
         public storeService: StoreService, 
         public router: Router, 
         public dataFormService: DataFormService,
-       
+        public mapListService: MapListService, 
+
       ) { }
     
     
@@ -73,7 +77,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
        
 
         this.activatedRoute.params.subscribe(params => {
-            this.idVisit = params.idVisit;
             
             this._api.getOneVisit(params.idVisit).subscribe( element => {
               
@@ -140,7 +143,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
               
                // ne cherger que si datalisVisit est undefinned
                this._api.getVisits(parametre).subscribe(donnee => {
-                  let tabTest = [];
                   donnee.forEach ( visit => {
                      let fullName; 
                      visit.observers.forEach( obs => {
@@ -148,62 +150,32 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                          
                      })
                      visit.observers = fullName;
-                     let tabPres = [];
-                     let tabAbs = [];
                      let pres = 0;
                      let abs = 0;
                      
                      visit.cor_visit_grid.forEach( maille => {
-                         if (maille.presence ) {
-                             pres += 1;
-                             tabPres.push(pres);
-                         } else {
-                             abs += 1; 
-                             tabAbs.push( abs);
+                        if (maille.presence ) {
+                           pres += 1;
+                        } else {
+                           abs += 1; 
                          }
-                     
-                         
                      });
          
-                     visit.state = tabPres.length + "P / " + tabAbs.length + "A ";
+                     visit.state = pres + "P / " + abs + "A ";
                     
                   });
 
-                //   tabTest = []
                   this.dataListVisit = donnee ; 
-                //   tabTest = donnee.slice();
-                  
-                //   console.log('passe la')
-                 
-                //   tabTest.forEach( test => {
-                    
-                //     if (test.id_base_visit == this.idVisit) {
-                //        console.log("index de test ", tabTest.indexOf(test) );
-                       
-                //        tabTest.splice(tabTest.indexOf(test) , 1 );
-                                
-                //     } 
-                //   })
+               
                 console.log('laaaaaaaaaaaa')
-                console.log(this.idVisit);
                 
                   this.rows = this.dataListVisit.filter(
-                      visit => {
-                        console.log(visit.id_base_visit);
-                        console.log(params.idVisit);
-                        
-                        return visit.id_base_visit.toString() !==   params.idVisit
-                       
-                                                     
-                        
-                      }
-                  )
-                  console.log("cette table " , this.dataListVisit);
+                     dataa => {
+                     
+                        return dataa.id_base_visit.toString() !== params.idVisit
                 
-                   
-                     
-                    //  this.rows = tabTest;
-                     
+                     }
+                  )
                      
                })
 
@@ -212,12 +184,15 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
            
          })
     
-
+         
       }
     
     
       onEachFeature(feature, layer) {
-         this.visitGrid.forEach( maille => {
+
+        
+        this.visitGrid.forEach( maille => {
+           
             if(maille.id_area == feature.id) {
                if (maille.presence) {
                   layer.setStyle(this.storeService.myStylePresent);
@@ -229,12 +204,13 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       }
 
       onNavigue() {
-         this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idVisit]);
+         this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idSite, 'visit', this.idVisit]);
    
       }
 
+
       onEdit(id_visit) {
-         this.router.navigate([`${ModuleConfig.api_url}/editVisit`,  id_visit])
+         this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idSite, 'visit', id_visit])
    
       }
 
@@ -243,4 +219,26 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
          this.router.navigate([`${ModuleConfig.api_url}/infoVisit`,  id_visit])
    
       }
+      
+      onDownload(format) {
+        this.activatedRoute.params.subscribe(params => {
+
+      //   const parametre = {
+      //     id_base_visit: params.idVisit,
+      //     export_format : format,
+      //   }
+
+     
+       const url = `${
+        AppConfig.API_ENDPOINT}${ModuleConfig.api_url}/export_visit?id_base_visit=${params.idVisit}&export_format=${format}`;
+  
+      document.location.href = url;
+     
+      
+   
+  })
+} 
+
+ 
+
 }
