@@ -1,13 +1,18 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.dialects.postgresql import UUID
+from geoalchemy2 import Geometry
+
 
 
 from geonature.utils.env import DB
 from geonature.utils.utilssqlalchemy import (
         serializable,
         geoserializable,
-        GenericQuery
+        GenericQuery,
 )
+from geonature.utils.utilsgeometry import shapeseralizable
+
 from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisitObserver
 from geonature.core.ref_geo.models import LAreas
 from pypnnomenclature.models import TNomenclatures
@@ -79,9 +84,12 @@ class CorVisitGrid(DB.Model):
       primary_key=True
     )
     presence = DB.Column(DB.Boolean)
+    uuid_base_visit = DB.Column(UUID(as_uuid=True))
+
 
 
 @serializable
+@shapeseralizable
 class TVisiteSFT(TBaseVisits):
     '''
     Visite sur une ZP
@@ -102,8 +110,6 @@ class TVisiteSFT(TBaseVisits):
             CorVisitGrid.id_base_visit,
         ]
     )
-    
-
     cor_visit_perturbation = DB.relationship(
         TNomenclatures,
         secondary=corVisitPerturbation,
@@ -133,11 +139,43 @@ class TVisiteSFT(TBaseVisits):
 @serializable
 class Taxonomie(DB.Model):
     __tablename__ = 'taxref'
-    __table_args__ = {'schema': 'taxonomie'}
+    __table_args__ = {
+        'schema': 'taxonomie',
+        'extend_existing': True
+    }
 
     cd_nom = DB.Column(
       DB.Integer,
       primary_key=True
       )
     nom_complet = DB.Column(DB.Unicode)
+
+
+@serializable
+@geoserializable
+@shapeseralizable
+class ExportVisits(DB.Model):
+    __tablename__ = 'export_visits'
+    __table_args__ = {
+        'schema': 'pr_monitoring_flora_territory',
+    }
+    id_area = DB.Column(
+        DB.Integer,
+        primary_key=True
+        )
+    id_base_visit = DB.Column(
+        DB.Integer,
+        primary_key=True
+        )
+    id_base_site = DB.Column(DB.Integer)
+    visit_date = DB.Column(DB.DateTime)
+    comments = DB.Column(DB.Unicode)
+    geom = DB.Column(Geometry('GEOMETRY', 2154))
+    presence = DB.Column(DB.Boolean)
+    label_perturbation = DB.Column(DB.Unicode)
+    observateurs = DB.Column(DB.Unicode)
+    base_site_name = DB.Column(DB.Unicode)
+    nom_valide = DB.Column(DB.Unicode)
+    cd_nom = DB.Column(DB.Integer)
+
 
