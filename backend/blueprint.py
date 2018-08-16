@@ -22,7 +22,7 @@ from geonature.utils.utilsgeometry import(
 )
 from pypnusershub import routes as fnauth
 
-from geonature.core.users.models import TRoles
+from geonature.core.users.models import TRoles, BibOrganismes
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
 
@@ -36,7 +36,6 @@ def get_sites_zp():
 #    , TBaseVisits.id_base_visit
    
     # t = DB.session.query(func.count(TBaseVisits.id_base_visit))
-    # print("je veux ici ", t.all())
     q = (
         DB.session.query(
             TInfoSite,
@@ -74,7 +73,7 @@ def get_sites_zp():
         feature['properties']['nb_visit'] = str(d[3])
         features.append(feature)
     return FeatureCollection(features)
-    # return "here"
+    return "here"
 
   
     # return FeatureCollection([d.get_geofeature() for d in data])
@@ -150,14 +149,14 @@ def get_visit(id_visit):
 @fnauth.check_auth_cruved('C', True)
 @json_resp
 def post_visit(info_role):
-    # print(info_role)
+    print("mes roles ", info_role)
     data = dict(request.get_json())
     tab_perturbation = data.pop('cor_visit_perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
     visit = TVisiteSFT(**data)
     # print(data)
-    # print(visit)
+    print(visit.as_dict(True))
     perturs = DB.session.query(TNomenclatures).filter(
         TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()    
     for per in perturs:
@@ -176,7 +175,7 @@ def post_visit(info_role):
     if visit.id_base_visit:
         user_cruved = get_or_fetch_user_cruved(
             session=session,
-            id_role=user.id_role,
+            id_role=info_role.id_role,
             id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
         )
         update_cruved = user_cruved['U']
@@ -251,19 +250,10 @@ def export_visit():
     
     else:
         print('LAAA')
-        # db_cols = [db_col for db_col in ExportVisits.__mapper__.c]
+       
         # #TODO: mettre en parametre le srid
-        # shape_service = ShapeService(db_cols, srid=2154)
-        # shape_service.create_shape_struct()
+        
         dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
-
-        # for d in data:
-        #     visit_list = d[0].as_list()
-        #     visit_list.append(d[2])
-        #     visit_list.append(d[3].label_default)
-        #     shape_service.create_features(visit_list, d[1])
-        # shape_service.save_shape(dir_path, file_name)
-        # shape_service.zip_it(dir_path, file_name)
 
         ExportVisits.as_shape(
             geom_col='geom',
@@ -281,6 +271,43 @@ def export_visit():
 
 
 
+@blueprint.route('/organisme', methods=['GET'])
+@json_resp
+def get_organisme():
+    '''
+    Retourne la liste des organismes
+    '''
+    parameters = request.args 
+
+    q = DB.session.query(
+        TVisiteSFT.id_base_visit, 
+        TRoles.nom_role, 
+        TRoles.prenom_role, 
+        BibOrganismes.nom_organisme
+        ).join(
+        corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
+        ).join(
+        TRoles, TRoles.id_role == corVisitObserver.c.id_role
+        ).join(
+        BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
+        )
+        
+    
+    if 'id_base_site' in parameters:
+        q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
+
+    data = q.all() 
+    print(data)
+    # return [d.as_dict(True) for d in data]
+    features = []
+    for d in data:
+        feature = {}
+        feature['id_base_visit'] = str(d[0])
+        feature['observer'] = str(d[1]) + ' ' + str(d[2])
+        feature['nom_organisme'] = str(d[3])
+        features.append(feature)
+    return FeatureCollection(features)
+ 
 
 
 
