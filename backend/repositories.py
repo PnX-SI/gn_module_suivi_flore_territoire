@@ -17,6 +17,9 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 print('même id ')
                 is_allowed = True
                 break
+            elif visit.id_digitiser == user.id_role:
+                is_allowed = True
+                break
         if not is_allowed:
             raise InsufficientRightsError(
             ('User "{}" cannot update visit number {} ')
@@ -31,6 +34,9 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 print('même role')
                 is_allowed = True
                 break
+            elif visit.id_digitiser == user.id_role:
+                is_allowed = True
+                break
             elif role.id_organisme == user.id_organisme:
                 is_allowed = True
                 break
@@ -40,4 +46,5 @@ def check_user_cruved_visit(user, visit, cruved_level):
             .format(user.id_role, visit.id_base_visit),
             403
             )   
-        
+    
+   
