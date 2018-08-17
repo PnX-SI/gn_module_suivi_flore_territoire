@@ -79,31 +79,29 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
                id_base_site: elem.properties.id_base_site
             }
 
-            let tabOrga = [];
-            this.tabOrganism = [];
+            let tabAllOrga = []; // tableau de tous les noms d'organismes faisant visites (doublon)
+            this.tabOrganism = [];  // tableau de noms sélectifs (sans doublon )
             this.tabTestTaxon.push(elem.properties.nom_taxon); 
 
             this._api.getOrganisme(param).subscribe( organi => {
                organi.features.forEach ( res => { 
 
                   let org = ' ' + res.nom_organisme ;
-                  tabOrga.push(org);
-                  let val = tabOrga[0]; 
+                  tabAllOrga.push(org);
+                  let val = tabAllOrga[0]; 
                   this.tabOrganism = [val]; 
                               
                   // vérifie s'il y en a différents organismes qui font des visites sur ce site 
                   //  si oui, affiche tous les organismes. Si non, affiche qu'une seule fois. 
                                   
-                  tabOrga.forEach( el => {
+                  tabAllOrga.forEach( el => {
                      if ((el !== undefined) && (el !== val)) {
                         this.tabOrganism.push(el);
                      }
                   })
-                  // console.log("ma tab Filter ", tabOrganism);
                   
                   
                })
-                             
 
                elem.properties.nom_organisme = this.tabOrganism; 
              
@@ -130,6 +128,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
      
       
    }
+
 
    onEachFeature(feature, layer) {
       this.mapListService.layerDict[feature.id] = layer;
@@ -168,14 +167,14 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   
    onSearchDate (event) {
    
-   let trans = event.toLowerCase();
-   this.filteredData = this.mapListService.tableData.filter(
-      ligne => {
+      let trans = event.toLowerCase();
+      this.filteredData = this.mapListService.tableData.filter(
+         ligne => {
        
-         return ((ligne.date_max.toLowerCase().indexOf(trans) !== -1) || !trans);
+            return ((ligne.date_max.toLowerCase().indexOf(trans) !== -1) || !trans);
         
 
-      })
+         })
   
 
    }
@@ -185,46 +184,47 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
    
    // let trans = event.toLowerCase();
 
-  
+      let select; 
 
-   this.filteredData = this.mapListService.tableData.filter(
-      ligne => {
-      console.log("mes lignes ", ligne );
+      this.filteredData = this.mapListService.tableData.filter(
+         ligne => {
+            ligne.nom_organisme.forEach( el => {
+               if (el.trim() === event ) {
+                  select = el.trim()
+               }
+            })
       
-      
-         for (let i = 0; i < ligne.nom_organisme.length; i++) {
-            return ligne.nom_organisme[i].trim() === event; 
-         //  ça marche que si l'événement === 1er élément du tableau. 
-         //  cmt résoudre???
- }
-       
-      })
+            // for (let i = 0; i < ligne.nom_organisme.length; i++) {
+            //    if (ligne.nom_organisme[i].trim() === event) {
+            //       select = ligne.nom_organisme[i].trim()
+            //    } 
+            // }
+            return select; 
+
+         })
 
      
-         }
+   }
          
   
 
 
    onSort(event) {
-      // const sort = event.sorts[0];
+      
       console.log("my event ", event );
 
       let prop = event.column.prop; 
 
-      
-
-  
       this.filteredData = this.mapListService.tableData.sort((a, b) => {
         
-          return a[prop].toString().localeCompare(b[prop].toString(),  undefined,  {numeric: true}) * (event.newValue === 'desc' ? -1 : 1)  ;
+         return a[prop].toString().localeCompare(b[prop].toString(),  undefined,  {numeric: true}) * (event.newValue === 'desc' ? -1 : 1)  ;
 
       
-    })
-
-     
+      })
+ 
    }
 
+   
    onDownload(format) {
 
     // const param = {
@@ -232,13 +232,13 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
     // }
     // this._api.downloadData(param).subscribe(); 
-    const url = `${
-      AppConfig.API_ENDPOINT}${ModuleConfig.api_url}/export_visit?export_format=${format}`;
+
+      const url = `${AppConfig.API_ENDPOINT}${ModuleConfig.api_url}/export_visit?export_format=${format}`;
 
       document.location.href = url;
     
       
-}
+   }
    
   
 }
