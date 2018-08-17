@@ -20,6 +20,7 @@ export class FormService {
         cor_visit_observer: [null, Validators.required],
         cor_visit_perturbation: new Array(),
         cor_visit_grid: new Array(), 
+        comments: null, 
 
       });
       return formSuivi;

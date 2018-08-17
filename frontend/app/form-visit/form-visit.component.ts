@@ -90,16 +90,15 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
          });
 
-         
-
-
-         
+            
             // vérifie s'il existe idVisit --> c' une modif
          if (this.idVisit !== undefined) {
           console.log("rentre ici ? ");
           
             this._api.getOneVisit(this.idVisit).subscribe( element => {
               
+               console.log( "mes éléments ", element);
+               
                this.visitGrid = element.cor_visit_grid;
                this.comptePresent = 0;
                this.compteAbsent = 0;   
@@ -152,22 +151,25 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
                   cor_visit_observer:  element.observers,
                   cor_visit_perturbation: element.cor_visit_perturbation,
                   cor_visit_grid: this.visitGrid,
+                  comments: element.comments, 
                })
                 
-               console.log("et visit grid à la fin là  ", this.visitGrid);
 
             });
          
             // récupère les mailles
-         this._api.getMaille(this.idSite).subscribe(data => {
-          this.zps = data;
-          this.geojson.currentGeoJson$.subscribe(currentLayer => {
-             this.mapService.map.fitBounds(currentLayer.getBounds());
-          })
-          this.rest = this.zps.features.length;
-
-       });
+         
          } 
+
+         this._api.getMaille(this.idSite).subscribe(data => {
+            this.zps = data;
+            this.geojson.currentGeoJson$.subscribe(currentLayer => {
+               this.mapService.map.fitBounds(currentLayer.getBounds());
+            })
+            this.rest = this.zps.features.length;
+
+         });
+        
              
       }
         
@@ -178,9 +180,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           // console.log("rien?  ", this.visitGrid);
           
           // console.log("je veux visitGrid ", this.visitGrid);
-          console.log(this.visitGrid);
           this.visitGrid.forEach( maille => {
-            console.log("mes mailles ", maille);
                
             if(maille.id_area == feature.id) {
                if (maille.presence) {
@@ -196,7 +196,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
          layer.on({
             click: (event1 => {
                layer.setStyle(this.storeService.myStylePresent);
-               console.log("cette maille porte id ", );
                
                   if (feature.state == 2) {
                      this.compteAbsent -= 1;
@@ -207,12 +206,13 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
                   } else {
                    this.comptePresent += 1;
                  }
+
                feature.state = 1;
                this.getMailleNoVisit();
                this.visitGrid.forEach( dataG => {
-                 if (feature.id == dataG.id_area) {
-                    dataG.presence = true;
-                 }
+                  if (feature.id == dataG.id_area) {
+                     dataG.presence = true;
+                  }
                   
                });
                this.visitModif[feature.id] = true;  
@@ -257,7 +257,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
                      dataG.presence = false;
                   }
                    
-                });
+               });
                this.visitModif[feature.id] = false;
 
             })
@@ -265,6 +265,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
          });
                
       }
+
 
       getMailleNoVisit() {
         this.rest = this.zps.features.length - this.compteAbsent - this.comptePresent;
@@ -309,7 +310,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       
          formModif['cor_visit_perturbation'] = formModif['cor_visit_perturbation'].map(pertu => pertu.id_nomenclature);
      
-      
+         formModif['comments'] = this.modifGrid.controls.comments.value; 
 
          console.log('mon form ', formModif);
          
@@ -329,19 +330,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
 
       }
-   
-      onDelDate() {
-          document.getElementById("ancienDate").innerHTML = ""; 
-        
-      }
-
-      onDelObs() {
-         this.tabObserver = [];
-      }
-
-      onDelPer() {
-        this.namePertur = []; 
-      }
+  
 
       openIntesectionModal(content) {
          this._modalService.open(content);
