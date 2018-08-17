@@ -42,7 +42,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     { name: 'Date', prop: 'visit_date'}, 
     { name: 'Observateur(s)', prop: "observers" },
     { name: 'Présence/ Absence ? ', prop: "state"},
-    { name: 'Identifiant ? ', prop: "id_base_visit"}
+    // { name: 'Identifiant ? ', prop: "id_base_visit"}
 
     // { name: 'Actions' }
   ];
@@ -141,7 +141,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                   id_base_site: this.idSite,
                }
               
-               // ne cherger que si datalisVisit est undefinned
                this._api.getVisits(parametre).subscribe(donnee => {
                   donnee.forEach ( visit => {
                      let fullName; 
