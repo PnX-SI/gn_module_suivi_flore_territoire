@@ -61,12 +61,13 @@ def get_sites_zp():
     
 
     # print(q)
-    print(current_app.config)
+    # print(current_app.config)
     data = q.all()
+    print("mes data ", data)
 
     features = []
     for d in data:
-        print (d)
+        print ("mon d", d)
         feature = d[0].get_geofeature()
         feature['properties']['date_max'] = str(d[1])
         feature['properties']['nom_taxon'] = str(d[2])
@@ -91,6 +92,8 @@ def get_one_zp():
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
     data = q.first()
+    
+
     if data:
         return data.as_dict()
     return None
@@ -178,6 +181,7 @@ def post_visit(info_role):
             id_role=info_role.id_role,
             id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
         )
+        print('coucou ', user_cruved)
         update_cruved = user_cruved['U']
         check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)

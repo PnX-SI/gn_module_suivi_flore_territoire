@@ -48,3 +48,4 @@ def check_user_cruved_visit(user, visit, cruved_level):
             )   
     
    
+
