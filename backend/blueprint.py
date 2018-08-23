@@ -49,8 +49,6 @@ def get_sites_zp():
         .group_by(TInfoSite, Taxonomie.nom_complet)
     )
    
-    # q = DB.session.query(TInfoSite, func.max(TBaseVisits.visit_date)).join(
-    #     TBaseVisits, TInfoSite.id_base_site == TBaseVisits.id_base_site).group_by(TInfoSite)
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
     if 'id_application' in parameters:
@@ -74,7 +72,6 @@ def get_sites_zp():
         feature['properties']['nb_visit'] = str(d[3])
         features.append(feature)
     return FeatureCollection(features)
-    return "here"
 
   
     # return FeatureCollection([d.get_geofeature() for d in data])
@@ -305,7 +302,7 @@ def get_organisme():
     # return [d.as_dict(True) for d in data]
     features = []
     for d in data:
-        feature = {}
+        feature = dict()
         feature['id_base_visit'] = str(d[0])
         feature['observer'] = str(d[1]) + ' ' + str(d[2])
         feature['nom_organisme'] = str(d[3])
@@ -313,6 +310,43 @@ def get_organisme():
     return FeatureCollection(features)
  
 
+@blueprint.route('/info_zp/<id_base_site>', methods=['GET'])
+@json_resp
+def get_info_zp(id_base_site):
+      '''
+      Retourne la/les communes d'une ZP. 
+      TODO: Intégrer cette partie dans routes.py de gn_monitoring 
+      '''
+
+      params = request.args
+
+
+      q = DB.session.query(
+         corSiteArea,
+         LAreas.area_name,
+      ).join(
+         LAreas,
+         LAreas.id_area == corSiteArea.c.id_area
+      ).filter(
+         corSiteArea.c.id_base_site == id_base_site
+      ) 
+
+      if 'id_area_type' in params:
+         q = q.filter(LAreas.id_type == params['id_area_type'])
+      
+      data = q.all()
+      print("mes data ", data )
+      features = []
+      for d in data:
+         feature = dict()
+         feature['id_base_site'] = str(d[0])
+         feature['id_area'] = str(d[1])
+         feature['area_name'] = []
+         feature['area_name'].append(str(d[2]))
+         # une ZP peut être se retrouver dans 2 communes différentes? 
+         # si oui, comment ça se présente? 
+         features.append(feature)
+      return FeatureCollection(features)
 
 
 
