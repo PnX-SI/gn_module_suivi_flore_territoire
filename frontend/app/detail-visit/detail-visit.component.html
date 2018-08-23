@@ -16,18 +16,21 @@
          <ul class="list-group">
             <li class="list-group-item">  <i class="fa fa-map-marker" style="font-size:18px" >
                Zone de prospection:  <span class="info"> {{ idSite }}  </span>   </i> </li>
-            <li class="list-group-item"> <i class="fa fa-leaf" style="font-size:18px"> 
+            <li class="list-group-item"> <i class="fa fa-tree" style="font-size:18px"> 
                Espèce prospectée : <span class="info"> {{nomTaxon}} </span> </i> </li> 
             <li class="list-group-item"> <i class="fa fa-group" style="font-size:18px">  
                Observateur : <span class="info" *ngFor="let obs of tabObserver"> {{obs}} </span> </i></li>  
             <li class="list-group-item"><i class="fa fa-calendar" style="font-size:18px">  
-               Date de la dernière visite : <span class="info"> {{date}} </span> </i> </li>
+               Date de la visite : <span class="info"> {{date}} </span> </i> </li>
             <li class="list-group-item"><i class="fa fa-warning" style="font-size:18px">  
                Type de perturbation : <span class="info" *ngFor="let per of tabPertur" > {{per}} </span> </i> </li>              
-            <li class="list-group-item"><i class="fa fa-paw" style="font-size:18px">  
-               Maille(s) de présence : <span class="info"> {{comptePresent}} </span> </i> </li>
+            <li class="list-group-item"><i class="fa fa-leaf" style="font-size:18px">  
+               Maille(s) de présence : <span class="info"> {{storeService.presence}} </span> </i> </li>
             <li class="list-group-item"><i class="fa fa-ban" style="font-size:18px">  
-               Maille(s) d'absence : <span class="info"> {{compteAbsent}} </span> </i> </li>
+               Maille(s) d'absence : <span class="info"> {{storeService.absence}} </span> </i> </li>
+            <li class="list-group-item"> <i class="fa fa-question-circle" style="font-size:18px"> 
+               Maille(s) pas encore visitées : <span class="info"> {{storeService.rest}} </span> </i> </li>
+               
          </ul>
       </div>
 
@@ -38,7 +41,7 @@
                <i class="fa fa-download" aria-hidden="true"> </i>
                Télécharger cette visite 
             </button>
-            <button type="button" class="btn btn-success box-shadow btn-sm " id="add-btn" (click)="onNavigue()">
+            <button type="button" class="btn btn-success box-shadow btn-sm " id="add-btn" (click)="onEditHere()">
                <i class="fa fa-pencil-square-o" aria-hidden="true"> </i> 
                Editer cette visite 
             </button>
@@ -58,8 +61,7 @@
             [footerHeight]="50"
             [rowHeight]="'auto'"
             [limit]="6"
-            [messages]="message"
-            >
+            [messages]="message">
            
                <ngx-datatable-column maxWidth="100">
                   <ng-template  let-row="row" ngx-datatable-cell-template >
@@ -72,7 +74,7 @@
                <ngx-datatable-column maxWidth="100">
                   <ng-template  let-row="row" ngx-datatable-cell-template >
                      <button type="button" class="btn btn-success fa fa-edit" 
-                     (click)="onEdit(row.id_base_visit)" title="Editer">
+                     (click)="onEditOther(row.id_base_visit)" title="Editer">
                      </button>
                   </ng-template>
                </ngx-datatable-column> 

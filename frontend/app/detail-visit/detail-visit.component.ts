@@ -25,8 +25,6 @@ import { MapListService } from '@geonature_common/map-list/map-list.service';
 
 export class DetailVisitComponent implements OnInit, AfterViewInit {
    public zps;
-   public compteAbsent = 0; 
-   public comptePresent = 0; 
    public codeTaxon; 
    public nomTaxon;
    public date;
@@ -42,7 +40,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     { name: 'Date', prop: 'visit_date'}, 
     { name: 'Observateur(s)', prop: "observers" },
     { name: 'Présence/ Absence ? ', prop: "state"},
-    // { name: 'Identifiant ? ', prop: "id_base_visit"}
+    { name: 'Identifiant ? ', prop: "id_base_visit"}
 
     // { name: 'Actions' }
   ];
@@ -81,13 +79,13 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
             this._api.getOneVisit(params.idVisit).subscribe( element => {
               
                this.visitGrid = element.cor_visit_grid;
-               this.comptePresent = 0;
-               this.compteAbsent = 0;
+               this.storeService.presence = 0;
+               this.storeService.absence = 0; 
                this.visitGrid.forEach( grid => {
                   if (grid.presence == true) {
-                     this.comptePresent += 1;
+                     this.storeService.presence += 1;
                   } else {
-                     this.compteAbsent += 1;
+                     this.storeService.absence += 1;
                   }
                     
                })
@@ -109,6 +107,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
 
                let fullNameObs;
                this.tabObserver = [];
+
                element.observers.forEach( obs => {
                   if (obs == element.observers[element.observers.length-1]) {
                      fullNameObs = obs.nom_complet + ". ";   
@@ -121,10 +120,18 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                this.date = element.visit_date;
                this.idSite = element.id_base_site
               
+               const parametre1 = {
+                  id_area_type: 203
+               }
                 
-               this._api.getMaille(this.idSite).subscribe(data => {
-                   console.log(data)
+               this._api.getMaille(this.idSite, parametre1).subscribe(data => {
+               // affiche les mailles sur la carte 
+                  //  console.log(data)
                   this.zps = data;
+                  this.storeService.total = data.features.length;
+                  console.log("cb mailles? ", this.storeService.total );
+                  
+                  this.storeService.getMailleNoVisit(); 
                   this.geojson.currentGeoJson$.subscribe(currentLayer => {
                      this.mapService.map.fitBounds(currentLayer.getBounds());
                   });
@@ -137,11 +144,11 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                   });
                });
        
-               const parametre = {
+               const parametre2 = {
                   id_base_site: this.idSite,
                }
               
-               this._api.getVisits(parametre).subscribe(donnee => {
+               this._api.getVisits(parametre2).subscribe(donnee => {
                   donnee.forEach ( visit => {
                      let fullName; 
                      visit.observers.forEach( obs => {
@@ -202,13 +209,16 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
          })
       }
 
-      onNavigue() {
-         this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idSite, 'visit', this.idVisit]);
-   
+
+      onEditHere() {
+
+         this.activatedRoute.params.subscribe(params => {
+            this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idSite, 'visit', params.idVisit]);
+         })
       }
 
 
-      onEdit(id_visit) {
+      onEditOther(id_visit) {
          this.router.navigate([`${ModuleConfig.api_url}/editVisit`, this.idSite, 'visit', id_visit])
    
       }
