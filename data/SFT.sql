@@ -18,7 +18,8 @@ SET default_with_oids = false;
 CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
-    cd_nom integer NOT NULL  
+    cd_nom integer NOT NULL,
+    -- rajouter colonne nom de commune --
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.t_infos_site IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
 
@@ -60,10 +61,10 @@ ALTER TABLE ONLY cor_visit_perturbation
 ---------------
 
 ALTER TABLE ONLY t_infos_site 
-    ADD CONSTRAINT fk_infos_site_id_base_site FOREIGN KEY (id_base_site) REFERENCES gn_monitoring.t_base_sites (id_base_site) ON UPDATE CASCADE ON DELETE CASCADE; 
+    ADD CONSTRAINT fk_t_infos_site_id_base_site FOREIGN KEY (id_base_site) REFERENCES gn_monitoring.t_base_sites (id_base_site) ON UPDATE CASCADE ON DELETE CASCADE; 
 
 ALTER TABLE ONLY t_infos_site
-    ADD CONSTRAINT fk_infos_site_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_t_infos_site_cd_nom FOREIGN KEY (cd_nom) REFERENCES taxonomie.taxref (cd_nom) ON UPDATE CASCADE;
 
 
 ALTER TABLE ONLY cor_visit_grid

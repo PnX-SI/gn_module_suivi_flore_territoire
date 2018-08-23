@@ -12,7 +12,7 @@ SET search_path = pr_monitoring_flora_territory, pg_catalog;
 INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr)
     VALUES ('TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.');
 
-
+-- to insert the data -- 
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, id_broader, hierarchy) VALUES 
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'GeF', 'Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 0, '118.001'),
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Bru', 'Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Bru') , '118.503.001'),
@@ -113,12 +113,28 @@ FROM ref_geo.l_areas
 WHERE id_type=203
 GROUP by area_code, id_area;
 
-
+-- Intersections mailles 25*25 et les ZP --> affiche maille
 INSERT INTO gn_monitoring.cor_site_area (id_base_site, id_area)
 SELECT bs.id_base_site, a.id_area 
 FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_Within(ST_TRANSFORM(a.geom, 4326), bs.geom)
 WHERE id_type=203;
+
+-- Intersections communes et ZP --> affiche nom commune  
+INSERT INTO gn_monitoring.cor_site_area
+SELECT bs.id_base_site, a.id_area
+FROM ref_geo.l_areas a
+JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
+WHERE id_type=101;
+
+-- Lister les communes de chaque site
+SELECT c.id_area, c.id_base_site, a.area_name FROM ref_geo.l_areas a
+JOIN gn_monitoring.cor_site_area c ON a.id_area = c.id_area
+WHERE a.id_type = 101
+
+-- Supprimer les correspondances entre sites et communes
+DELETE FROM gn_monitoring.cor_site_area c USING ref_geo.l_areas a WHERE c.id_area = a.id_area AND a.id_type = 101;
+
 
 -- TODO Mettre en paramètre l'id du module
 INSERT INTO gn_monitoring.cor_site_application
