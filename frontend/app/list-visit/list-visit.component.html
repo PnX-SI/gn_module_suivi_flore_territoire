@@ -21,14 +21,16 @@
 
       <div class="tab-content">
          <div class="tab-pane active modal-header  list-group-item" id="infoGen" role="tabpanel">  
-            <p> <span class="strong "> Code site : </span>  <span> {{idSite}} </span></p>
-            <p> <span class="strong"> Nom de l'espèce suivie : </span> {{nomTaxon}}  <span>  </span></p>
-            <p> <span class="strong "> Commune : </span>  <span>  </span></p>
+            <p> <span > Code site : </span>  <span class="strong "> {{idSite}} </span></p>
+            <p> <span > Nom de l'espèce suivie : </span >  <span class="strong">  {{nomTaxon}} </span></p>
+            <p> <span > Commune : </span>  <span class="strong ">  {{nomCommune}} </span></p>
+            <p> <span > Nombre de mailles : </span>  <span class="strong ">  {{storeService.total}} </span></p>
+
          </div>
             
          <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
-            <p> <span class="strong"> Nom du site : </span>  <span>  </span></p>
-            <p> <span class="strong"> Description du site : </span>  <span> </span></p>
+            <p> <span> Nom du site : </span>  <span  class="strong">  </span></p>
+            <p> <span > Description du site : </span>  <span class="strong"> </span></p>
          </div>
       </div>
 
@@ -127,12 +129,12 @@
             </div>
             <div class="modal-body">
               <span > <b> Attention: </b> </span> <br>
-              <span> Vous vous apprêter à télécharger les données de  <b> toutes les visites </b> sur cette zone . </span><br>
+              <span> Vous vous apprêtez à télécharger les données de  <b> toutes les visites </b> sur cette zone . </span><br>
               <br><br><br>
       
               <div class="export-button">
                <button *ngFor="let format of storeService.exportFormat" class="buttonLoad"
-                  (click)="onDownload(format)"
+                  (click)="onDownload(format); c()"
                  type="button"
                  class="btn btn-success format-btn">
                   Format {{format}}

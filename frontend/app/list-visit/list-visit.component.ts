@@ -29,28 +29,21 @@ public zps;
 public nomTaxon; 
 public currentZp = {};
 public idSite; 
-public rest; 
-public especeSuivi; 
-public infoSite; 
 public visitGrid : FormGroup; 
-public visit_boo = false;
-public idMaille; 
-public visits = {};
-public codeTaxon; 
 public idVisit;
-public coordonne ; 
 public message = { emptyMessage: "Aucune visite sur ce site ", totalMessage: "visites au total" }  
 public rows = [];
 
 public columns = [
     { name: 'Date', prop: 'visit_date'}, 
     { name: 'Observateur(s)', prop: "observers" },
-    { name: 'Présence/ Absence ? ', prop: "state"}
+    { name: 'Présence/ Absence ? ', prop: "state"},
+
     // { name: 'Actions' }
   ];
 
- public presence = 0; 
- public absence = 0;  
+
+ public nomCommune;
 
 @ViewChild('geojson') geojson: GeoJsonComponent
     
@@ -66,22 +59,51 @@ public columns = [
         private _commonService: CommonService,
         public mapListService:  MapListService) { }
 
+
    ngOnInit() {
       
       this.idSite = this.activatedRoute.snapshot.params['idSite'];
-      
+
+    //   this.storeService.total = 0; 
       this._api.getInfoSite(this.idSite).subscribe(info => { 
          this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
             this.nomTaxon = taxon.nom_valide;  
          });
       });
       
-      const param = {
+
+      const param1 = {
+        id_area_type : 101
+      }
+
+      this._api.getCommune(this.idSite, param1).subscribe( commune => {
+          console.log("donne ", commune.features)
+          commune.features.forEach( name => {
+            this.nomCommune = name.area_name ;
+              
+          } )
+          
+      })
+
+      const param2 = {
+         id_area_type: 203
+      }
+            
+      
+      this._api.getMaille(this.idSite, param2).subscribe(nbMaille => {
+               
+         this.storeService.total = nbMaille.features.length ;
+               // console.log("et ici ? ", this.storeService.total );
+               
+      })
+
+      const param3 = {
          id_base_site: this.idSite,
       }
-        
-      this._api.getVisits(param).subscribe(data => {
-        console.log('mes data ', data );
+    // question: pourquoi on ne peut pas faire param.id_base_site? 
+    
+
+      this._api.getVisits(param3).subscribe(data => {
          data.forEach( visit => {
             
             
@@ -91,38 +113,39 @@ public columns = [
                 
             })
             visit.observers = fullName;
-            let tabPres = [];
-            let tabAbs = [];
             let pres = 0;
             let abs = 0;
             
             visit.cor_visit_grid.forEach( maille => {
                 if (maille.presence ) {
                     pres += 1;
-                    tabPres.push(pres);
                 } else {
                     abs += 1; 
-                    tabAbs.push( abs);
                 }
                    
             });
 
-            visit.state = tabPres.length + "P / " + tabAbs.length + "A ";
-           
+            visit.state = pres + "P / " + abs + "A ";
+         
+      
+            
          });
         
          
-            this.rows = data;
+         
+         this.rows = data;
 
       
       })
 
+      
 
    }
     
    
    ngAfterViewInit(){
       this.mapService.map.doubleClickZoom.disable();
+
       const parametre = {
          id_base_site: this.idSite,
          id_application: ModuleConfig.id_application,
@@ -135,7 +158,6 @@ public columns = [
              
             this.zps = data;
             this.geojson.currentGeoJson$.subscribe(currentLayer => {
-                console.log("my currentLayer", currentLayer.getBounds());
                 
                this.mapService.map.fitBounds(currentLayer.getBounds()); 
             });
@@ -168,10 +190,10 @@ public columns = [
    
    onDownload(format) {
     
-        const url = `${
+      const url = `${
           AppConfig.API_ENDPOINT}${ModuleConfig.api_url}/export_visit?id_base_site=${this.idSite}&export_format=${format}`;
     
-        document.location.href = url;
-          
+      document.location.href = url;
+       
    }
 }
