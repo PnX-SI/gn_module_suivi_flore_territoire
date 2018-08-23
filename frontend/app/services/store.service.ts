@@ -22,11 +22,19 @@ public myStyleAbsent = {
     weight: 3
 };
 
+public presence = 0;
+public absence = 0; 
+public total = 0;
+public rest = 0; 
 public exportFormat = ['geojson', 'csv', 'shapefile'];
 
     
     constructor(private _modalService: NgbModal) { } 
    
+
+    getMailleNoVisit() {
+        this.rest = this.total - this.absence - this.presence;
+     }
    
     openIntesectionModal(content) {
         this._modalService.open(content);
