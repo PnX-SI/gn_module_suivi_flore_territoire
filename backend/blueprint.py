@@ -17,14 +17,12 @@ from pypnusershub.db.tools import (
     InsufficientRightsError,
     get_or_fetch_user_cruved,
 )
-from geonature.utils.utilsgeometry import(
-    ShapeService
-)
 from pypnusershub import routes as fnauth
 
 from geonature.core.users.models import TRoles, BibOrganismes
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
+
 
 @blueprint.route('/sites', methods=['GET'])
 @json_resp
@@ -32,9 +30,9 @@ def get_sites_zp():
     '''
     Retourne la liste des ZP
     '''
-    parameters = request.args 
+    parameters = request.args
 #    , TBaseVisits.id_base_visit
-   
+
     # t = DB.session.query(func.count(TBaseVisits.id_base_visit))
     q = (
         DB.session.query(
@@ -48,7 +46,7 @@ def get_sites_zp():
             Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
         .group_by(TInfoSite, Taxonomie.nom_complet)
     )
-   
+
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
     if 'id_application' in parameters:
@@ -56,7 +54,6 @@ def get_sites_zp():
             corSiteApplication, corSiteApplication.c.id_base_site == TInfoSite.id_base_site
         ).filter(corSiteApplication.c.id_application == parameters['id_application'])
         # q = q.filter(TInfoSite.base_site.applications.any(id_application=parameters['id_application']))
-    
 
     # print(q)
     # print(current_app.config)
@@ -65,7 +62,7 @@ def get_sites_zp():
 
     features = []
     for d in data:
-        print ("mon d", d)
+        print("mon d", d)
         feature = d[0].get_geofeature()
         feature['properties']['date_max'] = str(d[1])
         feature['properties']['nom_taxon'] = str(d[2])
@@ -73,8 +70,8 @@ def get_sites_zp():
         features.append(feature)
     return FeatureCollection(features)
 
-  
     # return FeatureCollection([d.get_geofeature() for d in data])
+
 
 @blueprint.route('/site', methods=['GET'])
 @json_resp
@@ -89,11 +86,11 @@ def get_one_zp():
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
     data = q.first()
-    
 
     if data:
         return data.as_dict()
     return None
+
 
 @blueprint.route('/site/<id_infos_site>', methods=['GET'])
 @json_resp
@@ -103,8 +100,6 @@ def get_one_zp_id(id_infos_site):
     '''
     data = DB.session.query(TInfoSite).get(id_infos_site)
     return data.as_dict()
-
-
 
 
 @blueprint.route('/visits', methods=['GET'])
@@ -120,7 +115,7 @@ def get_visits():
     data = q.all()
     # return data.as_dict()
     return [d.as_dict(True) for d in data]
-    
+
     # mydata = []
     # for d in dat:
     #     mydata.append(d.as_dict(True))
@@ -133,7 +128,7 @@ def test():
     data = DB.session.query(TNomenclatures).all()
     return [d.as_dict(True) for d in data]
 
-    
+
 @blueprint.route('/visit/<id_visit>', methods=['GET'])
 @json_resp
 def get_visit(id_visit):
@@ -144,11 +139,13 @@ def get_visit(id_visit):
     return data.as_dict(recursif=True)
 
 
-
 @blueprint.route('/visit', methods=['POST'])
 @fnauth.check_auth_cruved('C', True)
 @json_resp
 def post_visit(info_role):
+    '''
+    Poste une nouvelle visite ou éditer une ancienne
+    '''
     print("mes roles ", info_role)
     data = dict(request.get_json())
     tab_perturbation = data.pop('cor_visit_perturbation')
@@ -158,7 +155,7 @@ def post_visit(info_role):
     # print(data)
     print(visit.as_dict(True))
     perturs = DB.session.query(TNomenclatures).filter(
-        TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()    
+        TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
     for per in perturs:
         visit.cor_visit_perturbation.append(per)
     for v in tab_visit_grid:
@@ -167,8 +164,8 @@ def post_visit(info_role):
         # print(visit_grid)
     observers = DB.session.query(TRoles).filter(
         TRoles.id_role.in_(tab_observer)
-        ).all()
-        # print(observers)
+    ).all()
+    # print(observers)
     for o in observers:
         # print(o.as_dict())
         visit.observers.append(o)
@@ -182,7 +179,7 @@ def post_visit(info_role):
         update_cruved = user_cruved['U']
         check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)
-    else:    
+    else:
         DB.session.add(visit)
     DB.session.commit()
     # print(visit.as_dict(recursif=True))
@@ -190,32 +187,30 @@ def post_visit(info_role):
     return visit.as_dict(recursif=True)
 
 
-
 @blueprint.route('/export_visit', methods=['GET'])
 def export_visit():
 
     parameters = request.args
-        # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
+    # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
 
     export_format = parameters['export_format'] if 'export_format' in request.args else 'shapefile'
 
     file_name = datetime.datetime.now().strftime('%Y_%m_%d_%Hh%Mm%S')
-    q =  (DB.session.query(ExportVisits))
-    
+    q = (DB.session.query(ExportVisits))
+
     if 'id_base_visit' in parameters:
 
         q = (DB.session.query(ExportVisits)
-            .filter(ExportVisits.id_base_visit == parameters['id_base_visit'])
-        )
+             .filter(ExportVisits.id_base_visit == parameters['id_base_visit'])
+             )
     elif 'id_base_site' in parameters:
         q = (DB.session.query(ExportVisits)
-            .filter(ExportVisits.id_base_site == parameters['id_base_site'])
-        )
-    
-        
+             .filter(ExportVisits.id_base_site == parameters['id_base_site'])
+             )
+
     data = q.all()
     features = []
-    
+
     if export_format == 'geojson':
 
         for d in data:
@@ -228,18 +223,17 @@ def export_visit():
             as_file=True,
             filename=file_name,
             indent=4
-    )
+        )
 
     elif export_format == 'csv':
         tab_visit = []
 
         for d in data:
-            visit =  d.as_dict()
+            visit = d.as_dict()
             geom_wkt = to_shape(d.geom)
             visit['geom'] = geom_wkt
-            
+
             tab_visit.append(visit)
-        
 
         return to_csv_resp(
             file_name,
@@ -248,12 +242,12 @@ def export_visit():
             ';'
 
         )
-    
+
     else:
         print('LAAA')
-       
+
         # #TODO: mettre en parametre le srid
-        
+
         dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
 
         ExportVisits.as_shape(
@@ -271,85 +265,74 @@ def export_visit():
         )
 
 
-
 @blueprint.route('/organisme', methods=['GET'])
 @json_resp
 def get_organisme():
     '''
     Retourne la liste des organismes
     '''
-    parameters = request.args 
+    parameters = request.args
 
     q = DB.session.query(
-        TVisiteSFT.id_base_visit, 
-        TRoles.nom_role, 
-        TRoles.prenom_role, 
+        TVisiteSFT.id_base_site,
+        TRoles.nom_role,
+        TRoles.prenom_role,
         BibOrganismes.nom_organisme
-        ).join(
+    ).join(
         corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
-        ).join(
+    ).join(
         TRoles, TRoles.id_role == corVisitObserver.c.id_role
-        ).join(
+    ).join(
         BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
-        )
-        
-    
+    ).distinct()
+
     if 'id_base_site' in parameters:
         q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
 
-    data = q.all() 
+    data = q.all()
     print(data)
     # return [d.as_dict(True) for d in data]
-    features = []
+    organism = []
     for d in data:
-        feature = dict()
-        feature['id_base_visit'] = str(d[0])
-        feature['observer'] = str(d[1]) + ' ' + str(d[2])
-        feature['nom_organisme'] = str(d[3])
-        features.append(feature)
-    return FeatureCollection(features)
- 
+        info_orga = dict()
+        info_orga['id_base_site'] = str(d[0])
+        info_orga['observer'] = str(d[1]) + ' ' + str(d[2])
+        info_orga['nom_organisme'] = str(d[3])
+        organism.append(info_orga)
+    # return FeatureCollection(features)
+    return organism
+
 
 @blueprint.route('/info_zp/<id_base_site>', methods=['GET'])
 @json_resp
 def get_info_zp(id_base_site):
-      '''
-      Retourne la/les communes d'une ZP. 
-      TODO: Intégrer cette partie dans routes.py de gn_monitoring 
-      '''
+    '''
+    Retourne la/les communes d'une ZP. 
+    TODO: Intégrer cette partie dans routes.py de gn_monitoring 
+    '''
 
-      params = request.args
+    params = request.args
 
+    q = DB.session.query(
+        corSiteArea,
+        LAreas.area_name,
+    ).join(
+        LAreas,
+        LAreas.id_area == corSiteArea.c.id_area
+    ).filter(
+        corSiteArea.c.id_base_site == id_base_site
+    )
 
-      q = DB.session.query(
-         corSiteArea,
-         LAreas.area_name,
-      ).join(
-         LAreas,
-         LAreas.id_area == corSiteArea.c.id_area
-      ).filter(
-         corSiteArea.c.id_base_site == id_base_site
-      ) 
+    if 'id_area_type' in params:
+        q = q.filter(LAreas.id_type == params['id_area_type'])
 
-      if 'id_area_type' in params:
-         q = q.filter(LAreas.id_type == params['id_area_type'])
-      
-      data = q.all()
-      print("mes data ", data )
-      features = []
-      for d in data:
-         feature = dict()
-         feature['id_base_site'] = str(d[0])
-         feature['id_area'] = str(d[1])
-         feature['area_name'] = []
-         feature['area_name'].append(str(d[2]))
-         # une ZP peut être se retrouver dans 2 communes différentes? 
-         # si oui, comment ça se présente? 
-         features.append(feature)
-      return FeatureCollection(features)
-
-
-
-
-
-
+    data = q.all()
+    print("mes data ", data)
+    tab_zp = []
+    for d in data:
+        info_zp = dict()
+        info_zp['id_base_site'] = str(d[0])
+        info_zp['id_area'] = str(d[1])
+        info_zp['area_name'] = str(d[2])
+        tab_zp.append(info_zp)
+    return tab_zp
