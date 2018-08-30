@@ -6,6 +6,46 @@ from marshmallow import Schema, fields
 from geonature.utils.config_schema import GnModuleProdConf
 
 
+available_export_format = ['geojson' , 'csv', 'shapefile']
+
+zp_message = { "emptyMessage": "Aucune zone à afficher ", "totalMessage": "zone(s) de prospection au total" }  
+list_visit_message = { "emptyMessage": "Aucune visite sur ce site ", "totalMessage": "visites au total" }  
+
+
+default_maplist_zp_columns = [
+       { "name": 'Identifiant', "prop":'id_base_site', "width": 90 },
+       { "name": 'Taxon', "prop": 'nom_taxon', "width": 350}, 
+       { "name": 'Nombre de visites', "prop": 'nb_visit', "width": 120 },
+       { "name": 'Date de la dernière visite', "prop": 'date_max', "width": 160},
+       { "name": 'Organisme', "prop": 'nom_organisme', "width": 200}
+     ]
+
+default_list_visit_columns = [
+    { "name": 'Date', "prop": 'visit_date'}, 
+    { "name": 'Observateur(s)', "prop": "observers" },
+    { "name": 'Présence/ Absence ? ', "prop": "state"},
+
+  ]
+
+
+
 class GnModuleSchemaConf(GnModuleProdConf):
-    pass
+    zp_message = fields.Dict(missing=zp_message)
+    list_visit_message = fields.Dict(missing=list_visit_message)
+    export_available_format = fields.List(fields.String(), missing=available_export_format)
+    default_zp_columns = fields.List(fields.Dict(), missing=default_maplist_zp_columns)
+    default_list_visit_columns = fields.List(fields.Dict(), missing=default_list_visit_columns)
+    id_type_maille = fields.Integer(missing=203)
+    id_type_commune = fields.Integer(missing=101)
+    id_menu_list_user = fields.Integer(missing=10)
+
+
+
+
+
+
+
+
+
+
 
