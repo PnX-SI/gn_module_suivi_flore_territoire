@@ -94,11 +94,12 @@ WITH
     observers AS(
 SELECT 
     v.id_base_visit,
-    string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs
+    string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
+    roles.organisme AS organisme
 FROM gn_monitoring.t_base_visits v
 JOIN gn_monitoring.cor_visit_observer observer ON observer.id_base_visit = v.id_base_visit
 JOIN utilisateurs.t_roles roles ON roles.id_role = observer.id_role
-GROUP BY v.id_base_visit
+GROUP BY v.id_base_visit, roles.organisme
 ),
 perturbations AS(
 SELECT 
@@ -113,6 +114,7 @@ GROUP BY v.id_base_visit
 SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, visits.id_digitiser, visits.visit_date, visits.comments, visits.uuid_base_visit, ar.geom,
     per.label_perturbation,
     obs.observateurs,
+    obs.organisme,
     sites.base_site_name,
     taxon.nom_valide,
     taxon.cd_nom
@@ -126,6 +128,7 @@ JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
 JOIN pr_monitoring_flora_territory.t_infos_site info ON info.id_base_site = sites.id_base_site
 JOIN taxonomie.taxref taxon ON taxon.cd_nom = info.cd_nom
 JOIN ref_geo.l_areas ar ON ar.id_area = cor.id_area
+
 
 ORDER BY visits.id_base_visit
 

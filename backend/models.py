@@ -4,19 +4,19 @@ from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geometry
 
 
-
 from geonature.utils.env import DB
 from geonature.utils.utilssqlalchemy import (
-        serializable,
-        geoserializable,
-        GenericQuery,
+    serializable,
+    geoserializable,
+    GenericQuery,
 )
-from geonature.utils.utilsgeometry import shapeseralizable
+from geonature.utils.utilsgeometry import shapeserializable
 
 from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisitObserver
 from geonature.core.ref_geo.models import LAreas
 from pypnnomenclature.models import TNomenclatures
 from geonature.core.users.models import TRoles
+
 
 @serializable
 @geoserializable
@@ -44,6 +44,7 @@ class TInfoSite(DB.Model):
             recursif
         )
 
+
 '''
 Corespondance entre une maille et une visite
 '''
@@ -51,18 +52,19 @@ corVisitPerturbation = DB.Table(
     'cor_visit_perturbation',
     DB.MetaData(schema='pr_monitoring_flora_territory'),
     DB.Column(
-      'id_base_visit',
-      DB.Integer,
-      ForeignKey(TBaseVisits.id_base_visit),
-      primary_key=True,
-      ),
+        'id_base_visit',
+        DB.Integer,
+        ForeignKey(TBaseVisits.id_base_visit),
+        primary_key=True,
+    ),
     DB.Column(
-      'id_nomenclature_perturbation',   
-      DB.Integer,
-      ForeignKey(TNomenclatures.id_nomenclature),
-      primary_key=True
-      )
+        'id_nomenclature_perturbation',
+        DB.Integer,
+        ForeignKey(TNomenclatures.id_nomenclature),
+        primary_key=True
+    )
 )
+
 
 @serializable
 # @geoserializable
@@ -74,22 +76,21 @@ class CorVisitGrid(DB.Model):
     __table_args__ = {'schema': 'pr_monitoring_flora_territory'}
 
     id_area = DB.Column(
-      DB.Integer,
-      ForeignKey(LAreas.id_area),
-      primary_key=True
-      )
+        DB.Integer,
+        ForeignKey(LAreas.id_area),
+        primary_key=True
+    )
     id_base_visit = DB.Column(
-      DB.Integer,
-      ForeignKey(TBaseVisits.id_base_visit),
-      primary_key=True
+        DB.Integer,
+        ForeignKey(TBaseVisits.id_base_visit),
+        primary_key=True
     )
     presence = DB.Column(DB.Boolean)
     uuid_base_visit = DB.Column(UUID(as_uuid=True))
 
 
-
 @serializable
-@shapeseralizable
+@shapeserializable
 class TVisiteSFT(TBaseVisits):
     '''
     Visite sur une ZP
@@ -99,7 +100,7 @@ class TVisiteSFT(TBaseVisits):
     __table_args__ = {
         'schema': 'gn_monitoring',
         'extend_existing': True
-        }
+    }
 
     cor_visit_grid = DB.relationship(
         'CorVisitGrid',
@@ -121,7 +122,7 @@ class TVisiteSFT(TBaseVisits):
             corVisitPerturbation.c.id_base_visit,
             corVisitPerturbation.c.id_nomenclature_perturbation,
         ]
-    )   
+    )
 
     observers = DB.relationship(
         'TRoles',
@@ -136,6 +137,7 @@ class TVisiteSFT(TBaseVisits):
         ]
     )
 
+
 @serializable
 class Taxonomie(DB.Model):
     __tablename__ = 'taxref'
@@ -145,15 +147,15 @@ class Taxonomie(DB.Model):
     }
 
     cd_nom = DB.Column(
-      DB.Integer,
-      primary_key=True
-      )
+        DB.Integer,
+        primary_key=True
+    )
     nom_complet = DB.Column(DB.Unicode)
 
 
 @serializable
 @geoserializable
-@shapeseralizable
+@shapeserializable
 class ExportVisits(DB.Model):
     __tablename__ = 'export_visits'
     __table_args__ = {
@@ -162,11 +164,11 @@ class ExportVisits(DB.Model):
     id_area = DB.Column(
         DB.Integer,
         primary_key=True
-        )
+    )
     id_base_visit = DB.Column(
         DB.Integer,
         primary_key=True
-        )
+    )
     id_base_site = DB.Column(DB.Integer)
     visit_date = DB.Column(DB.DateTime)
     comments = DB.Column(DB.Unicode)
@@ -174,8 +176,7 @@ class ExportVisits(DB.Model):
     presence = DB.Column(DB.Boolean)
     label_perturbation = DB.Column(DB.Unicode)
     observateurs = DB.Column(DB.Unicode)
+    organisme = DB.Column(DB.Unicode)
     base_site_name = DB.Column(DB.Unicode)
     nom_valide = DB.Column(DB.Unicode)
     cd_nom = DB.Column(DB.Integer)
-
-
