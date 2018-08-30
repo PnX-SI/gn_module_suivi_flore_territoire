@@ -7,6 +7,7 @@ def check_user_cruved_visit(user, visit, cruved_level):
     """
     Check if user have right on a visit object, related to his cruved
     if not, raise 403 error
+    if allowed return void
     """
     
     is_allowed = False
