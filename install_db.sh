@@ -3,7 +3,7 @@
 
 . config/settings.ini
 
-if [ ! -f 'var/log/install_sft.log' ]
+if [-f 'var/log/install_sft.log' ]
 then
   rm var/log/install_sft.log
 fi
