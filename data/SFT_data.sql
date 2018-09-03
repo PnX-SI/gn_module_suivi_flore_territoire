@@ -44,7 +44,7 @@ JOIN gn_monitoring.t_base_sites bs ON ST_Within(ST_TRANSFORM(a.geom, 4326), bs.g
 WHERE id_type=203;
 
 -- Intersections communes et ZP --> affiche nom commune  
-INSERT INTO gn_monitoring.cor_site_area
+INSERT INTO gn_monitoring.cor_site_area (id_base_site, id_area)
 SELECT bs.id_base_site, a.id_area
 FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
