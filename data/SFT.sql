@@ -18,7 +18,7 @@ SET default_with_oids = false;
 CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
-    cd_nom integer NOT NULL,
+    cd_nom integer NOT NULL
     -- rajouter colonne nom de commune --
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.t_infos_site IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
@@ -40,10 +40,6 @@ CREATE TABLE cor_visit_perturbation (
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_perturbation IS 'Extension de t_base_visit de gn_monitoring, enregistrer les perturbations constatées lors d\une visite';
 
-
----------------
---PRIMARY KEY--
----------------
 
 ALTER TABLE ONLY t_infos_site 
     ADD CONSTRAINT pk_id_t_infos_site PRIMARY KEY (id_infos_site);
@@ -81,15 +77,9 @@ ALTER TABLE ONLY cor_visit_perturbation
     ADD CONSTRAINT fk_cor_visit_perturbation_id_nomenclature_perturbation FOREIGN KEY (id_nomenclature_perturbation) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
 
 
+--Créer la vue pour exporter les visites
 
-
-----------------
--- CREATE VUE--- 
-----------------
--- to download the data -- 
-
-
-CREATE OR REPLACE VIEW pr_monitoring_flora_territory.export_visits AS 
+    CREATE OR REPLACE VIEW pr_monitoring_flora_territory.export_visits AS 
 WITH
     observers AS(
 SELECT 

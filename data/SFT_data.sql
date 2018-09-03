@@ -8,11 +8,12 @@ SET client_min_messages = warning;
 SET search_path = pr_monitoring_flora_territory, pg_catalog;
 
 
--- to create the nomenclature of perturbations-- 
+-- créer nomenclature des perturbations-- 
 INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr)
     VALUES ('TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.');
 
--- to insert the data -- 
+-- insérer les types de perturbations --
+-- problème id_broader ??
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, id_broader, hierarchy) VALUES 
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'GeF', 'Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 0, '118.001'),
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Bru', 'Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Bru') , '118.503.001'),
@@ -77,22 +78,26 @@ INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemoni
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Arg', 'Arrachage', 'Arrachage', 'Gestion des invasives: Arrachage', 'Arrachage', 'Gestion des invasives: Arrachage', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Arg'), '118.879.001'),
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Fag', 'Fauchage', 'Fauchage', 'Gestion des invasives: Fauchage', 'Fauchage', 'Gestion des invasives: Fauchage', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Fag'), '118.879.002'),
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Dbs', 'Débroussaillage', 'Débroussaillage', 'Gestion des invasives: Débroussaillage', 'Débroussaillage', 'Gestion des invasives: Débroussaillage', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Dbs'), '118.879.003'),
-(ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Reb', 'Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives: Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives:Recouvrement avec bâches', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Reb'), '118.879.004')
+(ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Reb', 'Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives: Recouvrement avec bâches', 'Recouvrement avec bâches', 'Gestion des invasives:Recouvrement avec bâches', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Reb'), '118.879.004');
 
 
 
 
 
-
+-- créer nomenclature  ZP --  
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, label_fr, definition_fr )
 VALUES (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'ZP', 'Zone de prospection', 'Zone de prospection - suivi flore territoire', 'Zone de prospection',  'Zone de prospection issu du module suivi flore territoire');
 
 -- PROVISOIRE A ADAPTER GRACE AU SHAPEFILE DU CBNA
+
+-- insérer les données dans t_base_sites grâce à celles dans la table zp_tmp
+-- ATTENTION: il faut que le zp_tmp.shp soit en 2154, sinon ça donne des erreurs pour afficher les Zp.  
 INSERT INTO gn_monitoring.t_base_sites
 (id_inventor, id_digitiser, id_nomenclature_type_site, base_site_name, base_site_description, base_site_code, first_use_date, geom )
 SELECT 1, 1, ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), 'zp', '', id, '01-01-2018', ST_TRANSFORM(ST_SetSRID(geom, 2154), 4326)
 FROM pr_monitoring_flora_territory.zp_tmp;
 
+-- extension de la table t_base_sites : mettre les données dans t_infos_site
 INSERT INTO pr_monitoring_flora_territory.t_infos_site (id_base_site, cd_nom)
 SELECT id_base_site, zp.cd_nom
 FROM gn_monitoring.t_base_sites bs
@@ -100,13 +105,16 @@ JOIN pr_monitoring_flora_territory.zp_tmp zp ON zp.id::character varying = bs.ba
 
 --TODO--
 -- parametrer ref_geo.bib_areas_types -- 
+-- créer les mailles 25*25 
 INSERT INTO ref_geo.bib_areas_types (id_type, type_name, type_desc)
 VALUES (203, 'Mailles25*25', 'Maille INPN 50*50 redécoupé en 25m');
 
+--insérer les mailles dans l_areas grâce au fichier maille_tmp
 INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source)
 SELECT 203, id, id, geom, ST_CENTROID(geom), 'INPN'
 FROM pr_monitoring_flora_territory.maille_tmp;
 
+-- insérer les mailles dans li_grids
 INSERT INTO ref_geo.li_grids
 SELECT area_code, id_area, ST_XMin(ST_Extent(geom)), ST_XMax(ST_Extent(geom)), ST_YMin(ST_Extent(geom)),ST_YMax(ST_Extent(geom))
 FROM ref_geo.l_areas
@@ -127,13 +135,8 @@ FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
 WHERE id_type=101;
 
--- Lister les communes de chaque site
-SELECT c.id_area, c.id_base_site, a.area_name FROM ref_geo.l_areas a
-JOIN gn_monitoring.cor_site_area c ON a.id_area = c.id_area
-WHERE a.id_type = 101
 
--- Supprimer les correspondances entre sites et communes
-DELETE FROM gn_monitoring.cor_site_area c USING ref_geo.l_areas a WHERE c.id_area = a.id_area AND a.id_type = 101;
+
 
 
 -- TODO Mettre en paramètre l'id du module
@@ -141,6 +144,3 @@ INSERT INTO gn_monitoring.cor_site_application
 SELECT  bs.id_base_site, MY_ID_MODULE
 FROM gn_monitoring.t_base_sites bs
 JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;
-
-DROP TABLE pr_monitoring_flora_territory.zp_tmp;
-DROP TABLE pr_monitoring_flora_territory.maille_tmp;
