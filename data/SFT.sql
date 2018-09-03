@@ -7,7 +7,7 @@ SET client_min_messages = warning;
 
 CREATE SCHEMA pr_monitoring_flora_territory;
 
-SET search_path = pr_monitoring_flora_territory, pg_catalog;
+SET search_path = pr_monitoring_flora_territory, pg_catalog, public;
 
 SET default_with_oids = false;
 

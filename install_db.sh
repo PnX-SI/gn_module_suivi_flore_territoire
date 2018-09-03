@@ -3,7 +3,7 @@
 
 . config/settings.ini
 
-if [ ! -d 'var/log/install_sft.log' ]
+if [ ! -f 'var/log/install_sft.log' ]
 then
   rm var/log/install_sft.log
 fi
@@ -12,7 +12,7 @@ cp data/SFT.sql /tmp/suivi_territoire.sql
 cp data/SFT_data.sql /tmp/data_suivi_territoire.sql
 # copie le fichier SFT.sql et SFT_data.sql dans tmp
 
-sudo sed -i "s/MY_ID_MODULE/$MY_ID_MODULE/g" /tmp/data_suivi_territoire.sql
+sudo sed -i "s/MY_ID_MODULE/$id_application/g" /tmp/data_suivi_territoire.sql
 # modifier une partie de la chaine de caractère, remplace la chaine MY_ID_MODULE par la variable $MY_ID_MODULE
 export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/suivi_territoire.sql &>> var/log/install_sft.log
 

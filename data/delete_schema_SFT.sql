@@ -18,6 +18,8 @@ ALTER TABLE ONLY gn_monitoring.t_base_sites
 -- ATTENTION: CETTE ACTION VA AUSSI SUPPRIMER TOUTES LES DONNÉES DANS T_BASE_SITES, ET DONC T_BASE_VISITS, ET COR_SITE_AREA, COR_SITE_APPLICATION, COR SITE OBSERVER:
 DELETE FROM ref_nomenclatures.t_nomenclatures where cd_nomenclature='ZP';
 
+DELETE FROM gn_monitoring.cor_site_area;
+
 -- Supprimer mailles 25*25
 ALTER TABLE ref_geo.l_areas  DROP CONSTRAINT fk_l_areas_id_type ; 
 
