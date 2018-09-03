@@ -118,9 +118,7 @@ JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
 JOIN pr_monitoring_flora_territory.t_infos_site info ON info.id_base_site = sites.id_base_site
 JOIN taxonomie.taxref taxon ON taxon.cd_nom = info.cd_nom
 JOIN ref_geo.l_areas ar ON ar.id_area = cor.id_area
-
-
-ORDER BY visits.id_base_visit
+ORDER BY visits.id_base_visit;
 
 ------------
 --TRIGGERS--
