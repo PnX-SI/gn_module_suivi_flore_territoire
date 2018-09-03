@@ -1,5 +1,3 @@
--- Supprimer une table dans schema -- 
-DROP TABLE pr_monitoring_flora_territory.zp_tmp
 
 -- Supprimer un schéma -- 
 DROP SCHEMA  pr_monitoring_flora_territory CASCADE;
