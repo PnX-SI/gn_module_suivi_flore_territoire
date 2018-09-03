@@ -2,3 +2,4 @@ settings.ini
 conf_gn_module.toml
 __pycache__/
 *.pyc
+module.config.ts
