@@ -1,19 +1,16 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from "@angular/core";
-import { FormControl, FormGroup, FormBuilder } from "@angular/forms";
-import { AppConfig } from "@geonature_config/app.config";
-import { MapService } from "@geonature_common/map/map.service";
-import { maille } from "./mailleGeojson";
-import { DataService } from "../services/data.service";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Router } from "@angular/router";
-import { GeojsonComponent } from "@geonature_common/map/geojson.component";
+import { Router, ActivatedRoute } from "@angular/router";
 
-import { ActivatedRoute } from "@angular/router";
-import { StoreService } from "../services/store.service";
-import { DataFormService } from "@geonature_common/form/data-form.service";
-import { NgbDateParserFormatter, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { ToastrService, ToastrConfig } from "ngx-toastr";
+import { NgbDateParserFormatter } from "@ng-bootstrap/ng-bootstrap";
+import { ToastrService } from "ngx-toastr";
+
 import { CommonService } from "@geonature_common/service/common.service";
+import { MapService } from "@geonature_common/map/map.service";
+import { GeojsonComponent } from "@geonature_common/map/geojson/geojson.component";
+import { DataFormService } from "@geonature_common/form/data-form.service";
+
+import { DataService } from "../services/data.service";
+import { StoreService } from "../services/store.service";
 import { FormService } from "../services/form.service";
 import { ModuleConfig } from "../module.config";
 
@@ -24,9 +21,7 @@ import { ModuleConfig } from "../module.config";
 })
 export class FormVisitComponent implements OnInit, AfterViewInit {
   public zps;
-  public compteAbsent = 0;
-  public comptePresent = 0;
-  public rest;
+
   public modifGrid;
   public nomTaxon;
   public date;
@@ -36,10 +31,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   public visitGrid = []; // tableau de l'objet maille visité : [{id_area: qqc, presence: true/false}]
   public tabObserver = [];
   public visitModif = {}; // l'objet maille visité (modifié)
-  public idMenu;
 
   @ViewChild("geojson")
-  geojson: GeoJsonComponent;
+  geojson: GeojsonComponent;
 
   constructor(
     public mapService: MapService,
@@ -48,12 +42,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     public storeService: StoreService,
     public router: Router,
     public dataFormService: DataFormService,
-    private _fb: FormBuilder,
     public dateParser: NgbDateParserFormatter,
     private toastr: ToastrService,
     private _commonService: CommonService,
-    public formService: FormService,
-    public _modalService: NgbModal
+    public formService: FormService
   ) {}
 
   ngOnInit() {
@@ -62,11 +54,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     this.idVisit = this.activatedRoute.snapshot.params["idVisit"];
 
     this.modifGrid = this.formService.initFormSFT();
-
-    // this.idMenu = ModuleConfig.id_menu;
-    // console.log( "mon id menu ", this.idMenu);
-
-    // console.log("mon id app ", ModuleConfig.id_application);
   }
 
   ngAfterViewInit() {
@@ -81,20 +68,18 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     // vérifie s'il existe idVisit --> c' une modif
     if (this.idVisit !== undefined) {
-      console.log("rentre ici ? ");
-
       this._api.getOneVisit(this.idVisit).subscribe(element => {
         console.log("mes éléments ", element);
 
         this.visitGrid = element.cor_visit_grid;
-        this.comptePresent = 0;
-        this.compteAbsent = 0;
+        this.storeService.presence = 0;
+        this.storeService.absence = 0;
         // compter l'absence/présence des mailles déjà existant
         this.visitGrid.forEach(grid => {
           if (grid.presence == true) {
-            this.comptePresent += 1;
+            this.storeService.presence += 1;
           } else {
-            this.compteAbsent += 1;
+            this.storeService.absence += 1;
           }
         });
 
@@ -147,16 +132,12 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.geojson.currentGeoJson$.subscribe(currentLayer => {
           this.mapService.map.fitBounds(currentLayer.getBounds());
         });
-        this.rest = this.zps.features.length;
+        this.storeService.total = this.zps.features.length;
+        this.storeService.getMailleNoVisit();
       });
   }
 
   onEachFeature(feature, layer) {
-    // colorer mailles déjà visitées
-    // console.log('rentre ici ? ');
-    // console.log("rien?  ", this.visitGrid);
-
-    // console.log("je veux visitGrid ", this.visitGrid);
     this.visitGrid.forEach(maille => {
       if (maille.id_area == feature.id) {
         if (maille.presence) {
@@ -173,16 +154,16 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         layer.setStyle(this.storeService.myStylePresent);
 
         if (feature.state == 2) {
-          this.compteAbsent -= 1;
-          this.comptePresent += 1;
+          this.storeService.absence -= 1;
+          this.storeService.presence += 1;
         } else if (feature.state == 1) {
-          this.comptePresent += 0;
+          this.storeService.presence += 0;
         } else {
-          this.comptePresent += 1;
+          this.storeService.presence += 1;
         }
 
         feature.state = 1;
-        this.getMailleNoVisit();
+        this.storeService.getMailleNoVisit();
         this.visitGrid.forEach(dataG => {
           if (feature.id == dataG.id_area) {
             dataG.presence = true;
@@ -194,15 +175,15 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       contextmenu: event2 => {
         layer.setStyle(this.storeService.myStyleAbsent);
         if (feature.state == 1) {
-          this.comptePresent -= 1;
-          this.compteAbsent += 1;
+          this.storeService.presence -= 1;
+          this.storeService.absence += 1;
         } else if (feature.state == 2) {
-          this.compteAbsent += 0;
+          this.storeService.absence += 0;
         } else {
-          this.compteAbsent += 1;
+          this.storeService.absence += 1;
         }
         feature.state = 2;
-        this.getMailleNoVisit();
+        this.storeService.getMailleNoVisit();
         this.visitGrid.forEach(dataG => {
           if (feature.id == dataG.id_area) {
             dataG.presence = false;
@@ -214,12 +195,12 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       dblclick: event3 => {
         layer.setStyle(this.mapService.originStyle);
         if (feature.state == 1) {
-          this.comptePresent -= 1;
+          this.storeService.presence -= 1;
         } else if (feature.state == 2) {
-          this.compteAbsent -= 1;
+          this.storeService.absence -= 1;
         }
         feature.state = 0;
-        this.getMailleNoVisit();
+        this.storeService.getMailleNoVisit();
         this.visitGrid.forEach(dataG => {
           if (feature.id == dataG.id_area) {
             dataG.presence = false;
@@ -230,11 +211,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getMailleNoVisit() {
-    this.rest =
-      this.zps.features.length - this.compteAbsent - this.comptePresent;
-  }
-
   onVisual() {
     this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]);
   }
@@ -243,7 +219,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     const formModif = Object.assign({}, this.modifGrid.value);
 
     formModif["id_base_site"] = this.idSite;
-    // formModif['id_base_visit'] = this.idVisit;
     //  formModif['visit_date'] = this.dateParser.format(formModif['visit_date']);
     formModif["visit_date"] = this.dateParser.format(
       this.modifGrid.controls.visit_date.value
@@ -277,6 +252,14 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.toastr.success("Visite modifiée", "", {
           positionClass: "toast-top-center"
         });
+        setTimeout(
+          () =>
+            this.router.navigate([
+              `${ModuleConfig.api_url}/listVisit`,
+              this.idSite
+            ]),
+          2000
+        );
       },
       error => {
         if (error.status === 403) {
@@ -286,9 +269,5 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
       }
     );
-  }
-
-  openIntesectionModal(content) {
-    this._modalService.open(content);
   }
 }

@@ -1,13 +1,13 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+
 import { MapService } from '@geonature_common/map/map.service';
-import { DataService } from '../services/data.service';
-import { Router } from '@angular/router';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { ActivatedRoute } from '@angular/router';
 import { StoreService } from '../services/store.service';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 import { ModuleConfig } from '../module.config';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'pnx-detail-visit',

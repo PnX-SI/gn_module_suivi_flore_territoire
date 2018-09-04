@@ -1,29 +1,21 @@
 .btn btn-warning {
-    float: right; 
+  float: right;
 }
 
-// .modif {
-//     display: flex; 
-//     justify-content: space-between;
-// }
-
-
-
 .info {
-    font-size: 18px;
-    font-family: Verdana; 
-    font-weight: bold; 
+  font-size: 18px;
+  font-family: Verdana;
+  font-weight: bold;
 }
 
 .nbGrid {
-    padding-left: 10px;
+  padding-left: 10px;
 }
 
 #comment {
-    margin-top: 5px;
-    padding: 5px
+  margin-top: 5px;
+  padding: 5px;
 }
-
 
 .droite {
   float: right;
@@ -33,29 +25,34 @@
 }
 
 .debLigne {
-    margin-left: 9px;
-
+  margin-left: 9px;
 }
 
-
 #left {
-    color: #008000;
+  color: #008000;
 }
 
 #right {
-    
-    color: #8B0000;
+  color: #8b0000;
 }
 
 #dbcl {
-    color: #3388ff; 
+  color: #3388ff;
 }
 
 .strong {
-    font-weight: bold;
+  font-weight: bold;
 }
 
-
 .form {
-    margin-left: 9px
+  margin-left: 9px;
+}
+
+.toto {
+  margin-top: 200px;
+}
+
+#instru {
+  font-size: 18px;
+  font-weight: bold;
 }

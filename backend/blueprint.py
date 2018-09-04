@@ -33,7 +33,7 @@ def get_sites_zp():
     parameters = request.args
 #    , TBaseVisits.id_base_visit
 
-    # t = DB.session.query(func.count(TBaseVisits.id_base_visit))
+    t = DB.session.query(func.count(TBaseVisits.id_base_visit))
     q = (
         DB.session.query(
             TInfoSite,
@@ -46,6 +46,15 @@ def get_sites_zp():
             Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
         .group_by(TInfoSite, Taxonomie.nom_complet)
     )
+    # q = (
+    #     DB.session.query(
+    #         TInfoSite,
+    #         Taxonomie.nom_complet
+
+    #     ).join(
+    #         Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
+    #     .group_by(TInfoSite, Taxonomie.nom_complet)
+    # )
 
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
