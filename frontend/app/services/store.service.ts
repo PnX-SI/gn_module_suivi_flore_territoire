@@ -38,7 +38,7 @@ export class StoreService {
     this.rest = this.total - this.absence - this.presence;
   }
 
-  openIntesectionModal(content) {
+  openModal(content) {
     this._modalService.open(content);
   }
 }
