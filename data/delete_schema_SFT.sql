@@ -1,4 +1,3 @@
-
 -- Supprimer un schéma -- 
 DROP SCHEMA  pr_monitoring_flora_territory CASCADE;
 
@@ -37,6 +36,3 @@ ALTER TABLE ONLY ref_geo.li_grids ADD CONSTRAINT fk_li_grids_id_area FOREIGN KEY
        
 
 DELETE FROM ref_geo.bib_areas_types where type_name='Mailles25*25'
-
--- PENSER À METTRE LA CLÉ PRIMAIRE GEO DE LA TABLE ZP_TMP ET CELLE DE LA TABLE T_BASE_SITES
--- PAREIL AVEC GEO DE MAILLE DE LA TABLE MAILLE_TMP 
