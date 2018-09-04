@@ -1,15 +1,15 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+
+import { MapListService } from '@geonature_common/map-list/map-list.service';
 import { MapService } from '@geonature_common/map/map.service';
-import { DataService } from '../services/data.service';
-import { HttpParams } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { ActivatedRoute } from '@angular/router';
+import { DataService } from '../services/data.service';
+
 import { StoreService } from '../services/store.service';
 import { ModuleConfig } from '../module.config';
-import { MapListService } from '@geonature_common/map-list/map-list.service';
 
 @Component({
   selector: 'pnx-list-visit',
