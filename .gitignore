@@ -1,5 +1,9 @@
 settings.ini
 conf_gn_module.toml
-__pycache__/
+__pycache__/*
 *.pyc
 module.config.ts
+conf_gn_module.toml
+var/
+log/*
+.vscode
