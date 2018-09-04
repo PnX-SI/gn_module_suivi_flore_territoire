@@ -1,9 +1,11 @@
-import { Component, OnInit, AfterViewInit, Input, ViewChild } from '@angular/core';
-import { MapService } from '@geonature_common/map/map.service';
-import { DataService } from '../services/data.service';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { StoreService } from '../services/store.service';
+
+import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
+
+import { DataService } from '../services/data.service';
+import { StoreService } from '../services/store.service';
 import { ModuleConfig } from '../module.config';
 
 @Component({
