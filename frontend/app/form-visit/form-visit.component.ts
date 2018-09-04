@@ -1,23 +1,23 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, AfterViewInit, ViewChild } from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
 
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
+import { NgbDateParserFormatter } from "@ng-bootstrap/ng-bootstrap";
+import { ToastrService } from "ngx-toastr";
 
-import { CommonService } from '@geonature_common/service/common.service';
-import { MapService } from '@geonature_common/map/map.service';
-import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
-import { DataFormService } from '@geonature_common/form/data-form.service';
+import { CommonService } from "@geonature_common/service/common.service";
+import { MapService } from "@geonature_common/map/map.service";
+import { GeojsonComponent } from "@geonature_common/map/geojson/geojson.component";
+import { DataFormService } from "@geonature_common/form/data-form.service";
 
-import { DataService } from '../services/data.service';
-import { StoreService } from '../services/store.service';
-import { FormService } from '../services/form.service';
-import { ModuleConfig } from '../module.config';
+import { DataService } from "../services/data.service";
+import { StoreService } from "../services/store.service";
+import { FormService } from "../services/form.service";
+import { ModuleConfig } from "../module.config";
 
 @Component({
-  selector: 'pnx-form-visit',
-  templateUrl: 'form-visit.component.html',
-  styleUrls: ['./form-visit.component.scss']
+  selector: "pnx-form-visit",
+  templateUrl: "form-visit.component.html",
+  styleUrls: ["./form-visit.component.scss"]
 })
 export class FormVisitComponent implements OnInit, AfterViewInit {
   public zps;
@@ -32,7 +32,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   public tabObserver = [];
   public visitModif = {}; // l'objet maille visité (modifié)
 
-  @ViewChild('geojson')
+  @ViewChild("geojson")
   geojson: GeojsonComponent;
 
   constructor(
@@ -49,9 +49,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.idSite = this.activatedRoute.snapshot.params['idSite'];
+    this.idSite = this.activatedRoute.snapshot.params["idSite"];
 
-    this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
+    this.idVisit = this.activatedRoute.snapshot.params["idVisit"];
 
     this.modifGrid = this.formService.initFormSFT();
   }
@@ -69,7 +69,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     // vérifie s'il existe idVisit --> c' une modif
     if (this.idVisit !== undefined) {
       this._api.getOneVisit(this.idVisit).subscribe(element => {
-        console.log('mes éléments ', element);
+        console.log("mes éléments ", element);
 
         this.visitGrid = element.cor_visit_grid;
         this.storeService.presence = 0;
@@ -90,9 +90,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
         tabVisitPerturb.forEach(per => {
           if (per === tabVisitPerturb[tabVisitPerturb.length - 1]) {
-            typePer = per.label_fr + '. ';
+            typePer = per.label_fr + ". ";
           } else {
-            typePer = per.label_fr + ', ';
+            typePer = per.label_fr + ", ";
           }
           this.namePertur.push(typePer);
         });
@@ -103,9 +103,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
         element.observers.forEach(name => {
           if (name === element.observers[element.observers.length - 1]) {
-            fullNameObserver = name.nom_complet + '. ';
+            fullNameObserver = name.nom_complet + ". ";
           } else {
-            fullNameObserver = name.nom_complet + ', ';
+            fullNameObserver = name.nom_complet + ", ";
           }
           this.tabObserver.push(fullNameObserver);
         });
@@ -218,9 +218,11 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   onModif() {
     const formModif = Object.assign({}, this.modifGrid.value);
 
-    formModif['id_base_site'] = this.idSite;
+    formModif["id_base_site"] = this.idSite;
     //  formModif['visit_date'] = this.dateParser.format(formModif['visit_date']);
-    formModif['visit_date'] = this.dateParser.format(this.modifGrid.controls.visit_date.value);
+    formModif["visit_date"] = this.dateParser.format(
+      this.modifGrid.controls.visit_date.value
+    );
 
     for (let key in this.visitModif) {
       this.visitGrid.push({
@@ -230,32 +232,40 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       });
     }
 
-    formModif['cor_visit_grid'] = this.visitGrid;
-    formModif['cor_visit_observer'] = formModif['cor_visit_observer'].map(obs => {
-      return obs.id_role;
-    });
-
-    formModif['cor_visit_perturbation'] = formModif['cor_visit_perturbation'].map(
-      pertu => pertu.id_nomenclature
+    formModif["cor_visit_grid"] = this.visitGrid;
+    formModif["cor_visit_observer"] = formModif["cor_visit_observer"].map(
+      obs => {
+        return obs.id_role;
+      }
     );
 
-    formModif['comments'] = this.modifGrid.controls.comments.value;
+    formModif["cor_visit_perturbation"] = formModif[
+      "cor_visit_perturbation"
+    ].map(pertu => pertu.id_nomenclature);
 
-    console.log('mon form ', formModif);
+    formModif["comments"] = this.modifGrid.controls.comments.value;
+
+    console.log("mon form ", formModif);
 
     this._api.postVisit(formModif).subscribe(
       data => {
-        this.toastr.success('Visite modifiée', '', { positionClass: 'toast-top-center' });
+        this.toastr.success("Visite modifiée", "", {
+          positionClass: "toast-top-center"
+        });
         setTimeout(
-          () => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]),
+          () =>
+            this.router.navigate([
+              `${ModuleConfig.api_url}/listVisit`,
+              this.idSite
+            ]),
           2000
         );
       },
       error => {
         if (error.status === 403) {
-          this._commonService.translateToaster('error', 'NotAllowed');
+          this._commonService.translateToaster("error", "NotAllowed");
         } else {
-          this._commonService.translateToaster('error', 'ErrorMessage');
+          this._commonService.translateToaster("error", "ErrorMessage");
         }
       }
     );
