@@ -1,3 +1,16 @@
 id_module_suivi_flore_territoire=MY_ID_MODULE
 
 
+db_host=localhost
+
+# PostgreSQL port
+db_port=5432
+
+# GeoNature database name
+db_name=geonature2db
+
+# GeoNature database owner username
+user_pg=geonatuser
+
+# GeoNature database owner password
+user_pg_pass=mon_pass
