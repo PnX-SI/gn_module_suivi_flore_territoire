@@ -40,7 +40,7 @@ def get_sites_zp():
             func.max(TBaseVisits.visit_date),
             Taxonomie.nom_complet,
             func.count(TBaseVisits.id_base_visit)
-        ).join(
+        ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
         ).join(
             Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
