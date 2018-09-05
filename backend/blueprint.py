@@ -33,7 +33,7 @@ def get_sites_zp():
     parameters = request.args
 #    , TBaseVisits.id_base_visit
 
-    t = DB.session.query(func.count(TBaseVisits.id_base_visit))
+    # t = DB.session.query(func.count(TBaseVisits.id_base_visit))
     q = (
         DB.session.query(
             TInfoSite,
@@ -46,15 +46,8 @@ def get_sites_zp():
             Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
         .group_by(TInfoSite, Taxonomie.nom_complet)
     )
-    # q = (
-    #     DB.session.query(
-    #         TInfoSite,
-    #         Taxonomie.nom_complet
 
-    #     ).join(
-    #         Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom)
-    #     .group_by(TInfoSite, Taxonomie.nom_complet)
-    # )
+    print("ici", q.all())
 
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
@@ -62,16 +55,12 @@ def get_sites_zp():
         q = q.join(
             corSiteApplication, corSiteApplication.c.id_base_site == TInfoSite.id_base_site
         ).filter(corSiteApplication.c.id_application == parameters['id_application'])
-        # q = q.filter(TInfoSite.base_site.applications.any(id_application=parameters['id_application']))
 
-    # print(q)
-    # print(current_app.config)
     data = q.all()
     print("mes data ", data)
 
     features = []
     for d in data:
-        print("mon d", d)
         feature = d[0].get_geofeature()
         feature['properties']['date_max'] = str(d[1])
         feature['properties']['nom_taxon'] = str(d[2])
@@ -283,20 +272,20 @@ def get_organisme():
     parameters = request.args
 
     q = DB.session.query(
-        TVisiteSFT.id_base_site,
+        TInfoSite.id_base_site,
         TRoles.nom_role,
         TRoles.prenom_role,
         BibOrganismes.nom_organisme
-    ).join(
+    ).outerjoin(TVisiteSFT, TVisiteSFT.id_base_site == TInfoSite.id_base_site).outerjoin(
         corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
-    ).join(
+    ).outerjoin(
         TRoles, TRoles.id_role == corVisitObserver.c.id_role
-    ).join(
+    ).outerjoin(
         BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
     ).distinct()
 
     if 'id_base_site' in parameters:
-        q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
+        q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
 
     data = q.all()
     print(data)
