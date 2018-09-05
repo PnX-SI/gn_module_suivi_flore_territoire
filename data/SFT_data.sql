@@ -25,14 +25,14 @@ VALUES (203, 'Mailles25*25', 'Maille INPN 50*50 redécoupé en 25m');
 
 --insérer les mailles dans l_areas grâce au fichier maille_tmp
 INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source)
-SELECT 203, id, id, geom, ST_CENTROID(geom), 'INPN'
+SELECT ref_geo.get_id_area_type('Mailles25*25'), id, id, geom, ST_CENTROID(geom), 'INPN'
 FROM pr_monitoring_flora_territory.maille_tmp;
 
 -- insérer les mailles dans li_grids
 INSERT INTO ref_geo.li_grids
 SELECT area_code, id_area, ST_XMin(ST_Extent(geom)), ST_XMax(ST_Extent(geom)), ST_YMin(ST_Extent(geom)),ST_YMax(ST_Extent(geom))
 FROM ref_geo.l_areas
-WHERE id_type=203
+WHERE id_type=ref_geo.get_id_area_type('Mailles25*25')
 GROUP by area_code, id_area;
 
 -- Intersections mailles 25*25 et les ZP --> affiche maille
@@ -40,14 +40,14 @@ INSERT INTO gn_monitoring.cor_site_area (id_base_site, id_area)
 SELECT bs.id_base_site, a.id_area 
 FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_Within(ST_TRANSFORM(a.geom, 4326), bs.geom)
-WHERE id_type=203;
+WHERE id_type=ref_geo.get_id_area_type('Mailles25*25');
 
 -- Intersections communes et ZP --> affiche nom commune  
 INSERT INTO gn_monitoring.cor_site_area (id_base_site, id_area)
 SELECT bs.id_base_site, a.id_area
 FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
-WHERE id_type=101;
+WHERE id_type=ref_geo.get_id_area_type('Communes');
 
 
 -- TODO Mettre en paramètre l'id du module

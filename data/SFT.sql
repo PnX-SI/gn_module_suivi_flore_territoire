@@ -128,6 +128,24 @@ ORDER BY visits.id_base_visit;
 --   correspond bien à celui stocké dans t_nomenclatures. 
 
 
+
+------------
+--FUNCTIONS-
+------------
+CREATE OR REPLACE FUNCTION ref_geo.get_id_area_type(mytype character varying)
+  RETURNS integer AS
+$BODY$
+--Function which return the id_type from the mnemonique of a nomenclature type
+DECLARE theidtype character varying;
+  BEGIN
+SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_name = mytype;
+return theidtype;
+  END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE
+  COST 100;
+
+
 --------------
 -- DATA -----
 --------------
