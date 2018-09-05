@@ -1,61 +1,51 @@
 .ngx-datatable.material {
-    max-height: 79vh!important;
-    box-shadow: none!important;
-    overflow-y: scroll;
+  max-height: 79vh !important;
+  box-shadow: none !important;
+  overflow-y: scroll;
 }
 
 // #blocSearch {
-//     display: flex; 
+//     display: flex;
 //     justify-content: space-between
 // }
 .inputSearch {
-    width:120%;
-    height: 30px;
+  width: 120%;
+  height: 30px;
 
-    // background-color: transparent; 
-    border:none; 
+  // background-color: transparent;
+  border: none;
 
-
- 
-    // border-bottom: 1px #181818 
+  // border-bottom: 1px #181818
 }
 
 .searchZP {
-    margin-right: 100px; 
-
+  margin-right: 100px;
 }
 
-
-
-:host /deep/ .single-selection .datatable-body-row.active  .datatable-row-group {
-    background-color: rgb(154, 217, 247) !important;
-   }
-
+:host /deep/ .single-selection .datatable-body-row.active .datatable-row-group {
+  background-color: rgb(154, 217, 247) !important;
+}
 
 .searchZP {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
 }
 
 .box-shadow {
-    box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  }
+  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 
 #end-btn {
-    margin-top: 15px;
-    margin-bottom: 30px
+  margin-top: 15px;
+  margin-bottom: 30px;
 }
 
 .format-btn {
-    margin-left: 5px;
+  margin-left: 5px;
 }
 
 .export-btn {
-
-    display: block;
-    margin: auto 
-   
-  }
-
+  display: block;
+  margin: auto;
+}

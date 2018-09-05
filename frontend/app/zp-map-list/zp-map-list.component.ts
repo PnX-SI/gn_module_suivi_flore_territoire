@@ -35,12 +35,24 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     //  pkoi c' id_infos_site et pas id_base_site?
 
     this._api.getZp({ id_application: ModuleConfig.id_application }).subscribe(data => {
+      console.log('mon data ', data);
+
       this.zps = data;
 
       data.features.forEach(elem => {
+        console.log('mes élément', elem);
+        if (elem.properties.date_max === 'None') {
+          elem.properties.date_max = 'Aucune visite';
+        }
+
         this._api.getOrganisme({ id_base_site: elem.properties.id_base_site }).subscribe(organi => {
           this.tabOrganism = [];
           organi.forEach(result => {
+            console.log('mes résultats ', result);
+            if (result.nom_organisme === 'None') {
+              result.nom_organisme = 'Aucun organisme';
+            }
+
             this.tabOrganism.push(result.nom_organisme);
           });
           elem.properties.nom_organisme = this.tabOrganism;
@@ -91,7 +103,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onSearchOrganisme(event) {
-    let select;
+    let select = '';
 
     this.filteredData = this.mapListService.tableData.filter(ligne => {
       ligne.nom_organisme.forEach(el => {
