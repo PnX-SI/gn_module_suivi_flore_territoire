@@ -16,24 +16,24 @@
 
         <div id="blocSearch" class="row row-0 ">
             <div class="searchZP">
-                <small> Rechercher selon taxon </small>
                 <pnx-taxonomy #taxon label="{{ 'Taxon.Taxon' | translate }}" [parentFormControl]="taxonForm" [idList]="500" [charNumber]="3"
-                    [listLength]="20" (onChange)="onTaxonChanged($event);" (onDelete)="onDeleteTaxon()">
+                    [listLength]="20" (onChange)="onTaxonChanged($event);" (onDelete)="onDelete()">
                 </pnx-taxonomy>
                 <!-- <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch"> -->
             </div>
 
 
             <div class="searchZP">
-                <small> Rechercher selon l'année </small>
-                <input type="number" [formControl]="yearForm" class="inputSearch" (onDeleteDate)="onDateDelete()">
+                <small> Année de visite </small>
+                <input type="number" [formControl]="yearForm" class="inputSearch" (onDeleteDate)="onDelete()">
             </div>
 
             <div class="searchZP">
-                <small> Rechercher selon l'organisme </small>
-                <select class="form-control form-control-sm" name="monSelect" [ngModel]="searchOrga" (ngModelChange)="onSearchOrganisme($event)">
-                    <option [ngValue]="null" selected> -- Sélectionnez un filtre -- </option>
-                    <option *ngFor="let label of tabOrganism"> {{label}} </option>
+                <small> Organisme </small>
+                <select class="form-control form-control-sm" name="monSelect" [formControl]="organForm">
+
+                    <option selected> -- Sélectionnez un filtre -- </option>
+                    <option *ngFor="let label of filteredData" [ngValue]="label.organisme"> {{label.organisme}} </option>
                     <!--pkoi quand je mets [ngValue]="label" ça marche pas?   -->
                     <option> test 1 </option>
                     <option> test 2 </option>
@@ -41,7 +41,7 @@
                 </select>
 
             </div>
-
+            {{ filteredData |json }}
         </div>
 
 

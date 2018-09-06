@@ -24,6 +24,11 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   public tabOrganism = [];
   public taxonForm = new FormControl();
   public yearForm = new FormControl();
+  public organForm = new FormControl();
+  public paramApp = {
+    id_application: ModuleConfig.id_application
+  };
+
   @Output()
   onDeleteDate = new EventEmitter<any>();
 
@@ -37,38 +42,8 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.mapListService.idName = 'id_infos_site';
-    //  pkoi c' id_infos_site et pas id_base_site?
 
-    this._api.getZp({ id_application: ModuleConfig.id_application }).subscribe(data => {
-      console.log('mon data ', data);
-
-      this.zps = data;
-
-      data.features.forEach(elem => {
-        console.log('mes élément', elem);
-        if (elem.properties.date_max === 'None') {
-          elem.properties.date_max = 'Aucune visite';
-        }
-
-        this._api.getOrganisme({ id_base_site: elem.properties.id_base_site }).subscribe(organi => {
-          this.tabOrganism = [];
-          organi.forEach(result => {
-            console.log('mes résultats ', result);
-            if (result.nom_organisme === 'None') {
-              result.nom_organisme = 'Aucun organisme';
-            }
-
-            this.tabOrganism.push(result.nom_organisme);
-          });
-          elem.properties.nom_organisme = this.tabOrganism;
-        });
-      });
-
-      this.mapListService.loadTableData(data);
-
-      this.filteredData = this.mapListService.tableData;
-    });
-
+    this.onChargeList(this.paramApp);
     this.yearForm.valueChanges
       .filter(input => input !== null && input.toString().length === 4)
       .subscribe(year => {
@@ -79,8 +54,29 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       .filter(input => !input || input === null || input === '')
       .subscribe(year => {
         this.onDeleteDate.emit();
-        this.onDateDelete();
+        this.onDelete();
       });
+
+    this.organForm.valueChanges.subscribe(org => this.onSearchOrganisme(org));
+  }
+
+  onChargeList(param) {
+    this._api.getZp(param).subscribe(data => {
+      this.zps = data;
+
+      data.features.forEach(elem => {
+        elem.properties.date_max === 'None'
+          ? (elem.properties.date_max = 'Aucune visite')
+          : elem.properties.date_max;
+
+        elem.properties.organisme === 'None'
+          ? (elem.properties.organisme = 'Aucun organisme')
+          : elem.properties.organisme;
+      });
+
+      this.mapListService.loadTableData(data);
+      this.filteredData = this.mapListService.tableData;
+    });
   }
 
   ngAfterViewInit() {
@@ -102,151 +98,24 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     this.router.navigate([`${ModuleConfig.api_url}/listVisit`, id_base_site]);
   }
 
-  onSearchTaxon(event) {
-    let trans = event.toLowerCase();
-    this.filteredData = this.mapListService.tableData.filter(ligne => {
-      return ligne.nom_taxon.toLowerCase().indexOf(trans) !== -1 || !trans;
-    });
-  }
-
   onSearchDate(event) {
-    console.log('mon event hereeeeeeeeee', event);
-
-    this._api
-      .getZp({ id_application: ModuleConfig.id_application, year: event })
-      .subscribe(data => {
-        data.features.forEach(elem => {
-          if (elem.properties.date_max === 'None') {
-            elem.properties.date_max = 'Aucune visite';
-          }
-
-          this._api
-            .getOrganisme({ id_base_site: elem.properties.id_base_site })
-            .subscribe(organi => {
-              this.tabOrganism = [];
-              organi.forEach(result => {
-                if (result.nom_organisme === 'None') {
-                  result.nom_organisme = 'Aucun organisme';
-                }
-
-                this.tabOrganism.push(result.nom_organisme);
-              });
-              elem.properties.nom_organisme = this.tabOrganism;
-            });
-        });
-
-        this.mapListService.loadTableData(data);
-
-        this.filteredData = this.mapListService.tableData;
-      });
+    this.onChargeList({
+      id_application: ModuleConfig.id_application,
+      year: event
+    });
   }
 
-  onDateDelete() {
-    this._api.getZp({ id_application: ModuleConfig.id_application }).subscribe(data => {
-      console.log('mon data ', data);
-
-      this.zps = data;
-
-      data.features.forEach(elem => {
-        console.log('mes élément', elem);
-        if (elem.properties.date_max === 'None') {
-          elem.properties.date_max = 'Aucune visite';
-        }
-
-        this._api.getOrganisme({ id_base_site: elem.properties.id_base_site }).subscribe(organi => {
-          this.tabOrganism = [];
-          organi.forEach(result => {
-            console.log('mes résultats ', result);
-            if (result.nom_organisme === 'None') {
-              result.nom_organisme = 'Aucun organisme';
-            }
-
-            this.tabOrganism.push(result.nom_organisme);
-          });
-          elem.properties.nom_organisme = this.tabOrganism;
-        });
-      });
-
-      this.mapListService.loadTableData(data);
-
-      this.filteredData = this.mapListService.tableData;
-    });
+  onDelete() {
+    this.onChargeList(this.paramApp);
   }
 
   onSearchOrganisme(event) {
-    let select = '';
+    console.log(' mon event ', event);
 
-    this.filteredData = this.mapListService.tableData.filter(ligne => {
-      ligne.nom_organisme.forEach(el => {
-        if (el.trim() === event) {
-          select = el.trim();
-        }
-      });
-
-      return select;
-    });
+    this.onChargeList({ id_application: ModuleConfig.id_application, organisme: event });
   }
 
   onTaxonChanged(event) {
-    console.log(event.item.cd_nom);
-    this._api
-      .getZp({ id_application: ModuleConfig.id_application, cd_nom: event.item.cd_nom })
-      .subscribe(data => {
-        data.features.forEach(elem => {
-          if (elem.properties.date_max === 'None') {
-            elem.properties.date_max = 'Aucune visite';
-          }
-
-          this._api
-            .getOrganisme({ id_base_site: elem.properties.id_base_site })
-            .subscribe(organi => {
-              this.tabOrganism = [];
-              organi.forEach(result => {
-                if (result.nom_organisme === 'None') {
-                  result.nom_organisme = 'Aucun organisme';
-                }
-
-                this.tabOrganism.push(result.nom_organisme);
-              });
-              elem.properties.nom_organisme = this.tabOrganism;
-            });
-        });
-
-        this.mapListService.loadTableData(data);
-
-        this.filteredData = this.mapListService.tableData;
-      });
-  }
-
-  onDeleteTaxon() {
-    this._api.getZp({ id_application: ModuleConfig.id_application }).subscribe(data => {
-      console.log('mon data ', data);
-
-      this.zps = data;
-
-      data.features.forEach(elem => {
-        console.log('mes élément', elem);
-        if (elem.properties.date_max === 'None') {
-          elem.properties.date_max = 'Aucune visite';
-        }
-
-        this._api.getOrganisme({ id_base_site: elem.properties.id_base_site }).subscribe(organi => {
-          this.tabOrganism = [];
-          organi.forEach(result => {
-            console.log('mes résultats ', result);
-            if (result.nom_organisme === 'None') {
-              result.nom_organisme = 'Aucun organisme';
-            }
-
-            this.tabOrganism.push(result.nom_organisme);
-          });
-          elem.properties.nom_organisme = this.tabOrganism;
-        });
-      });
-
-      this.mapListService.loadTableData(data);
-
-      this.filteredData = this.mapListService.tableData;
-    });
+    this.onChargeList({ id_application: ModuleConfig.id_application, cd_nom: event.item.cd_nom });
   }
 }
