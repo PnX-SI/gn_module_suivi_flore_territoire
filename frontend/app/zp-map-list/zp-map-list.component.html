@@ -17,12 +17,16 @@
         <div id="blocSearch" class="row row-0 ">
             <div class="searchZP">
                 <small> Rechercher selon taxon </small>
-                <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch">
+                <pnx-taxonomy #taxon label="{{ 'Taxon.Taxon' | translate }}" [parentFormControl]="taxonForm" [idList]="500" [charNumber]="3"
+                    [listLength]="20" (onChange)="onTaxonChanged($event);" (onDelete)="onDeleteTaxon()">
+                </pnx-taxonomy>
+                <!-- <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch"> -->
             </div>
+
 
             <div class="searchZP">
                 <small> Rechercher selon l'année </small>
-                <input type="number" [ngModel]="searchDate" (ngModelChange)="onSearchDate($event)" class="inputSearch">
+                <input type="number" [formControl]="yearForm" class="inputSearch" (onDeleteDate)="onDateDelete()">
             </div>
 
             <div class="searchZP">
