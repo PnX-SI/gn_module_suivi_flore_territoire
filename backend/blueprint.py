@@ -39,7 +39,7 @@ def get_sites_zp():
             TInfoSite,
             func.max(TBaseVisits.visit_date),
             Taxonomie.nom_complet,
-            func.count(TBaseVisits.id_base_visit)
+            func.count(TBaseVisits.id_base_visit),
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
         ).join(
@@ -47,22 +47,44 @@ def get_sites_zp():
         .group_by(TInfoSite, Taxonomie.nom_complet)
     )
 
-    print("ici", q.all())
-
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
     if 'id_application' in parameters:
         q = q.join(
             corSiteApplication, corSiteApplication.c.id_base_site == TInfoSite.id_base_site
         ).filter(corSiteApplication.c.id_application == parameters['id_application'])
+    if 'cd_nom' in parameters:
+        q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
+    if 'year' in parameters:
+        # relance la requête pour récupérer la date_max exacte si on filtre sur l'année
+        q_year = (
+            DB.session.query(
+                TInfoSite.id_base_site,
+                func.max(TBaseVisits.visit_date),
+            ).outerjoin(
+                TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
+            )
+            .group_by(TInfoSite.id_base_site)
+        )
+
+        data_year = q_year.all()
+
+        q = q.filter(func.date_part('year', TBaseVisits.visit_date) == parameters['year'])
 
     data = q.all()
-    print("mes data ", data)
 
     features = []
     for d in data:
         feature = d[0].get_geofeature()
-        feature['properties']['date_max'] = str(d[1])
+        print(feature.properties)
+        id_site = feature['properties']['base_site']['id_base_site']
+        if 'year' in parameters:
+            for dy in data_year:
+                #  récupérer la bonne date max du site si on filtre sur année
+                if id_site == dy[0]:
+                    feature['properties']['date_max'] = str(dy[1])
+        else:
+            feature['properties']['date_max'] = str(d[1])
         feature['properties']['nom_taxon'] = str(d[2])
         feature['properties']['nb_visit'] = str(d[3])
         features.append(feature)
@@ -334,3 +356,17 @@ def get_info_zp(id_base_site):
         info_zp['area_name'] = str(d[2])
         tab_zp.append(info_zp)
     return tab_zp
+
+
+@blueprint.route('/info_annee/<id_base_site>', methods=['GET'])
+@json_resp
+def get_info_annee(id_base_site):
+    q = DB.session.query(TInfoSite, TVisiteSFT.visit_date).outerjoin(
+        TVisiteSFT, TVisiteSFT.id_base_site == TInfoSite.id_base_site
+    ).filter(TInfoSite.id_base_site == id_base_site)
+    # q = DB.session.query(TVisiteSFT.visit_date)
+
+    data = q.all()
+    tab_annee = []
+    print("ici ", q.all())
+    return "coucou"
