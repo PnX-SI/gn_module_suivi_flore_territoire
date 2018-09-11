@@ -25,23 +25,21 @@
 
             <div class="searchZP">
                 <small> Année de visite </small>
-                <input type="number" [formControl]="yearForm" class="inputSearch" (onDeleteDate)="onDelete()">
+                <input type="number" [formControl]="yearForm" class="inputSearch" (onDeleteFiltre)="onDelete()">
             </div>
 
             <div class="searchZP">
                 <small> Organisme </small>
                 <select class="form-control form-control-sm" name="monSelect" [formControl]="organForm">
-
-                    <option selected> -- Sélectionnez un filtre -- </option>
-                    <option *ngFor="let label of filteredData" [ngValue]="label.organisme"> {{label.organisme}} </option>
-                    <!--pkoi quand je mets [ngValue]="label" ça marche pas?   -->
+                    <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
+                    <option *ngFor="let label of tabOrganism"> {{label}} </option>
                     <option> test 1 </option>
                     <option> test 2 </option>
+                    <option value="all"> Tous </option>
 
                 </select>
 
             </div>
-            {{ filteredData |json }}
         </div>
 
 

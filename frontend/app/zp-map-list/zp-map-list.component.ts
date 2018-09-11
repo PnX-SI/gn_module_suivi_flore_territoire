@@ -30,7 +30,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   };
 
   @Output()
-  onDeleteDate = new EventEmitter<any>();
+  onDeleteFiltre = new EventEmitter<any>();
 
   constructor(
     public mapService: MapService,
@@ -44,6 +44,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     this.mapListService.idName = 'id_infos_site';
 
     this.onChargeList(this.paramApp);
+
     this.yearForm.valueChanges
       .filter(input => input !== null && input.toString().length === 4)
       .subscribe(year => {
@@ -53,26 +54,25 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     this.yearForm.valueChanges
       .filter(input => !input || input === null || input === '')
       .subscribe(year => {
-        this.onDeleteDate.emit();
+        this.onDeleteFiltre.emit();
         this.onDelete();
       });
 
-    this.organForm.valueChanges.subscribe(org => this.onSearchOrganisme(org));
+    this.organForm.valueChanges
+      .filter(select => !select || select !== null)
+      .subscribe(org => this.onSearchOrganisme(org));
+
+    this.organForm.valueChanges
+      .filter(input => !input || input === null || input === 'all')
+      .subscribe(org => {
+        this.onDeleteFiltre.emit();
+        this.onDelete();
+      });
   }
 
   onChargeList(param) {
     this._api.getZp(param).subscribe(data => {
       this.zps = data;
-
-      data.features.forEach(elem => {
-        elem.properties.date_max === 'None'
-          ? (elem.properties.date_max = 'Aucune visite')
-          : elem.properties.date_max;
-
-        elem.properties.organisme === 'None'
-          ? (elem.properties.organisme = 'Aucun organisme')
-          : elem.properties.organisme;
-      });
 
       this.mapListService.loadTableData(data);
       this.filteredData = this.mapListService.tableData;
@@ -81,6 +81,10 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.mapListService.enableMapListConnexion(this.mapService.getMap());
+
+    this._api.getOrganisme().subscribe(orga => {
+      this.tabOrganism.push(orga.nom_organisme);
+    });
   }
 
   onEachFeature(feature, layer) {
@@ -110,7 +114,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onSearchOrganisme(event) {
-    console.log(' mon event ', event);
+    console.log('mon event ', event);
 
     this.onChargeList({ id_application: ModuleConfig.id_application, organisme: event });
   }
