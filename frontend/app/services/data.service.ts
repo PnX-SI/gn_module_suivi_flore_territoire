@@ -6,7 +6,7 @@ import { AppConfig } from '@geonature_config/app.config';
 export class DataService {
   constructor(private _http: HttpClient) {}
 
-  getZp(params?) {
+  getZp(params) {
     let myParams = new HttpParams();
 
     for (let key in params) {
@@ -61,16 +61,8 @@ export class DataService {
     );
   }
 
-  getOrganisme(params: any) {
-    let myParams = new HttpParams();
-
-    for (let key in params) {
-      myParams = myParams.set(key, params[key]);
-    }
-
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/organisme`, {
-      params: myParams
-    });
+  getOrganisme() {
+    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/organisme`);
   }
 
   getCommune(id_base_site: number, params: any) {
