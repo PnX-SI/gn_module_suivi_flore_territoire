@@ -48,11 +48,7 @@ def get_sites_zp():
         ).outerjoin(
             TRoles, TRoles.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
-        ).distinct()
-        .group_by(TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme
-                  )
-    )
+            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().group_by(TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme))
 
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
@@ -86,7 +82,6 @@ def get_sites_zp():
     features = []
     for d in data:
         feature = d[0].get_geofeature()
-
         id_site = feature['properties']['base_site']['id_base_site']
         if 'year' in parameters:
             for dy in data_year:
@@ -95,9 +90,14 @@ def get_sites_zp():
                     feature['properties']['date_max'] = str(dy[1])
         else:
             feature['properties']['date_max'] = str(d[1])
+            if d[1] == None:
+                feature['properties']['date_max'] = 'Aucune visite'
         feature['properties']['nom_taxon'] = str(d[2])
         feature['properties']['nb_visit'] = str(d[3])
         feature['properties']['organisme'] = str(d[4])
+        if d[4] == None:
+            feature['properties']['organisme'] = 'Aucun'
+
         features.append(feature)
     return FeatureCollection(features)
 
@@ -296,44 +296,6 @@ def export_visit():
         )
 
 
-@blueprint.route('/organisme', methods=['GET'])
-@json_resp
-def get_organisme():
-    '''
-    Retourne la liste des organismes
-    '''
-    parameters = request.args
-
-    q = DB.session.query(
-        TInfoSite.id_base_site,
-        TRoles.nom_role,
-        TRoles.prenom_role,
-        BibOrganismes.nom_organisme
-    ).outerjoin(TVisiteSFT, TVisiteSFT.id_base_site == TInfoSite.id_base_site).outerjoin(
-        corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
-    ).outerjoin(
-        TRoles, TRoles.id_role == corVisitObserver.c.id_role
-    ).outerjoin(
-        BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
-    ).distinct()
-
-    if 'id_base_site' in parameters:
-        q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-
-    data = q.all()
-    print(data)
-    # return [d.as_dict(True) for d in data]
-    organism = []
-    for d in data:
-        info_orga = dict()
-        info_orga['id_base_site'] = str(d[0])
-        info_orga['observer'] = str(d[1]) + ' ' + str(d[2])
-        info_orga['nom_organisme'] = str(d[3])
-        organism.append(info_orga)
-    # return FeatureCollection(features)
-    return organism
-
-
 @blueprint.route('/info_zp/<id_base_site>', methods=['GET'])
 @json_resp
 def get_info_zp(id_base_site):
@@ -367,3 +329,44 @@ def get_info_zp(id_base_site):
         info_zp['area_name'] = str(d[2])
         tab_zp.append(info_zp)
     return tab_zp
+
+
+@blueprint.route('/organisme', methods=['GET'])
+@json_resp
+def get_organisme():
+    '''
+    Retourne la liste de tous les organismes présents
+    '''
+    parameters = request.args
+
+    # q = DB.session.query(
+    #     TInfoSite.id_base_site,
+    #     TRoles.nom_role,
+    #     TRoles.prenom_role,
+    #     BibOrganismes.nom_organisme
+    # ).outerjoin(TVisiteSFT, TVisiteSFT.id_base_site == TInfoSite.id_base_site).outerjoin(
+    #     corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
+    # ).outerjoin(
+    #     TRoles, TRoles.id_role == corVisitObserver.c.id_role
+    # ).outerjoin(
+    #     BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
+    # )
+
+    q = DB.session.query(
+        BibOrganismes.nom_organisme, TRoles.nom_role, TRoles.prenom_role).outerjoin(
+        TRoles, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().join(
+        corVisitObserver, TRoles.id_role == corVisitObserver.c.id_role).outerjoin(
+        TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
+
+    data = q.all()
+    print(data)
+    info_orga = dict()
+
+    for d in data:
+        #     info_orga['id_base_site'] = str(d[0])
+        info_orga['nom_organisme'] = str(d[0])
+        info_orga['observer'] = str(d[1]) + ' ' + str(d[2])
+    # # return FeatureCollection(features)
+    # return organism
+
+    return info_orga
