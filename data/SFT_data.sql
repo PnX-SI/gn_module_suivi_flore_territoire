@@ -51,7 +51,7 @@ WHERE id_type=ref_geo.get_id_area_type('Communes');
 
 
 -- TODO Mettre en paramètre l'id du module
-INSERT INTO gn_monitoring.cor_site_application
+INSERT INTO gn_monitoring.cor_site_application 
 SELECT  bs.id_base_site, MY_ID_MODULE
 FROM gn_monitoring.t_base_sites bs
 JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;

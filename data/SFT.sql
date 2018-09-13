@@ -79,8 +79,7 @@ ALTER TABLE ONLY cor_visit_perturbation
 
 --Créer la vue pour exporter les visites
 
-    CREATE OR REPLACE VIEW pr_monitoring_flora_territory.export_visits AS 
-WITH
+   CREATE OR REPLACE VIEW pr_monitoring_flora_territory.export_visits AS WITH
     observers AS(
 SELECT 
     v.id_base_visit,
@@ -99,6 +98,14 @@ FROM gn_monitoring.t_base_visits v
 JOIN pr_monitoring_flora_territory.cor_visit_perturbation p ON v.id_base_visit = p.id_base_visit
 JOIN ref_nomenclatures.t_nomenclatures n ON p.id_nomenclature_perturbation = n.id_nomenclature
 GROUP BY v.id_base_visit
+),
+area AS(
+SELECT bs.id_base_site,
+       a.id_area,
+       a.area_name
+FROM ref_geo.l_areas a
+JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
+WHERE a.id_type=ref_geo.get_id_area_type('Communes')
 )
 -- toutes les mailles d'un site et leur visites
 SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, visits.id_digitiser, visits.visit_date, visits.comments, visits.uuid_base_visit, ar.geom,
@@ -107,14 +114,15 @@ SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, vis
     obs.organisme,
     sites.base_site_name,
     taxon.nom_valide,
-    taxon.cd_nom
-    
+    taxon.cd_nom,
+    area.area_name    
 FROM gn_monitoring.t_base_sites sites
 JOIN gn_monitoring.cor_site_area cor ON cor.id_base_site = sites.id_base_site
 JOIN gn_monitoring.t_base_visits visits ON sites.id_base_site = visits.id_base_site
 LEFT JOIN pr_monitoring_flora_territory.cor_visit_grid grid ON grid.id_area = cor.id_area AND grid.id_base_visit = visits.id_base_visit
 JOIN observers obs ON obs.id_base_visit = visits.id_base_visit
 JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
+JOIN area ON area.id_base_site = sites.id_base_site
 JOIN pr_monitoring_flora_territory.t_infos_site info ON info.id_base_site = sites.id_base_site
 JOIN taxonomie.taxref taxon ON taxon.cd_nom = info.cd_nom
 JOIN ref_geo.l_areas ar ON ar.id_area = cor.id_area
