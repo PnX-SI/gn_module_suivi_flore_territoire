@@ -65,7 +65,7 @@ export class DataService {
     return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/organisme`);
   }
 
-  getCommune(id_base_site: number, params: any) {
+  getCommune(id_application: number, params: any) {
     let myParams = new HttpParams();
 
     for (let key in params) {
@@ -73,7 +73,7 @@ export class DataService {
     }
 
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/suivi_flore_territoire/info_zp/${id_base_site}`,
+      `${AppConfig.API_ENDPOINT}/suivi_flore_territoire/commune/${id_application}`,
       { params: myParams }
     );
   }
