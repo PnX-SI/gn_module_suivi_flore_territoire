@@ -7,6 +7,8 @@ from geoalchemy2.shape import to_shape
 
 from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
 from geonature.utils.env import DB, ROOT_DIR
+from geonature.utils.utilsgeometry import FionaShapeService
+
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
 from .repositories import check_user_cruved_visit
 from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
@@ -31,8 +33,9 @@ def get_sites_zp():
     Retourne la liste des ZP
     '''
     parameters = request.args
-#    , TBaseVisits.id_base_visit
-
+    id_type_commune = blueprint.config['id_type_commune']
+    # grâce au fichier config
+    print("my id ", id_type_commune)
     q = (
         DB.session.query(
             TInfoSite,
@@ -51,7 +54,7 @@ def get_sites_zp():
         ).outerjoin(
             BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().outerjoin(
                 corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site).outerjoin(
-                    LAreas, LAreas.id_area == corSiteArea.c.id_area).filter(LAreas.id_type == 101).group_by(
+                    LAreas, LAreas.id_area == corSiteArea.c.id_area).filter(LAreas.id_type == id_type_commune).group_by(
                         TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme, LAreas.area_name
         ))
 
@@ -85,7 +88,6 @@ def get_sites_zp():
 
     data = q.all()
 
-    print("mes data ", data)
     features = []
     for d in data:
         feature = d[0].get_geofeature()
@@ -184,18 +186,20 @@ def post_visit(info_role):
     '''
     Poste une nouvelle visite ou éditer une ancienne
     '''
-    print("mes roles ", info_role)
     data = dict(request.get_json())
     tab_perturbation = data.pop('cor_visit_perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
     visit = TVisiteSFT(**data)
     # print(data)
-    print(visit.as_dict(True))
-    perturs = DB.session.query(TNomenclatures).filter(
-        TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
-    for per in perturs:
-        visit.cor_visit_perturbation.append(per)
+    visit.as_dict(True)
+    # pour que visit prenne en compte des relations
+    # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
+    if (tab_perturbation != None):
+        perturs = DB.session.query(TNomenclatures).filter(
+            TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
+        for per in perturs:
+            visit.cor_visit_perturbation.append(per)
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
@@ -299,14 +303,12 @@ def export_visit():
     else:
         print('LAAA')
 
-        # #TODO: mettre en parametre le srid
-
         dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
 
         ExportVisits.as_shape(
             geom_col='geom',
             dir_path=dir_path,
-            srid=2154,
+            srid=blueprint.config['export_srid'],
             data=data,
             file_name=file_name
         )
@@ -324,7 +326,6 @@ def get_commune(id_application):
     '''
     Retourne toutes les communes présents dans le module
     '''
-
     params = request.args
 
     q = DB.session.query(LAreas.area_name).distinct().outerjoin(
