@@ -32,7 +32,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
 
   constructor(
     public mapService: MapService,
-    public _api: DataService,
+    private _api: DataService,
     public activatedRoute: ActivatedRoute,
     public storeService: StoreService,
     public router: Router,
@@ -44,13 +44,11 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
 
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
-    this._api
-      .getCommune(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_commune })
-      .subscribe(commune => {
-        commune.forEach(name => {
-          this.nomCommune = name.area_name;
-        });
+    this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
+      info.features.forEach(com => {
+        this.nomCommune = com.properties.nom_commune;
       });
+    });
 
     this._api
       .getMaille(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
@@ -58,7 +56,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
         this.storeService.total = nbMaille.features.length;
       });
 
-    const param3 = this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
+    this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
       data.forEach(visit => {
         let fullName;
         visit.observers.forEach(obs => {
