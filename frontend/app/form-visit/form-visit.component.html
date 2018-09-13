@@ -1,125 +1,129 @@
 <div class="row row-0">
-   <!-- MAP  -->
+  <!-- MAP  -->
 
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-      <pnx-map height="95vh">
-         <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
-         </pnx-geojson>
-      </pnx-map>
-   </div>
-
-
-
-   <!-- FORMULAIRE  -->
-
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
-      <h5 class="debLigne"> <i class="fa fa-edit"> <b> Ajouter une visite / Editer cette visite </b></i> </h5>
-
-      <div class="list-group-item">
-         <i class="fa fa-map-marker" style="font-size:18px"> Zone de prospection: <span class="info"> {{ idSite }} </span>
-         </i>
-      </div>
-
-      <div class="list-group-item">
-         <i class="fa fa-tree" style="font-size:18px"> Espèce prospectée : <span class="info"> {{nomTaxon}} </span> </i>
-      </div>
-
-      <div class=" list-group-item modif">
-         <div> <i class="fa fa-hourglass-2" style="font-size:18px"> Date de la visite : </i> </div>
-         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form">
-            <pnx-date [parentFormControl]="modifGrid.controls.visit_date"> </pnx-date>
-         </div>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+    <pnx-map height="95vh">
+      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+      </pnx-geojson>
+    </pnx-map>
+  </div>
 
 
-      </div>
 
+  <!-- FORMULAIRE  -->
 
-      <div class=" list-group-item">
-         <div> <i class="fa fa-group" style="font-size:18px"> Observateur : </i> </div>
-         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form" id="newObserver">
-            <pnx-observers [parentFormControl]="modifGrid.controls.cor_visit_observer" [bindAllItem]="true" [idMenu]="storeService.sftConfig.id_menu_list_user">
-            </pnx-observers>
-         </div>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
+    <h5 class="debLigne"> <i class="fa fa-edit"> <b> Ajouter une visite / Editer cette visite </b></i> </h5>
 
+    <div class="list-group-item">
+      <i class="fa fa-map-marker" style="font-size:18px"> Zone de prospection: <span class="info"> {{ idSite }} </span>
+      </i>
+    </div>
+
+    <div class="list-group-item">
+      <i class="fa fa-tree" style="font-size:18px"> Espèce prospectée : <span class="info"> {{nomTaxon}} </span>
+      </i>
+    </div>
+
+    <div class=" list-group-item modif">
+      <div> <i class="fa fa-hourglass-2" style="font-size:18px"> Date de la visite : </i> </div>
+      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form">
+        <pnx-date [parentFormControl]="modifGrid.controls.visit_date"> </pnx-date>
       </div>
 
 
-      <div class=" list-group-item">
-         <div> <i class="fa fa-warning" style="font-size:18px"> Type(s) de perturbations : </i> </div>
+    </div>
 
-         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form" id="newPerturs">
-            <pnx-nomenclature [parentFormControl]="modifGrid.controls.cor_visit_perturbation" [multiSelect]="true" keyValue="id_nomenclature"
-               [bindAllItem]="true" keyLabel="label_default" codeNomenclatureType="TYPE_PERTURBATION">
-            </pnx-nomenclature>
-         </div>
 
+    <div class=" list-group-item">
+      <div> <i class="fa fa-group" style="font-size:18px"> Observateur : </i> </div>
+      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form" id="newObserver" requir>
+        <pnx-observers [parentFormControl]="modifGrid.controls.cor_visit_observer" [bindAllItem]="true" [idMenu]="storeService.sftConfig.id_menu_list_user">
+        </pnx-observers>
       </div>
 
-      <div class=" list-group-item">
-         <div> <i class="fa fa-comments" style="font-size:18px"> Commentaires : </i> </div>
-         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form ">
-            <textarea class="form-control" rows="2" id="commentaire" [formControl]="modifGrid.controls.comments"></textarea>
-         </div>
+    </div>
 
+
+    <div class=" list-group-item">
+      <div> <i class="fa fa-warning" style="font-size:18px"> Type(s) de perturbations : </i> </div>
+
+      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form" id="newPerturs">
+        <pnx-nomenclature [parentFormControl]="modifGrid.controls.cor_visit_perturbation" [multiSelect]="true" keyValue="id_nomenclature"
+          [bindAllItem]="true" keyLabel="label_default" codeNomenclatureType="TYPE_PERTURBATION">
+        </pnx-nomenclature>
       </div>
 
+      {{modifGrid.controls.cor_visit_perturbation.value |json }}
+    </div>
 
-      <div class="list-group-item">
-         <div> <i class="fa fa-leaf" style="font-size:18px"> Maille(s) présente(s) d'espèce : </i> </div>
-         <div class="info nbGrid" id="nbPres"> {{storeService.presence}} </div>
+    <div class=" list-group-item">
+      <div> <i class="fa fa-comments" style="font-size:18px"> Commentaires : </i> </div>
+      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form ">
+        <textarea class="form-control" rows="2" id="commentaire" [formControl]="modifGrid.controls.comments"></textarea>
       </div>
 
-      <div class="list-group-item">
-         <div> <i class="fa fa-ban" style="font-size:18px"> Maille(s) absente(s) d'espèce : </i> </div>
-         <div class="info nbGrid" id="nbAbs"> {{storeService.absence}} </div>
-      </div>
-
-      <div class="list-group-item">
-         <div> <i class="fa fa-question-circle" style="font-size:18px"> Maille(s) pas encore visitées : </i> </div>
-         <div class="info nbGrid" id="nbRest"> {{storeService.rest}} </div>
-      </div>
-      <br/>
-
-      <!-- Footer -->
-      <!-- afficher modale instructions  -->
-      <div>
-
-         <!-- BUTTON  -->
-         <button type="button" class="btn btn-light btn-sm fa fa-gear clickable" matTooltip="Comment modifier? " (click)="storeService.openModal(content)">
-         </button> <span id="instru"> Instructions </span>
+    </div>
 
 
-         <ng-template #content let-c="close" let-d="dismiss">
-            <div class="modal-header">
-               <h4 class="modal-title"> Pour saisir les mailles: </h4>
-               <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
-                  <span aria-hidden="true">&times;</span>
-               </button>
-            </div>
+    <div class="list-group-item">
+      <div> <i class="fa fa-leaf" style="font-size:18px"> Maille(s) présente(s) d'espèce : </i> </div>
+      <div class="info nbGrid" id="nbPres"> {{storeService.presence}} </div>
+    </div>
 
-            <div class="modal-body">
-               <p class="col-list">
-                  <span id="left" class="strong"> Clic gauche </span>: L'espèce suivie est présente sur cette maille. </p>
-               <p class="col-list">
-                  <span id="right" class="strong"> Clic droit </span> : L'espèce suivie est absente sur cette maille. </p>
-               <p class="col-list">
-                  <span id="dbcl" class="strong"> Double clic </span> : Cette maille n'est pas encore visitée. </p>
-            </div>
+    <div class="list-group-item">
+      <div> <i class="fa fa-ban" style="font-size:18px"> Maille(s) absente(s) d'espèce : </i> </div>
+      <div class="info nbGrid" id="nbAbs"> {{storeService.absence}} </div>
+    </div>
 
-            <div class="modal-footer">
-               <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Fermer</button>
-            </div>
-         </ng-template>
+    <div class="list-group-item">
+      <div> <i class="fa fa-question-circle" style="font-size:18px"> Maille(s) pas encore visitées : </i> </div>
+      <div class="info nbGrid" id="nbRest"> {{storeService.rest}} </div>
+    </div>
+    <br/>
 
+    <!-- Footer -->
+    <!-- afficher modale instructions  -->
+    <div>
 
-         <button class="btn btn-primary btn-sm droite" (click)="onModif()"> Enregistrer les modifications </button>
-
-         <button class="btn btn-success btn-sm droite" (click)="onVisual()"> Visualiser les visites précédentes</button>
+      <!-- BUTTON  -->
+      <button type="button" class="btn btn-light btn-sm fa fa-gear clickable" matTooltip="Comment modifier? " (click)="storeService.openModal(content)">
+      </button> <span id="instru"> Instructions </span>
 
 
+      <ng-template #content let-c="close" let-d="dismiss">
+        <div class="modal-header">
+          <h4 class="modal-title"> Pour saisir les mailles: </h4>
+          <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
 
-      </div>
+        <div class="modal-body">
+          <p class="col-list">
+            <span id="left" class="strong"> Clic gauche </span>: L'espèce suivie est présente sur cette maille. </p>
+          <p class="col-list">
+            <span id="right" class="strong"> Clic droit </span> : L'espèce suivie est absente sur cette maille. </p>
+          <p class="col-list">
+            <span id="dbcl" class="strong"> Double clic </span> : Cette maille n'est pas encore visitée.
+          </p>
+        </div>
 
-      <!-- {{modifGrid.value |json}} -->
-   </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Fermer</button>
+        </div>
+      </ng-template>
+
+
+      <button class="btn btn-primary btn-sm droite" (click)="onModif()" [disabled]=" modifGrid.invalid "> Enregistrer les
+        modifications </button>
+
+      <button class=" btn btn-success btn-sm droite " (click)="onVisual() "> Visualiser les visites précédentes</button>
+
+
+
+    </div>
+
+    <!-- {{modifGrid.value |json}} -->
+  </div>
 </div>
