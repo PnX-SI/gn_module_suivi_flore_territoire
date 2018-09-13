@@ -170,6 +170,7 @@ class ExportVisits(DB.Model):
         primary_key=True
     )
     id_base_site = DB.Column(DB.Integer)
+    uuid_base_visit = DB.Column(UUID(as_uuid=True))
     visit_date = DB.Column(DB.DateTime)
     comments = DB.Column(DB.Unicode)
     geom = DB.Column(Geometry('GEOMETRY', 2154))
@@ -180,3 +181,4 @@ class ExportVisits(DB.Model):
     base_site_name = DB.Column(DB.Unicode)
     nom_valide = DB.Column(DB.Unicode)
     cd_nom = DB.Column(DB.Integer)
+    area_name = DB.Column(DB.Unicode)
