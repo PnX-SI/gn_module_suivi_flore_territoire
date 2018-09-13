@@ -39,7 +39,8 @@ def get_sites_zp():
             func.max(TBaseVisits.visit_date),
             Taxonomie.nom_complet,
             func.count(TBaseVisits.id_base_visit),
-            BibOrganismes.nom_organisme
+            BibOrganismes.nom_organisme,
+            LAreas.area_name
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
         ).join(
@@ -48,7 +49,11 @@ def get_sites_zp():
         ).outerjoin(
             TRoles, TRoles.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().group_by(TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme))
+            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().outerjoin(
+                corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site).outerjoin(
+                    LAreas, LAreas.id_area == corSiteArea.c.id_area).filter(LAreas.id_type == 101).group_by(
+                        TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme, LAreas.area_name
+        ))
 
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
@@ -60,7 +65,8 @@ def get_sites_zp():
         q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
     if 'organisme' in parameters:
         q = q.filter(BibOrganismes.nom_organisme == parameters['organisme'])
-
+    if 'commune' in parameters:
+        q = q.filter(LAreas.area_name == parameters['commune'])
     if 'year' in parameters:
         # relance la requête pour récupérer la date_max exacte si on filtre sur l'année
         q_year = (
@@ -79,6 +85,7 @@ def get_sites_zp():
 
     data = q.all()
 
+    print("mes data ", data)
     features = []
     for d in data:
         feature = d[0].get_geofeature()
@@ -95,9 +102,9 @@ def get_sites_zp():
         feature['properties']['nom_taxon'] = str(d[2])
         feature['properties']['nb_visit'] = str(d[3])
         feature['properties']['organisme'] = str(d[4])
+        feature['properties']['nom_commune'] = str(d[5])
         if d[4] == None:
             feature['properties']['organisme'] = 'Aucun'
-
         features.append(feature)
     return FeatureCollection(features)
 
@@ -230,13 +237,28 @@ def export_visit():
     q = (DB.session.query(ExportVisits))
 
     if 'id_base_visit' in parameters:
-
         q = (DB.session.query(ExportVisits)
              .filter(ExportVisits.id_base_visit == parameters['id_base_visit'])
              )
     elif 'id_base_site' in parameters:
         q = (DB.session.query(ExportVisits)
              .filter(ExportVisits.id_base_site == parameters['id_base_site'])
+             )
+    elif 'organisme' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.organisme == parameters['organisme'])
+             )
+    elif 'commune' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.area_name == parameters['commune'])
+             )
+    elif 'year' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(func.date_part('year', ExportVisits.visit_date) == parameters['year'])
+             )
+    elif 'cd_nom' in parameters:
+        q = (DB.session.query(ExportVisits)
+             .filter(ExportVisits.cd_nom == parameters['cd_nom'])
              )
 
     data = q.all()
@@ -296,39 +318,31 @@ def export_visit():
         )
 
 
-@blueprint.route('/info_zp/<id_base_site>', methods=['GET'])
+@blueprint.route('/commune/<id_application>', methods=['GET'])
 @json_resp
-def get_info_zp(id_base_site):
+def get_commune(id_application):
     '''
-    Retourne la/les communes d'une ZP. 
-    TODO: Intégrer cette partie dans routes.py de gn_monitoring 
+    Retourne toutes les communes présents dans le module
     '''
 
     params = request.args
 
-    q = DB.session.query(
-        corSiteArea,
-        LAreas.area_name,
-    ).join(
-        LAreas,
-        LAreas.id_area == corSiteArea.c.id_area
-    ).filter(
-        corSiteArea.c.id_base_site == id_base_site
-    )
+    q = DB.session.query(LAreas.area_name).distinct().outerjoin(
+        corSiteArea, LAreas.id_area == corSiteArea.c.id_area).outerjoin(
+        corSiteApplication, corSiteApplication.c.id_base_site == corSiteArea.c.id_base_site).filter(
+        corSiteApplication.c.id_application == id_application)
 
     if 'id_area_type' in params:
         q = q.filter(LAreas.id_type == params['id_area_type'])
 
     data = q.all()
-    print("mes data ", data)
-    tab_zp = []
+    tab_commune = []
+
     for d in data:
-        info_zp = dict()
-        info_zp['id_base_site'] = str(d[0])
-        info_zp['id_area'] = str(d[1])
-        info_zp['area_name'] = str(d[2])
-        tab_zp.append(info_zp)
-    return tab_zp
+        nom_com = dict()
+        nom_com['nom_commune'] = str(d[0])
+        tab_commune.append(nom_com)
+    return tab_commune
 
 
 @blueprint.route('/organisme', methods=['GET'])
@@ -337,20 +351,6 @@ def get_organisme():
     '''
     Retourne la liste de tous les organismes présents
     '''
-    parameters = request.args
-
-    # q = DB.session.query(
-    #     TInfoSite.id_base_site,
-    #     TRoles.nom_role,
-    #     TRoles.prenom_role,
-    #     BibOrganismes.nom_organisme
-    # ).outerjoin(TVisiteSFT, TVisiteSFT.id_base_site == TInfoSite.id_base_site).outerjoin(
-    #     corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
-    # ).outerjoin(
-    #     TRoles, TRoles.id_role == corVisitObserver.c.id_role
-    # ).outerjoin(
-    #     BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
-    # )
 
     q = DB.session.query(
         BibOrganismes.nom_organisme, TRoles.nom_role, TRoles.prenom_role).outerjoin(
@@ -359,14 +359,11 @@ def get_organisme():
         TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
 
     data = q.all()
-    print(data)
-    info_orga = dict()
-
+    tab_orga = []
     for d in data:
-        #     info_orga['id_base_site'] = str(d[0])
+        print("et mon d ", d)
+        info_orga = dict()
         info_orga['nom_organisme'] = str(d[0])
         info_orga['observer'] = str(d[1]) + ' ' + str(d[2])
-    # # return FeatureCollection(features)
-    # return organism
-
-    return info_orga
+        tab_orga.append(info_orga)
+    return tab_orga
