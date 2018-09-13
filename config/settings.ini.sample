@@ -14,3 +14,7 @@ user_pg=geonatuser
 
 # GeoNature database owner password
 user_pg_pass=mon_pass
+
+srid_local=2154
+
+srid_world=4326
