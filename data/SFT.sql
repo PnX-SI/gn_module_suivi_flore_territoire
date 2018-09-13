@@ -76,6 +76,22 @@ ALTER TABLE ONLY cor_visit_perturbation
 ALTER TABLE ONLY cor_visit_perturbation 
     ADD CONSTRAINT fk_cor_visit_perturbation_id_nomenclature_perturbation FOREIGN KEY (id_nomenclature_perturbation) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
 
+------------
+--FUNCTIONS-
+------------
+CREATE OR REPLACE FUNCTION ref_geo.get_id_area_type(mytype character varying)
+  RETURNS integer AS
+$BODY$
+--Function which return the id_type from the mnemonique of a nomenclature type
+DECLARE theidtype character varying;
+  BEGIN
+SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_code = mytype;
+return theidtype;
+  END;
+$BODY$
+  LANGUAGE plpgsql IMMUTABLE
+  COST 100;
+
 
 --Créer la vue pour exporter les visites
 
@@ -104,8 +120,8 @@ SELECT bs.id_base_site,
        a.id_area,
        a.area_name
 FROM ref_geo.l_areas a
-JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
-WHERE a.id_type=ref_geo.get_id_area_type('Communes')
+JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, MY_SRID_WORLD), bs.geom)
+WHERE a.id_type=ref_geo.get_id_area_type('Com')
 )
 -- toutes les mailles d'un site et leur visites
 SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, visits.id_digitiser, visits.visit_date, visits.comments, visits.uuid_base_visit, ar.geom,
@@ -146,7 +162,7 @@ $BODY$
 --Function which return the id_type from the mnemonique of a nomenclature type
 DECLARE theidtype character varying;
   BEGIN
-SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_name = mytype;
+SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_code = mytype;
 return theidtype;
   END;
 $BODY$
