@@ -230,10 +230,10 @@ def post_visit(info_role):
 
 
 @blueprint.route('/export_visit', methods=['GET'])
+def export_visit():
     '''
     Télécharger les données d'une visite (ou des visites )
     '''
-def export_visit():
 
     parameters = request.args
     # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
