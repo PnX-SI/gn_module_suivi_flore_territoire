@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from flask import Blueprint, request, session, current_app, send_from_directory
 from sqlalchemy.sql.expression import func
@@ -10,7 +11,7 @@ from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
 
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
-from .repositories import check_user_cruved_visit
+from .repositories import check_user_cruved_visit, check_year_visit
 from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
 from geonature.core.ref_geo.models import LAreas
 
@@ -186,7 +187,9 @@ def post_visit(info_role):
     '''
     Poste une nouvelle visite ou éditer une ancienne
     '''
+
     data = dict(request.get_json())
+
     tab_perturbation = data.pop('cor_visit_perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
@@ -203,13 +206,10 @@ def post_visit(info_role):
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
-        # print(visit_grid)
     observers = DB.session.query(TRoles).filter(
         TRoles.id_role.in_(tab_observer)
     ).all()
-    # print(observers)
     for o in observers:
-        # print(o.as_dict())
         visit.observers.append(o)
     if visit.id_base_visit:
         user_cruved = get_or_fetch_user_cruved(
@@ -217,11 +217,11 @@ def post_visit(info_role):
             id_role=info_role.id_role,
             id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
         )
-        print('coucou ', user_cruved)
         update_cruved = user_cruved['U']
         check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)
     else:
+        check_year_visit(data['id_base_site'], data['visit_date'][0:4])
         DB.session.add(visit)
     DB.session.commit()
     # print(visit.as_dict(recursif=True))
@@ -230,6 +230,9 @@ def post_visit(info_role):
 
 
 @blueprint.route('/export_visit', methods=['GET'])
+    '''
+    Télécharger les données d'une visite (ou des visites )
+    '''
 def export_visit():
 
     parameters = request.args
