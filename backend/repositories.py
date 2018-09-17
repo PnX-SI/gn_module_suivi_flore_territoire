@@ -1,10 +1,14 @@
 from flask import Blueprint, request, session, current_app
 
-from geonature.utils.errors import InsufficientRightsError
+from geonature.utils.errors import GeonatureApiError, InsufficientRightsError
 from pypnusershub.db.tools import get_or_fetch_user_cruved
 from geonature.core.gn_monitoring.models import TBaseVisits
 from geonature.utils.env import DB, ROOT_DIR
 from sqlalchemy.sql.expression import func
+
+
+class PostYearError (GeonatureApiError):
+    pass
 
 
 def check_user_cruved_visit(user, visit, cruved_level):
@@ -58,7 +62,7 @@ def check_year_visit(id_base_site, new_visit_date):
     if yes, observer is not allowed to post the new visit 
     """
     q_year = DB.session.query(
-        func.date_part('year', TBaseVisits.visit_date)).filter(
+        func.date_part('year', TBaseVisits.visit_date_min)).filter(
         TBaseVisits.id_base_site == id_base_site)
     tab_old_year = q_year.all()
     print(tab_old_year)
@@ -67,7 +71,7 @@ def check_year_visit(id_base_site, new_visit_date):
     for y in tab_old_year:
         year_old_visit = str(int(y[0]))
         if year_old_visit == year_new_visit:
-            raise InsufficientRightsError(
+            raise PostYearError(
                 ('ZP "{}" has already been visited in {} ')
                 .format(id_base_site, year_old_visit),
                 403)
