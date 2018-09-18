@@ -12,6 +12,7 @@ export class FormService {
       id_base_site: null,
       id_base_visit: null,
       visit_date_min: [null, Validators.required],
+      visit_date_max: null,
       cor_visit_observer: [null, Validators.required],
       cor_visit_perturbation: new Array(),
       cor_visit_grid: new Array(),
