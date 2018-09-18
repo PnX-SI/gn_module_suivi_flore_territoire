@@ -71,7 +71,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     // vérifie s'il existe idVisit --> c' une modif
     if (this.idVisit !== undefined) {
-
       this._api.getOneVisit(this.idVisit).subscribe(element => {
         console.log('mes éléments ', element);
 
@@ -79,25 +78,31 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.storeService.presence = 0;
         this.storeService.absence = 0;
         // compter l'absence/présence des mailles déjà existant
-        this.visitGrid.forEach(grid => {
-          if (grid.presence == true) {
-            this.storeService.presence += 1;
-          } else {
-            this.storeService.absence += 1;
-          }
-        });
+        if (this.visitGrid !== undefined) {
+          this.visitGrid.forEach(grid => {
+            if (grid.presence == true) {
+              this.storeService.presence += 1;
+            } else {
+              this.storeService.absence += 1;
+            }
+          });
+        }
 
         let typePer;
         let tabVisitPerturb = element.cor_visit_perturbation;
 
-        tabVisitPerturb.forEach(per => {
-          if (per === tabVisitPerturb[tabVisitPerturb.length - 1]) {
-            typePer = per.label_fr + '. ';
-          } else {
-            typePer = per.label_fr + ', ';
-          }
-          this.namePertur.push(typePer);
-        });
+        console.log('là là ', tabVisitPerturb);
+
+        if (tabVisitPerturb !== undefined) {
+          tabVisitPerturb.forEach(per => {
+            if (per === tabVisitPerturb[tabVisitPerturb.length - 1]) {
+              typePer = per.label_fr + '. ';
+            } else {
+              typePer = per.label_fr + ', ';
+            }
+            this.namePertur.push(typePer);
+          });
+        }
 
         this.date = element.visit_date_min;
 
@@ -112,10 +117,13 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           this.tabObserver.push(fullNameObserver);
         });
 
+        console.log('laa ', this.date);
+
         this.modifGrid.patchValue({
           id_base_site: this.idSite,
           id_base_visit: this.idVisit,
           visit_date_min: this.dateParser.parse(this.date),
+          visit_date_max: this.dateParser.parse(this.date),
           cor_visit_observer: element.observers,
           cor_visit_perturbation: element.cor_visit_perturbation,
           cor_visit_grid: this.visitGrid,
@@ -137,15 +145,17 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   }
 
   onEachFeature(feature, layer) {
-    this.visitGrid.forEach(maille => {
-      if (maille.id_area == feature.id) {
-        if (maille.presence) {
-          layer.setStyle(this.storeService.myStylePresent);
-        } else {
-          layer.setStyle(this.storeService.myStyleAbsent);
+    if (this.visitGrid !== undefined) {
+      this.visitGrid.forEach(maille => {
+        if (maille.id_area == feature.id) {
+          if (maille.presence) {
+            layer.setStyle(this.storeService.myStylePresent);
+          } else {
+            layer.setStyle(this.storeService.myStyleAbsent);
+          }
         }
-      }
-    });
+      });
+    }
 
     // évenement quand modifier statut de maille
     layer.on({
@@ -222,6 +232,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     formModif['visit_date_min'] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value
     );
+    formModif['visit_date_max'] = this.dateParser.format(
+      this.modifGrid.controls.visit_date_min.value
+    );
 
     for (let key in this.visitModif) {
       this.visitGrid.push({
@@ -237,7 +250,11 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       return obs.id_role;
     });
 
-    if (formModif['cor_visit_perturbation'] !== null) {
+    console.log('toto ', formModif['cor_visit_perturbation']);
+
+    if (formModif['cor_visit_perturbation'] !== undefined) {
+      console.log('rentre iiccci');
+
       formModif['cor_visit_perturbation'] = formModif['cor_visit_perturbation'].map(
         pertu => pertu.id_nomenclature
       );
@@ -250,10 +267,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.toastr.success('Visite modifiée', '', {
           positionClass: 'toast-top-center'
         });
-        setTimeout(
-          () => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]),
-          1000
-        );
+        // setTimeout(
+        //   () => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]),
+        //   1000
+        // );
       },
       error => {
         if (error.status === 403) {
