@@ -189,22 +189,25 @@ def post_visit(info_role):
     '''
 
     data = dict(request.get_json())
-    print("data début ", data)
-    tab_perturbation = data.pop('cor_visit_perturbation')
+    try:
+        tab_perturbation = data.pop('cor_visit_perturbation')
+    except:
+        print('pas de perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
-    print('mes data ', data)
     visit = TVisiteSFT(**data)
     print(data)
 
     visit.as_dict(True)
     # pour que visit prenne en compte des relations
     # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
-    if (tab_perturbation != None):
+    try:
         perturs = DB.session.query(TNomenclatures).filter(
             TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
         for per in perturs:
             visit.cor_visit_perturbation.append(per)
+    except:
+        print('pas de perturbation')
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
@@ -213,6 +216,7 @@ def post_visit(info_role):
     ).all()
     for o in observers:
         visit.observers.append(o)
+
     if visit.id_base_visit:
         user_cruved = get_or_fetch_user_cruved(
             session=session,
@@ -228,8 +232,8 @@ def post_visit(info_role):
     DB.session.commit()
     # print(visit.as_dict(recursif=True))
 
+    print('toto ')
     return visit.as_dict(recursif=True)
-    # return None
 
 
 @blueprint.route('/export_visit', methods=['GET'])
