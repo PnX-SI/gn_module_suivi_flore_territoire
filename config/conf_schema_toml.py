@@ -21,12 +21,14 @@ default_maplist_zp_columns = [
 ]
 
 default_list_visit_columns = [
-    {"name": 'Date', "prop": 'visit_date'},
+    {"name": 'Date', "prop": 'visit_date_min'},
     {"name": 'Observateur(s)', "prop": "observers"},
     {"name": 'Présence/ Absence ? ', "prop": "state"},
-    {"name": 'identifiant', "prop": "id_base_visit"}
+    # {"name": 'identifiant', "prop": "id_base_visit"}
 
 ]
+
+coor_zoom_center = [44.982667966765845, 6.062455200884894]
 
 
 class GnModuleSchemaConf(GnModuleProdConf):
@@ -36,7 +38,9 @@ class GnModuleSchemaConf(GnModuleProdConf):
     export_available_format = fields.List(fields.String(), missing=available_export_format)
     default_zp_columns = fields.List(fields.Dict(), missing=default_maplist_zp_columns)
     default_list_visit_columns = fields.List(fields.Dict(), missing=default_list_visit_columns)
-    id_type_maille = fields.Integer(missing=203)
+    id_type_maille = fields.Integer(missing=10011)
     id_type_commune = fields.Integer(missing=101)
     id_menu_list_user = fields.Integer(missing=10)
+    id_list_taxon = fields.Integer(missing=500)
     export_srid = fields.Integer(missing=2154)
+    zoom_center = fields.List(fields.Float(), missing=coor_zoom_center)
