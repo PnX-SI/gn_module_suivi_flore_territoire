@@ -19,7 +19,6 @@ CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
     cd_nom integer NOT NULL
-    -- rajouter colonne nom de commune --
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.t_infos_site IS 'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
 
@@ -29,7 +28,6 @@ CREATE TABLE cor_visit_grid (
     id_base_visit integer NOT NULL,
     presence boolean NOT NULL,
     uuid_base_visit UUID DEFAULT public.uuid_generate_v4() 
-    -- rajouter uuid (id unique) pour chaque visite de la table cor_visit_grid --     
 );
 COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_grid IS 'Enregistrer la présence/absence d\une espèce dans une maille définie lors d\une visite';
 
@@ -38,7 +36,7 @@ CREATE TABLE cor_visit_perturbation (
     id_base_visit integer NOT NULL,
     id_nomenclature_perturbation integer NOT NULL   
 );
-COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_perturbation IS 'Extension de t_base_visit de gn_monitoring, enregistrer les perturbations constatées lors d\une visite';
+COMMENT ON TABLE pr_monitoring_flora_territory.cor_visit_perturbation IS 'Enregistrer les perturbations constatées lors d\une visite';
 
 
 ALTER TABLE ONLY t_infos_site 
@@ -76,22 +74,6 @@ ALTER TABLE ONLY cor_visit_perturbation
 ALTER TABLE ONLY cor_visit_perturbation 
     ADD CONSTRAINT fk_cor_visit_perturbation_id_nomenclature_perturbation FOREIGN KEY (id_nomenclature_perturbation) REFERENCES ref_nomenclatures.t_nomenclatures (id_nomenclature) ON UPDATE CASCADE;
 
-------------
---FUNCTIONS-
-------------
-CREATE OR REPLACE FUNCTION ref_geo.get_id_area_type(mytype character varying)
-  RETURNS integer AS
-$BODY$
---Function which return the id_type from the mnemonique of a nomenclature type
-DECLARE theidtype character varying;
-  BEGIN
-SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_code = mytype;
-return theidtype;
-  END;
-$BODY$
-  LANGUAGE plpgsql IMMUTABLE
-  COST 100;
-
 
 --Créer la vue pour exporter les visites
 
@@ -121,10 +103,10 @@ SELECT bs.id_base_site,
        a.area_name
 FROM ref_geo.l_areas a
 JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, MY_SRID_WORLD), bs.geom)
-WHERE a.id_type=ref_geo.get_id_area_type('Com')
+WHERE a.id_type=ref_geo.get_id_area_type('COM')
 )
 -- toutes les mailles d'un site et leur visites
-SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, visits.id_digitiser, visits.visit_date, visits.comments, visits.uuid_base_visit, ar.geom,
+SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, visits.id_digitiser, visits.visit_date_min, visits.comments, visits.uuid_base_visit, ar.geom,
     per.label_perturbation,
     obs.observateurs,
     obs.organisme,
@@ -153,21 +135,6 @@ ORDER BY visits.id_base_visit;
 
 
 
-------------
---FUNCTIONS-
-------------
-CREATE OR REPLACE FUNCTION ref_geo.get_id_area_type(mytype character varying)
-  RETURNS integer AS
-$BODY$
---Function which return the id_type from the mnemonique of a nomenclature type
-DECLARE theidtype character varying;
-  BEGIN
-SELECT INTO theidtype id_type FROM ref_geo.bib_areas_types WHERE type_code = mytype;
-return theidtype;
-  END;
-$BODY$
-  LANGUAGE plpgsql IMMUTABLE
-  COST 100;
 
 
 --------------
@@ -175,13 +142,13 @@ $BODY$
 --------------
 
 -- créer nomenclature des perturbations-- 
-INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr)
-    VALUES ('TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.');
+INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
+    VALUES ('TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.', 'CBNA');
 
 
 
 -- insérer les types de perturbations --
--- problème id_broader ??
+-- TODO: problème id_broader ??
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, id_broader, hierarchy) VALUES 
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'GeF', 'Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 0, '118.001'),
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'Bru', 'Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', 'Brûlage contrôlé', 'Gestion par le feu: Brûlage contrôlé', ref_nomenclatures.get_id_nomenclature('TYPE_PERTURBATION', 'Bru') , '118.503.001'),
