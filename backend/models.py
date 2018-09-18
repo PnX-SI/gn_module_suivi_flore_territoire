@@ -171,7 +171,7 @@ class ExportVisits(DB.Model):
     )
     id_base_site = DB.Column(DB.Integer)
     uuid_base_visit = DB.Column(UUID(as_uuid=True))
-    visit_date = DB.Column(DB.DateTime)
+    visit_date_min = DB.Column(DB.DateTime)
     comments = DB.Column(DB.Unicode)
     geom = DB.Column(Geometry('GEOMETRY', 2154))
     presence = DB.Column(DB.Boolean)

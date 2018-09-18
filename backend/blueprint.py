@@ -40,7 +40,7 @@ def get_sites_zp():
     q = (
         DB.session.query(
             TInfoSite,
-            func.max(TBaseVisits.visit_date),
+            func.max(TBaseVisits.visit_date_min),
             Taxonomie.nom_complet,
             func.count(TBaseVisits.id_base_visit),
             BibOrganismes.nom_organisme,
@@ -76,7 +76,7 @@ def get_sites_zp():
         q_year = (
             DB.session.query(
                 TInfoSite.id_base_site,
-                func.max(TBaseVisits.visit_date),
+                func.max(TBaseVisits.visit_date_min),
             ).outerjoin(
                 TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
             )
@@ -85,7 +85,7 @@ def get_sites_zp():
 
         data_year = q_year.all()
 
-        q = q.filter(func.date_part('year', TBaseVisits.visit_date) == parameters['year'])
+        q = q.filter(func.date_part('year', TBaseVisits.visit_date_min) == parameters['year'])
 
     data = q.all()
 
@@ -189,12 +189,14 @@ def post_visit(info_role):
     '''
 
     data = dict(request.get_json())
-
+    print("data début ", data)
     tab_perturbation = data.pop('cor_visit_perturbation')
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
+    print('mes data ', data)
     visit = TVisiteSFT(**data)
-    # print(data)
+    print(data)
+
     visit.as_dict(True)
     # pour que visit prenne en compte des relations
     # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
@@ -221,12 +223,13 @@ def post_visit(info_role):
         check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)
     else:
-        check_year_visit(data['id_base_site'], data['visit_date'][0:4])
+        check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
         DB.session.add(visit)
     DB.session.commit()
     # print(visit.as_dict(recursif=True))
 
     return visit.as_dict(recursif=True)
+    # return None
 
 
 @blueprint.route('/export_visit', methods=['GET'])
