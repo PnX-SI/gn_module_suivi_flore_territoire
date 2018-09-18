@@ -20,8 +20,6 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   @Input()
   searchTaxon: string;
 
-  @Input()
-  displayAll: string;
   public filteredData = [];
   public tabOrganism = [];
   public taxonForm = new FormControl();
@@ -56,9 +54,8 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     });
 
     this.onChargeList(this.paramApp);
-
+    //  quand on fait la recherche
     this.filtreForm.controls.filtreYear.valueChanges
-      //  quand on cherche
       .filter(input => input !== null && input.toString().length === 4)
       .subscribe(year => {
         this.onSearchDate(year);
@@ -156,7 +153,6 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       id_application: ModuleConfig.id_application,
       year: event
     });
-    console.log('my event ', event);
     this.oldFilterDate = event;
 
     this.onSetParams('year', event);
@@ -183,6 +179,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onSetParams(param: string, value) {
+    //  ajouter le queryString pour télécharger les données
     this.storeService.queryString = this.storeService.queryString.set(param, value);
   }
 

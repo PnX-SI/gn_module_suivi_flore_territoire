@@ -62,6 +62,8 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     // récupère nom de l'espèce
 
     this._api.getInfoSite(this.idSite).subscribe(info => {
+      console.log('mes infos ', info);
+
       this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
         this.nomTaxon = taxon.nom_valide;
       });
@@ -69,6 +71,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     // vérifie s'il existe idVisit --> c' une modif
     if (this.idVisit !== undefined) {
+
       this._api.getOneVisit(this.idVisit).subscribe(element => {
         console.log('mes éléments ', element);
 
@@ -96,7 +99,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           this.namePertur.push(typePer);
         });
 
-        this.date = element.visit_date;
+        this.date = element.visit_date_min;
 
         let fullNameObserver;
 
@@ -112,7 +115,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.modifGrid.patchValue({
           id_base_site: this.idSite,
           id_base_visit: this.idVisit,
-          visit_date: this.dateParser.parse(this.date),
+          visit_date_min: this.dateParser.parse(this.date),
           cor_visit_observer: element.observers,
           cor_visit_perturbation: element.cor_visit_perturbation,
           cor_visit_grid: this.visitGrid,
@@ -215,8 +218,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     const formModif = Object.assign({}, this.modifGrid.value);
 
     formModif['id_base_site'] = this.idSite;
-    //  formModif['visit_date'] = this.dateParser.format(formModif['visit_date']);
-    formModif['visit_date'] = this.dateParser.format(this.modifGrid.controls.visit_date.value);
+    //  formModif['visit_date_min'] = this.dateParser.format(formModif['visit_date_min']);
+    formModif['visit_date_min'] = this.dateParser.format(
+      this.modifGrid.controls.visit_date_min.value
+    );
 
     for (let key in this.visitModif) {
       this.visitGrid.push({
@@ -252,12 +257,19 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       },
       error => {
         if (error.status === 403) {
-          this._commonService.translateToaster('error', 'NotAllowed');
+          if (error.error.raisedError === 'PostYearError') {
+            this.toastr.warning('Une visite a été déjà effectuée sur cette année ', '', {
+              positionClass: 'toast-top-center'
+            });
+          } else {
+            this._commonService.translateToaster('error', 'NotAllowed');
+          }
         } else {
           this._commonService.translateToaster('error', 'ErrorMessage');
         }
       }
     );
+    // griser le bouton après avoir posté la visite
     this.disabledAfterPost = true;
   }
 }

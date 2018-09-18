@@ -26,7 +26,8 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   public rows = [];
 
   public nomCommune;
-
+  public nomSite;
+  public descriSite;
   @ViewChild('geojson')
   geojson: GeojsonComponent;
 
@@ -45,18 +46,27 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
     this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
-      info.features.forEach(com => {
-        this.nomCommune = com.properties.nom_commune;
+      console.log('my zp ', info);
+
+      info.features.forEach(el => {
+        console.log('my com ', el);
+        this.nomSite = el.properties.base_site.base_site_name;
+        this.descriSite = el.properties.base_site.base_site_description;
+        this.nomCommune = el.properties.nom_commune;
       });
     });
 
     this._api
       .getMaille(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
       .subscribe(nbMaille => {
+        console.log('je veux nbMaille ', nbMaille);
+
         this.storeService.total = nbMaille.features.length;
       });
 
     this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
+      console.log('mes data ', data);
+
       data.forEach(visit => {
         let fullName;
         visit.observers.forEach(obs => {
@@ -66,13 +76,15 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
         let pres = 0;
         let abs = 0;
 
-        visit.cor_visit_grid.forEach(maille => {
-          if (maille.presence) {
-            pres += 1;
-          } else {
-            abs += 1;
-          }
-        });
+        if (visit.cor_visit_grid !== undefined) {
+          visit.cor_visit_grid.forEach(maille => {
+            if (maille.presence) {
+              pres += 1;
+            } else {
+              abs += 1;
+            }
+          });
+        }
 
         visit.state = pres + 'P / ' + abs + 'A ';
       });

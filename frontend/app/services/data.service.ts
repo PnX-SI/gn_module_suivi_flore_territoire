@@ -38,7 +38,6 @@ export class DataService {
 
   postVisit(data: any) {
     console.log(data);
-    console.log('déjà post ! ');
 
     return this._http.post<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit`, data);
   }

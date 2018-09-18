@@ -61,26 +61,30 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
         this.visitGrid = element.cor_visit_grid;
         this.storeService.presence = 0;
         this.storeService.absence = 0;
-        this.visitGrid.forEach(grid => {
-          if (grid.presence == true) {
-            this.storeService.presence += 1;
-          } else {
-            this.storeService.absence += 1;
-          }
-        });
+        if (this.visitGrid !== undefined) {
+          this.visitGrid.forEach(grid => {
+            if (grid.presence == true) {
+              this.storeService.presence += 1;
+            } else {
+              this.storeService.absence += 1;
+            }
+          });
+        }
 
         let typePer;
         let tabVisitPerturb = element.cor_visit_perturbation;
         this.tabPertur = [];
 
-        tabVisitPerturb.forEach(per => {
-          if (per == tabVisitPerturb[tabVisitPerturb.length - 1]) {
-            typePer = per.label_fr + '. ';
-          } else {
-            typePer = per.label_fr + ', ';
-          }
-          this.tabPertur.push(typePer);
-        });
+        if (tabVisitPerturb !== undefined) {
+          tabVisitPerturb.forEach(per => {
+            if (per == tabVisitPerturb[tabVisitPerturb.length - 1]) {
+              typePer = per.label_fr + '. ';
+            } else {
+              typePer = per.label_fr + ', ';
+            }
+            this.tabPertur.push(typePer);
+          });
+        }
 
         let fullNameObs;
         this.tabObserver = [];
@@ -94,19 +98,21 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           this.tabObserver.push(fullNameObs);
         });
 
-        this.date = element.visit_date;
+        this.date = element.visit_date_min;
         this.idSite = element.id_base_site;
 
-        this._api.getMaille(this.idSite, { id_area_type: 203 }).subscribe(data => {
-          // affiche les mailles sur la carte
-          //  console.log(data)
-          this.zps = data;
-          this.storeService.total = data.features.length;
-          this.storeService.getMailleNoVisit();
-          this.geojson.currentGeoJson$.subscribe(currentLayer => {
-            this.mapService.map.fitBounds(currentLayer.getBounds());
+        this._api
+          .getMaille(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
+          .subscribe(data => {
+            console.log('je veux data ', data);
+
+            this.zps = data;
+            this.storeService.total = data.features.length;
+            this.storeService.getMailleNoVisit();
+            this.geojson.currentGeoJson$.subscribe(currentLayer => {
+              this.mapService.map.fitBounds(currentLayer.getBounds());
+            });
           });
-        });
 
         this._api.getInfoSite(this.idSite).subscribe(info => {
           this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
@@ -124,13 +130,15 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
             let pres = 0;
             let abs = 0;
 
-            visit.cor_visit_grid.forEach(maille => {
-              if (maille.presence) {
-                pres += 1;
-              } else {
-                abs += 1;
-              }
-            });
+            if (visit.cor_visit_grid !== undefined) {
+              visit.cor_visit_grid.forEach(maille => {
+                if (maille.presence) {
+                  pres += 1;
+                } else {
+                  abs += 1;
+                }
+              });
+            }
 
             visit.state = pres + 'P / ' + abs + 'A ';
           });
@@ -146,15 +154,17 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   }
 
   onEachFeature(feature, layer) {
-    this.visitGrid.forEach(maille => {
-      if (maille.id_area == feature.id) {
-        if (maille.presence) {
-          layer.setStyle(this.storeService.myStylePresent);
-        } else {
-          layer.setStyle(this.storeService.myStyleAbsent);
+    if (this.visitGrid !== undefined) {
+      this.visitGrid.forEach(maille => {
+        if (maille.id_area == feature.id) {
+          if (maille.presence) {
+            layer.setStyle(this.storeService.myStylePresent);
+          } else {
+            layer.setStyle(this.storeService.myStyleAbsent);
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   onEditHere() {
