@@ -13,7 +13,7 @@
             <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
                <i class="fa fa-info-circle"> </i> Informations générales </a>
          </li>
-         <li class="nav-item">
+         <li class="nav-item" *ngIf="show">
             <a class="nav-link" data-toggle="tab" href="#details" role="tab">
                <i class="fa fa-search police"> </i> Détails </a>
          </li>
@@ -30,7 +30,7 @@
 
          <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
             <p> <span> Nom du site : </span> <span class="strong"> {{nomSite}} </span></p>
-            <p> <span> Description du site : </span> <span class="strong"> </span></p>
+            <p> <span> Description du site : </span> <span class="strong"> {{descriSite}} </span></p>
          </div>
       </div>
 

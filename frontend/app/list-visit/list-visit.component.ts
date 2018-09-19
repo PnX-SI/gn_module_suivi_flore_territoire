@@ -24,7 +24,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   public visitGrid: FormGroup;
   public idVisit;
   public rows = [];
-
+  public show = false;
   public nomCommune;
   public nomSite;
   public descriSite;
@@ -46,12 +46,14 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
     this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
-      console.log('my zp ', info);
-
       info.features.forEach(el => {
-        console.log('my com ', el);
         this.nomSite = el.properties.base_site.base_site_name;
         this.descriSite = el.properties.base_site.base_site_description;
+
+        if (this.descriSite !== '' || this.nomSite !== '') {
+          // masquer bloc 'détail' si les champs Nom et Description sont vides
+          this.show = true;
+        }
         this.nomCommune = el.properties.nom_commune;
       });
     });
@@ -59,14 +61,10 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this._api
       .getMaille(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
       .subscribe(nbMaille => {
-        console.log('je veux nbMaille ', nbMaille);
-
         this.storeService.total = nbMaille.features.length;
       });
 
     this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
-      console.log('mes data ', data);
-
       data.forEach(visit => {
         let fullName;
         visit.observers.forEach(obs => {
