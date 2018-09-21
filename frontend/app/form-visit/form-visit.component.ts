@@ -91,8 +91,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         let typePer;
         let tabVisitPerturb = element.cor_visit_perturbation;
 
-        console.log('là là ', tabVisitPerturb);
-
         if (tabVisitPerturb !== undefined) {
           tabVisitPerturb.forEach(per => {
             if (per === tabVisitPerturb[tabVisitPerturb.length - 1]) {
@@ -116,8 +114,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           }
           this.tabObserver.push(fullNameObserver);
         });
-
-        console.log('laa ', this.date);
 
         this.modifGrid.patchValue({
           id_base_site: this.idSite,

@@ -184,7 +184,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onDeleteParams(param: string, value) {
-    // effacer le queryString pour télécharger (de filtre)
+    // effacer le queryString (de filtre)pour télécharger
     this.storeService.queryString = this.storeService.queryString.delete(param, value);
   }
 }
