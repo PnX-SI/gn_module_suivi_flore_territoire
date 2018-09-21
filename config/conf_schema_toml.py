@@ -38,7 +38,7 @@ class GnModuleSchemaConf(GnModuleProdConf):
     export_available_format = fields.List(fields.String(), missing=available_export_format)
     default_zp_columns = fields.List(fields.Dict(), missing=default_maplist_zp_columns)
     default_list_visit_columns = fields.List(fields.Dict(), missing=default_list_visit_columns)
-    id_type_maille = fields.Integer(missing=10011)
+    id_type_maille = fields.Integer(missing=10013)
     id_type_commune = fields.Integer(missing=101)
     id_menu_list_user = fields.Integer(missing=10)
     id_list_taxon = fields.Integer(missing=500)
