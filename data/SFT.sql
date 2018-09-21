@@ -120,7 +120,7 @@ JOIN gn_monitoring.cor_site_area cor ON cor.id_base_site = sites.id_base_site
 JOIN gn_monitoring.t_base_visits visits ON sites.id_base_site = visits.id_base_site
 LEFT JOIN pr_monitoring_flora_territory.cor_visit_grid grid ON grid.id_area = cor.id_area AND grid.id_base_visit = visits.id_base_visit
 JOIN observers obs ON obs.id_base_visit = visits.id_base_visit
-JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
+LEFT JOIN perturbations per ON per.id_base_visit = visits.id_base_visit
 JOIN area ON area.id_base_site = sites.id_base_site
 JOIN pr_monitoring_flora_territory.t_infos_site info ON info.id_base_site = sites.id_base_site
 JOIN taxonomie.taxref taxon ON taxon.cd_nom = info.cd_nom

@@ -35,6 +35,5 @@ ALTER TABLE ONLY ref_geo.li_grids ADD CONSTRAINT fk_li_grids_id_area FOREIGN KEY
       ON UPDATE CASCADE ON DELETE CASCADE;
        
 
-DELETE FROM ref_geo.bib_areas_types where type_code='m25';
+DELETE FROM ref_geo.bib_areas_types where type_code='M25m';
 
-DROP FUNCTION IF EXISTS ref_geo.get_id_area_type(character varying);
