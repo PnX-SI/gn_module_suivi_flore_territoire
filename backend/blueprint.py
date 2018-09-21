@@ -1,28 +1,29 @@
 import datetime
 import time
 
+
 from flask import Blueprint, request, session, current_app, send_from_directory
 from sqlalchemy.sql.expression import func
 from geojson import FeatureCollection, Feature
 from geoalchemy2.shape import to_shape
-
-from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
-from geonature.utils.env import DB, ROOT_DIR
-from geonature.utils.utilsgeometry import FionaShapeService
-
-from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
-from .repositories import check_user_cruved_visit, check_year_visit
-from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
-from geonature.core.ref_geo.models import LAreas
 
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
 from pypnusershub.db.tools import (
     InsufficientRightsError,
     get_or_fetch_user_cruved,
 )
-from pypnusershub import routes as fnauth
 
+from pypnusershub import routes as fnauth
+from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
+from geonature.utils.env import DB, ROOT_DIR
+from geonature.utils.utilsgeometry import FionaShapeService
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
+from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import TRoles, BibOrganismes
+
+from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
+from .repositories import check_user_cruved_visit, check_year_visit
+
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
 
@@ -236,6 +237,30 @@ def post_visit(info_role):
     return visit.as_dict(recursif=True)
 
 
+#   id_area = DB.Column(
+#         DB.Integer,
+#         primary_key=True
+#     )
+#     id_base_visit = DB.Column(
+#         DB.Integer,
+#         primary_key=True
+#     )
+#     id_base_site = DB.Column(DB.Integer)
+#     uuid_base_visit = DB.Column(UUID(as_uuid=True))
+#     visit_date_min = DB.Column(DB.DateTime)
+#     comments = DB.Column(DB.Unicode)
+#     geom = DB.Column(Geometry('GEOMETRY', 2154))
+#     presence = DB.Column(DB.Boolean)
+#     label_perturbation = DB.Column(DB.Unicode)
+#     observateurs = DB.Column(DB.Unicode)
+#     organisme = DB.Column(DB.Unicode)
+#     base_site_name = DB.Column(DB.Unicode)
+#     nom_valide = DB.Column(DB.Unicode)
+#     cd_nom = DB.Column(DB.Integer)
+#     area_name = DB.Column(DB.Unicode)
+#     id_type = DB.Column(DB.Integer)
+
+
 @blueprint.route('/export_visit', methods=['GET'])
 def export_visit():
     '''
@@ -311,17 +336,20 @@ def export_visit():
         )
 
     else:
-        print('LAAA')
 
         dir_path = str(ROOT_DIR / 'backend/static/shapefiles')
 
-        ExportVisits.as_shape(
-            geom_col='geom',
+        FionaShapeService.create_shapes_struct(
+            db_cols=ExportVisits.__mapper__.c,
+            srid=2154,
             dir_path=dir_path,
-            srid=blueprint.config['export_srid'],
-            data=data,
-            file_name=file_name
+            file_name=file_name,
         )
+
+        for row in data:
+            FionaShapeService.create_feature(row.as_dict(), row.geom)
+
+        FionaShapeService.save_and_zip_shapefiles()
 
         return send_from_directory(
             dir_path,

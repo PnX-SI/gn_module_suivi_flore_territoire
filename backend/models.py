@@ -11,7 +11,7 @@ from geonature.utils.utilssqlalchemy import (
     GenericQuery,
 )
 from geonature.utils.utilsgeometry import shapeserializable
-
+from geonature.core.gn_synthese.models import synthese_export_serialization
 from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisitObserver
 from geonature.core.ref_geo.models import LAreas
 from pypnnomenclature.models import TNomenclatures
@@ -182,3 +182,4 @@ class ExportVisits(DB.Model):
     nom_valide = DB.Column(DB.Unicode)
     cd_nom = DB.Column(DB.Integer)
     area_name = DB.Column(DB.Unicode)
+    id_type = DB.Column(DB.Integer)
