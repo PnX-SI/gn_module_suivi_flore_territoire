@@ -8,11 +8,11 @@ VALUES (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'ZP', 'Zone de 
 -- ATTENTION: il faut que le zp_tmp.shp soit en 2154, sinon ça donne des erreurs pour afficher les Zp.  
 INSERT INTO gn_monitoring.t_base_sites
 (id_nomenclature_type_site, base_site_name, base_site_description,  base_site_code, first_use_date, geom )
-SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), 'zp', '', id, '01-01-2018', ST_TRANSFORM(ST_SetSRID(geom, MY_SRID_LOCAL), MY_SRID_WORLD)
+SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), '', '', id, '01-01-2018', ST_TRANSFORM(ST_SetSRID(geom, MY_SRID_LOCAL), MY_SRID_WORLD)
 FROM pr_monitoring_flora_territory.zp_tmp;
 
 --- update le nom du site
-UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, id_base_site); 
+-- UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, id_base_site); 
 
 -- extension de la table t_base_sites : mettre les données dans t_infos_site
 INSERT INTO pr_monitoring_flora_territory.t_infos_site (id_base_site, cd_nom)

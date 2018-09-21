@@ -113,7 +113,8 @@ SELECT sites.id_base_site, cor.id_area, visits.id_base_visit, grid.presence, vis
     sites.base_site_name,
     taxon.nom_valide,
     taxon.cd_nom,
-    area.area_name    
+    area.area_name,
+    ar.id_type
 FROM gn_monitoring.t_base_sites sites
 JOIN gn_monitoring.cor_site_area cor ON cor.id_base_site = sites.id_base_site
 JOIN gn_monitoring.t_base_visits visits ON sites.id_base_site = visits.id_base_site
@@ -124,6 +125,7 @@ JOIN area ON area.id_base_site = sites.id_base_site
 JOIN pr_monitoring_flora_territory.t_infos_site info ON info.id_base_site = sites.id_base_site
 JOIN taxonomie.taxref taxon ON taxon.cd_nom = info.cd_nom
 JOIN ref_geo.l_areas ar ON ar.id_area = cor.id_area
+WHERE ar.id_type=ref_geo.get_id_area_type('M25m')
 ORDER BY visits.id_base_visit;
 
 ------------
