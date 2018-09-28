@@ -18,7 +18,7 @@ Installation
 * Installez GeoNature (https://github.com/PnX-SI/GeoNature)
 * Téléchargez la dernière version stable du module (``wget https://github.com/PnX-SI/gn_module_suivi_flore_territoire/archive/X.Y.Z.zip``) dans ``/home/myuser/``
 * Dézippez la dans ``/home/myuser/`` (``unzip X.Y.Z.zip``)
-* Créez et adaptez le fichier ``config/settings.ini`` à partir de ``config/settings.ini.sample``
+* Créez et adaptez le fichier ``config/settings.ini`` à partir de ``config/settings.ini.sample`` (``cp config/settings.ini.sample config/settings.ini``)
 * Copiez les fichiers SHP d'exemple de ZP et de mailles (présents dans le répertoire ``data/sample``) dans le répertoire ``/tmp`` ou mettez-y les votres en leur donnant le même nom et la même structure (en SRID 2154)
 * Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes ``source venv/bin/activate`` puis ``geonature install_gn_module <mon_chemin_absolu_vers_le_module> <url_relative_du_module>`` (exemple ``geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /suivi_flore_territoire``)
 * Configurez le module en modifiant son fichier ``config/gn_module_config.toml`` à partir du fichier ``config/conf_gn_module.toml.example``
