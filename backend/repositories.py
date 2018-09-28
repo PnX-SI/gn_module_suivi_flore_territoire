@@ -58,8 +58,9 @@ def check_user_cruved_visit(user, visit, cruved_level):
 
 def check_year_visit(id_base_site, new_visit_date):
     """
-    Check if there is already a visit of the same year,
-    if yes, observer is not allowed to post the new visit 
+    Check if there is already a visit of the same year.
+    If yes, observer is not allowed to post the new visit
+
     """
     q_year = DB.session.query(
         func.date_part('year', TBaseVisits.visit_date_min)).filter(
