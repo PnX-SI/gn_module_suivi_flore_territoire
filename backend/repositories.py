@@ -71,7 +71,8 @@ def check_year_visit(id_base_site, new_visit_date):
     for y in tab_old_year:
         year_old_visit = str(int(y[0]))
         if year_old_visit == year_new_visit:
+            DB.session.rollback()
             raise PostYearError(
-                ('ZP "{}" has already been visited in {} ')
+                ('ZP {} has already been visited in {} ')
                 .format(id_base_site, year_old_visit),
                 403)
