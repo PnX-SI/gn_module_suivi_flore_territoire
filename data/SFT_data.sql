@@ -23,7 +23,6 @@ JOIN pr_monitoring_flora_territory.zp_tmp zp ON zp.id::character varying = bs.ba
 --TODO--
 -- parametrer ref_geo.bib_areas_types -- 
 -- créer les mailles 25*25 
--- ATTENTION: 203 EST ACTUELLEMENT RENTRÉ EN DUR 
 INSERT INTO ref_geo.bib_areas_types (type_name, type_code, type_desc)
 VALUES ('Mailles25*25m', 'M25m', 'Maille INPN redécoupé en 25m');
 
