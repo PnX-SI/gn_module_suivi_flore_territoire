@@ -155,13 +155,7 @@ def get_visits():
     if 'id_base_site' in parameters:
         q = q.filter(TVisiteSFT.id_base_site == parameters['id_base_site'])
     data = q.all()
-    # return data.as_dict()
     return [d.as_dict(True) for d in data]
-
-    # mydata = []
-    # for d in dat:
-    #     mydata.append(d.as_dict(True))
-    # return mydata
 
 
 @blueprint.route('/test', methods=['GET'])
@@ -188,17 +182,16 @@ def post_visit(info_role):
     '''
     Poste une nouvelle visite ou éditer une ancienne
     '''
-
     data = dict(request.get_json())
+    check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
+
     try:
         tab_perturbation = data.pop('cor_visit_perturbation')
     except:
-        print('pas de perturbation')
+        pass
     tab_visit_grid = data.pop('cor_visit_grid')
     tab_observer = data.pop('cor_visit_observer')
     visit = TVisiteSFT(**data)
-    print(data)
-
     visit.as_dict(True)
     # pour que visit prenne en compte des relations
     # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
@@ -208,7 +201,7 @@ def post_visit(info_role):
         for per in perturs:
             visit.cor_visit_perturbation.append(per)
     except:
-        print('pas de perturbation')
+        pass
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
@@ -228,43 +221,17 @@ def post_visit(info_role):
         check_user_cruved_visit(info_role, visit, update_cruved)
         DB.session.merge(visit)
     else:
-        check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
         DB.session.add(visit)
+
     DB.session.commit()
-    # print(visit.as_dict(recursif=True))
 
-    print('toto ')
     return visit.as_dict(recursif=True)
-
-
-#   id_area = DB.Column(
-#         DB.Integer,
-#         primary_key=True
-#     )
-#     id_base_visit = DB.Column(
-#         DB.Integer,
-#         primary_key=True
-#     )
-#     id_base_site = DB.Column(DB.Integer)
-#     uuid_base_visit = DB.Column(UUID(as_uuid=True))
-#     visit_date_min = DB.Column(DB.DateTime)
-#     comments = DB.Column(DB.Unicode)
-#     geom = DB.Column(Geometry('GEOMETRY', 2154))
-#     presence = DB.Column(DB.Boolean)
-#     label_perturbation = DB.Column(DB.Unicode)
-#     observateurs = DB.Column(DB.Unicode)
-#     organisme = DB.Column(DB.Unicode)
-#     base_site_name = DB.Column(DB.Unicode)
-#     nom_valide = DB.Column(DB.Unicode)
-#     cd_nom = DB.Column(DB.Integer)
-#     area_name = DB.Column(DB.Unicode)
-#     id_type = DB.Column(DB.Integer)
 
 
 @blueprint.route('/export_visit', methods=['GET'])
 def export_visit():
     '''
-    Télécharger les données d'une visite (ou des visites )
+    Télécharge les données d'une visite (ou des visites )
     '''
 
     parameters = request.args
