@@ -27,7 +27,7 @@
 
     <div class=" list-group-item modif">
       <div> <i class="fa fa-hourglass-2" style="font-size:18px"> Date de la visite : </i> </div>
-      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
         <pnx-date [parentFormControl]="modifGrid.controls.visit_date_min"> </pnx-date>
       </div>
 
@@ -36,7 +36,7 @@
 
     <div class=" list-group-item">
       <div> <i class="fa fa-group" style="font-size:18px"> Observateur : </i> </div>
-      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 padding-sm form" id="newObserver" requir>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form" id="newObserver" requir>
         <pnx-observers [parentFormControl]="modifGrid.controls.cor_visit_observer" [bindAllItem]="true" [idMenu]="storeService.sftConfig.id_menu_list_user">
         </pnx-observers>
       </div>
@@ -47,7 +47,7 @@
     <div class=" list-group-item">
       <div> <i class="fa fa-warning" style="font-size:18px"> Type(s) de perturbations : </i> </div>
 
-      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form" id="newPerturs">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form" id="newPerturs">
         <pnx-nomenclature [parentFormControl]="modifGrid.controls.cor_visit_perturbation" [multiSelect]="true" keyValue="id_nomenclature"
           [bindAllItem]="true" keyLabel="label_default" codeNomenclatureType="TYPE_PERTURBATION">
         </pnx-nomenclature>
@@ -113,15 +113,14 @@
       </ng-template>
 
 
-      <button class="btn btn-primary btn-sm droite" (click)="onModif()" [disabled]=" modifGrid.invalid "> Enregistrer les
+      <button class="btn btn-success btn-sm droite" (click)="onModif()" [disabled]=" modifGrid.invalid "> Enregistrer les
         modifications </button>
 
-      <button class=" btn btn-success btn-sm droite " (click)="onVisual() "> Visualiser les visites précédentes</button>
+      <button class="btn btn-primary btn-sm droite" (click)="onVisual() "> Visualiser les visites précédentes</button>
 
 
 
     </div>
 
-    <!-- {{modifGrid.value |json}} -->
   </div>
 </div>

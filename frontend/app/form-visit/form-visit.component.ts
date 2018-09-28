@@ -62,8 +62,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     // récupère nom de l'espèce
 
     this._api.getInfoSite(this.idSite).subscribe(info => {
-      console.log('mes infos ', info);
-
       this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
         this.nomTaxon = taxon.nom_valide;
       });
@@ -72,8 +70,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     // vérifie s'il existe idVisit --> c' une modif
     if (this.idVisit !== undefined) {
       this._api.getOneVisit(this.idVisit).subscribe(element => {
-        console.log('mes éléments ', element);
-
         this.visitGrid = element.cor_visit_grid;
         this.storeService.presence = 0;
         this.storeService.absence = 0;
@@ -246,11 +242,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       return obs.id_role;
     });
 
-    console.log('toto ', formModif['cor_visit_perturbation']);
-
-    if (formModif['cor_visit_perturbation'] !== undefined) {
-      console.log('rentre iiccci');
-
+    if (
+      formModif['cor_visit_perturbation'] !== null &&
+      formModif['cor_visit_perturbation'] !== undefined
+    ) {
       formModif['cor_visit_perturbation'] = formModif['cor_visit_perturbation'].map(
         pertu => pertu.id_nomenclature
       );
@@ -260,20 +255,27 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     this._api.postVisit(formModif).subscribe(
       data => {
-        this.toastr.success('Visite modifiée', '', {
+        this.toastr.success('Visite enregistrée', '', {
           positionClass: 'toast-top-center'
         });
-        // setTimeout(
-        //   () => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]),
-        //   1000
-        // );
+        setTimeout(
+          () => this.router.navigate([`${ModuleConfig.api_url}/listVisit`, this.idSite]),
+          1000
+        );
       },
       error => {
         if (error.status === 403) {
           if (error.error.raisedError === 'PostYearError') {
-            this.toastr.warning('Une visite a été déjà effectuée sur cette année ', '', {
-              positionClass: 'toast-top-center'
-            });
+            this.toastr.warning(
+              'Veuillez éditez une ancienne visite ou réactualisez la page pour saisir une nouvelle. ',
+              'Visite Existée Pour Cette Année!',
+              {
+                positionClass: 'toast-top-center'
+              },
+              {
+                timeOut: 5000
+              }
+            );
           } else {
             this._commonService.translateToaster('error', 'NotAllowed');
           }
