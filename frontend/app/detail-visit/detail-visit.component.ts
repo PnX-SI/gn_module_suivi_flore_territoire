@@ -104,8 +104,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
         this._api
           .getMaille(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
           .subscribe(data => {
-            console.log('je veux data ', data);
-
             this.zps = data;
             this.storeService.total = data.features.length;
             this.storeService.getMailleNoVisit();
