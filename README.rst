@@ -23,6 +23,7 @@ Installation
 * Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes ``source venv/bin/activate`` puis ``geonature install_gn_module <mon_chemin_absolu_vers_le_module> <url_relative_du_module>`` (exemple ``geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /suivi_flore_territoire``)
 * Configurez le module en modifiant son fichier ``config/gn_module_config.toml`` à partir du fichier ``config/conf_gn_module.toml.example``
 * Lancez la génération de la configuration avec le commande ``geonature update_module_configuration suivi_flore_territoire``
+* Complétez la configuration du module (``config/conf_gn_module.toml`` à partir des paramètres présents dans ``config/conf_schema_toml.py`` dont vous pouvez surcoucher les valeurs par défaut
 
 Licence
 =======
