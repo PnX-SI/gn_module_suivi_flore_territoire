@@ -4,6 +4,7 @@ import time
 
 from flask import Blueprint, request, session, current_app, send_from_directory
 from sqlalchemy.sql.expression import func
+from sqlalchemy import and_, distinct
 from geojson import FeatureCollection, Feature
 from geoalchemy2.shape import to_shape
 
@@ -43,29 +44,36 @@ def get_sites_zp():
             TInfoSite,
             func.max(TBaseVisits.visit_date_min),
             Taxonomie.nom_complet,
-            func.count(TBaseVisits.id_base_visit),
-            BibOrganismes.nom_organisme,
-            LAreas.area_name
+            func.count(distinct(TBaseVisits.id_base_visit)),
+            func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
+            func.string_agg(LAreas.area_name, ', ')
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
-        ).join(
-            Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom).outerjoin(
-            corVisitObserver, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
+        # get taxonomy lb_nom
+        ).outerjoin(
+            Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom
+        # get organisms of a site
+        ).outerjoin(
+            corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
         ).outerjoin(
             TRoles, TRoles.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().outerjoin(
-                corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site).outerjoin(
-                    LAreas, LAreas.id_area == corSiteArea.c.id_area).filter(LAreas.id_type == id_type_commune).group_by(
-                        TInfoSite, Taxonomie.nom_complet, BibOrganismes.nom_organisme, LAreas.area_name
-        ))
+            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
+        )
+        # get municipalities of a site
+        .outerjoin(
+            corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site
+        ).outerjoin(
+            LAreas, and_(LAreas.id_area == corSiteArea.c.id_area, LAreas.id_type == id_type_commune)
+        )
+        .group_by(
+            TInfoSite, Taxonomie.nom_complet
+        )
+    )
 
     if 'id_base_site' in parameters:
         q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-    if 'id_application' in parameters:
-        q = q.join(
-            corSiteApplication, corSiteApplication.c.id_base_site == TInfoSite.id_base_site
-        ).filter(corSiteApplication.c.id_application == parameters['id_application'])
+
     if 'cd_nom' in parameters:
         q = q.filter(TInfoSite.cd_nom == parameters['cd_nom'])
     if 'organisme' in parameters:
@@ -80,14 +88,12 @@ def get_sites_zp():
                 func.max(TBaseVisits.visit_date_min),
             ).outerjoin(
                 TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
-            )
-            .group_by(TInfoSite.id_base_site)
+            ).group_by(TInfoSite.id_base_site)
         )
 
         data_year = q_year.all()
 
         q = q.filter(func.date_part('year', TBaseVisits.visit_date_min) == parameters['year'])
-
     data = q.all()
 
     features = []
@@ -367,7 +373,6 @@ def get_organisme():
     data = q.all()
     tab_orga = []
     for d in data:
-        print("et mon d ", d)
         info_orga = dict()
         info_orga['nom_organisme'] = str(d[0])
         info_orga['observer'] = str(d[1]) + ' ' + str(d[2])
