@@ -31,9 +31,12 @@ sudo sed -i "s/MY_SRID_WORLD/$srid_world/g" /tmp/data_suivi_territoire.sql
 export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/suivi_territoire.sql &>> var/log/install_sft.log
 
 # Include sample data into database
-sudo -n -u postgres -s shp2pgsql -W "UTF-8" -s 2154 -D -I /tmp/mailles.shp pr_monitoring_flora_territory.maille_tmp | psql -h $db_host -U $user_pg -d $db_name &>> var/log/install_sft.log
-sudo -n -u postgres -s shp2pgsql -W "UTF-8" -s 2154 -D -I /tmp/zp.shp pr_monitoring_flora_territory.zp_tmp | psql -h $db_host -U $user_pg -d $db_name &>> var/log/install_sft.log
-export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/data_suivi_territoire.sql &>>  var/log/install_sft.log
+if $insert_sample_data
+then
+    sudo -n -u postgres -s shp2pgsql -W "UTF-8" -s 2154 -D -I /tmp/mailles.shp pr_monitoring_flora_territory.maille_tmp | psql -h $db_host -U $user_pg -d $db_name &>> var/log/install_sft.log
+    sudo -n -u postgres -s shp2pgsql -W "UTF-8" -s 2154 -D -I /tmp/zp.shp pr_monitoring_flora_territory.zp_tmp | psql -h $db_host -U $user_pg -d $db_name &>> var/log/install_sft.log
+    export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/data_suivi_territoire.sql &>>  var/log/install_sft.log
+fi
 
 # Remove temporary files
 rm /tmp/suivi_territoire.sql
