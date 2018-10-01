@@ -1,6 +1,8 @@
-id_module_suivi_flore_territoire=MY_ID_MODULE
+##########################
+# Database configuration #
+##########################
 
-
+# PostgreSQL host
 db_host=localhost
 
 # PostgreSQL port
@@ -13,8 +15,14 @@ db_name=geonature2db
 user_pg=geonatuser
 
 # GeoNature database owner password
-user_pg_pass=mon_pass
+user_pg_pass=my_password
 
+###########################
+# Data SRID configuration #
+###########################
+
+# GeoNature local SRID
 srid_local=2154
 
+# World SRID (Don't change it)
 srid_world=4326
