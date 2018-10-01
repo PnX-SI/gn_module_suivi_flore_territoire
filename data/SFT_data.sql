@@ -59,7 +59,16 @@ JOIN pr_monitoring_flora_territory.zp_tmp zp ON zp.id::character varying = bs.ba
 
 
 -- Insérer dans cor_site_application les sites suivis de ce module
+-- INSERT INTO gn_monitoring.cor_site_application 
+-- SELECT  bs.id_base_site, MY_ID_MODULE
+-- FROM gn_monitoring.t_base_sites bs
+-- JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;
+                                                                                                                          
+-- Insérer dans cor_site_application les sites suivis de ce module
 INSERT INTO gn_monitoring.cor_site_application 
-SELECT  bs.id_base_site, MY_ID_MODULE
-FROM gn_monitoring.t_base_sites bs
-JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;
+WITH idapp AS(
+SELECT id_application FROM utilisateurs.t_applications
+WHERE nom_application = 'suivi_flore_territoire'
+)
+SELECT ti.id_base_site, idapp.id_application
+FROM pr_monitoring_flora_territory.t_infos_site ti, idapp;
