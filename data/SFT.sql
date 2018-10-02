@@ -143,13 +143,21 @@ ORDER BY visits.id_base_visit;
 -- DATA -----
 --------------
 
--- créer nomenclature des perturbations-- 
+-- Créer la liste des taxons suivis dans le protocoles SFT
+INSERT INTO taxonomie.bib_listes (id_liste, nom_liste, desc_liste, regne, group2_inpn) 
+VALUES (30, 'Suivi Flore Territoire', 'Taxons suivis dans le protocole Suivi Flore Territoire', 'Plantae', 'Angiospermes')
+
+-- Insérer les taxons suivis dans le protocole SFT dans bib_noms et les ajouter dans la liste SFT
+INSERT INTO taxonomie.bib_noms (cd_nom, cd_ref, nom_francais) VALUES (97133, 97133, 'Reine des Alpes, Chardon bleu'); -- Eryngium Alpinum
+INSERT INTO cor_nom_liste (id_nom, id_liste) VALUES ((SELECT max(id_nom) FROM taxonomie.bib_noms), 30);
+INSERT INTO taxonomie.bib_noms (cd_nom, cd_ref, nom_francais) VALUES (115458, 115458, 'Potentille du Dauphiné'); -- Potentille du Dauphine
+INSERT INTO cor_nom_liste (id_nom, id_liste) VALUES ((SELECT max(id_nom) FROM taxonomie.bib_noms), 30);
+
+-- Créer la nomenclature des perturbations-- 
 INSERT INTO ref_nomenclatures.bib_nomenclatures_types (mnemonique, label_default, definition_default, label_fr, definition_fr, source)
     VALUES ('TYPE_PERTURBATION', 'Type de perturbations', 'Nomenclature des types de perturbations.', 'Type de perturbations', 'Nomenclatures des types de perturbations.', 'CBNA');
 
-
-
--- insérer les types de perturbations --
+-- Insérer les types de perturbations --
 -- TODO: problème id_broader ??
 INSERT INTO ref_nomenclatures.t_nomenclatures (id_type, cd_nomenclature, mnemonique, label_default, definition_default, label_fr, definition_fr, id_broader, hierarchy) VALUES 
 (ref_nomenclatures.get_id_nomenclature_type('TYPE_PERTURBATION'), 'GeF', 'Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 'Gestion par le feu', 'Type de perturbation: Gestion par le feu', 0, '118.001'),
