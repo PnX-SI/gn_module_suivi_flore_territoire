@@ -20,6 +20,11 @@ DELETE FROM ref_nomenclatures.t_nomenclatures where cd_nomenclature='ZP';
 DELETE FROM gn_monitoring.cor_site_area;
 
 -- Supprimer mailles 25*25
+
+DELETE FROM ref_geo.li_grids WHERE id_area IN (SELECT id_area FROM ref_geo.l_areas WHERE id_type = 32);
+DELETE FROM ref_geo.l_areas WHERE id_type = 32;
+
+
 ALTER TABLE ref_geo.l_areas  DROP CONSTRAINT fk_l_areas_id_type ; 
 
 
