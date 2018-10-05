@@ -31,3 +31,18 @@ Intrégrer les ZP
   JOIN pr_monitoring_flora_territory.zp_tmp2 zp ON zp.idzp::character varying = bs.base_site_code;
 
 La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger pour indiquer les communes et mailles 25m de chaque ZP
+
+Intrégrer les visites
+---------------------
+
+* Importer le CSV dans une table temporaire de la BDD avec QGIS (``pr_monitoring_flora_territory.obs_maille_tmp`` dans cet exemple)
+* Identifier les organismes présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT organismes FROM pr_monitoring_flora_territory.obs_maille_tmp``
+* Identifier les observateurs présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT observateu FROM pr_monitoring_flora_territory.obs_maille_tmp``
+* Remplissez la table des visites : 
+
+.. code:: sql
+
+  INSERT INTO gn_monitoring.t_base_visits (id_base_site, visit_date_min, visit_date_max)
+  SELECT DISTINCT s.id_base_site, replace(date_deb,'/','-')::date AS date_debut, replace(date_fin,'/','-')::date AS date_fin
+  FROM pr_monitoring_flora_territory.obs_maille_tmp o
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
