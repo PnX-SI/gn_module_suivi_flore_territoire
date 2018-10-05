@@ -7,6 +7,14 @@ id_application = 7
 
 # Paramètres du module
 
+zoom_center = [44.982667966765845, 6.062455200884894]
+
+id_type_maille = 32
+id_type_commune = 25
+id_menu_list_user = 1
+id_list_taxon = 30
+export_srid = 2154
+
 export_available_format = ['geojson', 'csv', 'shapefile']
 
 zp_message = {emptyMessage = "Aucune zone à afficher ", totalMessage = "zone(s) de prospection au total"}
@@ -26,11 +34,3 @@ default_list_visit_columns = [
     { name = "Observateur(s)", prop = "observers"},
     { name = "Présence/ Absence ?", prop = "state"}
 ]
-
-zoom_center = [44.982667966765845, 6.062455200884894]
-
-id_type_maille = 32
-id_type_commune = 25
-id_menu_list_user = 1
-id_list_taxon = 30
-export_srid = 2154
