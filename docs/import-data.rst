@@ -37,7 +37,8 @@ Intrégrer les visites
 
 * Importer le CSV dans une table temporaire de la BDD avec QGIS (``pr_monitoring_flora_territory.obs_maille_tmp`` dans cet exemple)
 * Identifier les organismes présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT organismes FROM pr_monitoring_flora_territory.obs_maille_tmp``
-* Identifier les observateurs présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT observateu FROM pr_monitoring_flora_territory.obs_maille_tmp``
+* Identifier les observateurs présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT observateu FROM pr_monitoring_flora_territory.obs_maille_tmp`` ou mieux ``SELECT DISTINCT unnest(string_to_array(observateu, '|')) AS observateurs FROM pr_monitoring_flora_territory.obs_maille_tmp ORDER BY observateurs``
+* Corriger le nom mal formaté : ``UPDATE pr_monitoring_flora_territory.obs_maille_tmp SET observateu = replace(observateu, 'PARCHOUX|Franck', 'PARCHOUX Franck');``
 * Remplissez la table des visites : 
 
 .. code:: sql
@@ -46,3 +47,37 @@ Intrégrer les visites
   SELECT DISTINCT s.id_base_site, replace(date_deb,'/','-')::date AS date_debut, replace(date_fin,'/','-')::date AS date_fin
   FROM pr_monitoring_flora_territory.obs_maille_tmp o
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
+  
+* Remplissez la table des observateurs (SQL à revoir) : 
+
+.. code:: sql
+
+   INSERT INTO gn_monitoring.cor_visit_observer
+       (id_base_visit, id_role)
+   WITH myuser AS(SELECT DISTINCT unnest(string_to_array(observateu, '|')) AS obs FROM pr_monitoring_flora_territory.obs_maille_tmp)
+   SELECT DISTINCT v.id_base_visit, role.id_role
+   FROM pr_monitoring_flora_territory.obs_maille_tmp o
+   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
+   JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
+   , myuser 
+   JOIN (SELECT r.nom_role ||' '|| r.prenom_role AS nom, r.id_role
+      FROM utilisateurs.t_roles AS r) as role
+      ON role.nom = myuser.obs
+  
+* Remplissez la table des observations : 
+
+.. code:: sql
+
+  INSERT INTO pr_monitoring_flora_territory.cor_visit_grid (id_area, id_base_visit, presence)
+  SELECT 
+  	id_area,  
+  	id_base_visit, 
+  	CASE
+       WHEN presence = 'na' THEN False
+       WHEN presence = 'pr' THEN True
+    END as presenceok
+  FROM pr_monitoring_flora_territory.obs_maille_tmp o
+  JOIN ref_geo.l_areas a ON a.area_name = o.cd25m
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
+  WHERE presence = 'na' OR presence = 'pr'
