@@ -48,7 +48,7 @@ Intrégrer les visites
   FROM pr_monitoring_flora_territory.obs_maille_tmp o
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
   
-* Remplissez la table des observateurs (SQL à revoir) : 
+* Remplissez la table des observateurs (SQL à revoir car il renvoie tous les observateurs pour toutes les visites) : 
 
 .. code:: sql
 
