@@ -26,14 +26,27 @@ Intrégrer les ZP
   UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, base_site_code);
 
   INSERT INTO pr_monitoring_flora_territory.t_infos_site (id_base_site, cd_nom)
-  SELECT id_base_site, zp.cd_nom
+  SELECT bs.id_base_site, zp.cd_nom
   FROM gn_monitoring.t_base_sites bs
-  JOIN pr_monitoring_flora_territory.zp_tmp2 zp ON zp.idzp::character varying = bs.base_site_code;
+  JOIN pr_monitoring_flora_territory.zp_tmp2 zp ON zp.idzp::character varying = bs.base_site_code
+  WHERE bs.id_nomenclature_type_site = ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP');
 
 La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger pour indiquer les communes et mailles 25m de chaque ZP
 
-Intrégrer les visites
----------------------
+Insérer les sites suivis de ce module dans ``cor_site_application``
+
+.. code:: sql
+
+  INSERT INTO gn_monitoring.cor_site_application 
+  WITH idapp AS(
+    SELECT id_application FROM utilisateurs.t_applications
+    WHERE nom_application = 'suivi_flore_territoire'
+  )
+  SELECT ti.id_base_site, idapp.id_application
+  FROM pr_monitoring_flora_territory.t_infos_site ti, idapp;
+
+Intégrer les visites
+--------------------
 
 * Importer le CSV dans une table temporaire de la BDD avec QGIS (``pr_monitoring_flora_territory.obs_maille_tmp`` dans cet exemple)
 * Identifier les organismes présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT organismes FROM pr_monitoring_flora_territory.obs_maille_tmp``
