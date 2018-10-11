@@ -16,6 +16,7 @@ fi
 
 # Copy SQL files into /tmp system folder in order to edit it with variables
 cp data/SFT.sql /tmp/suivi_territoire.sql
+cp data/SFT_perturbations.sql /tmp/perturbations_suivi_territoire.sql
 cp data/SFT_data.sql /tmp/data_suivi_territoire.sql
 # copie le fichier SFT.sql et SFT_data.sql dans tmp
 sudo sed -i "s/MY_SRID_WORLD/$srid_world/g" /tmp/suivi_territoire.sql
@@ -29,6 +30,8 @@ sudo sed -i "s/MY_SRID_WORLD/$srid_world/g" /tmp/data_suivi_territoire.sql
 
 # Create SFT schema into GeoNature database
 export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/suivi_territoire.sql &>> var/log/install_sft.log
+# Create perturbations list into nomenclatures schema
+export PGPASSWORD=$user_pg_pass;psql -h $db_host -U $user_pg -d $db_name -f /tmp/perturbations_suivi_territoire.sql &>> var/log/install_sft.log
 
 # Include sample data into database
 if $insert_sample_data
