@@ -1,18 +1,13 @@
 <div class="row row-0">
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-    <pnx-map height="95vh" [center]="storeService.sftConfig.zoom_center" [zoom]="12">
+    <pnx-map height="94vh" [center]="storeService.sftConfig.zoom_center" [zoom]="12">
       <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
       </pnx-geojson>
     </pnx-map>
   </div>
 
-
-
-
-
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container ">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
     <h3> Zones de prospection</h3>
-
 
     <div id="blocSearch" class="row row-0 ">
       <div class="searchZP">
@@ -22,21 +17,16 @@
         <!-- <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch"> -->
       </div>
 
-
       <div class="searchZP">
         <small> Année de visite </small>
         <input type="number" [formControl]="filtreForm.controls.filtreYear" class="inputSearch" (onDeleteFiltre)="onDelete()">
       </div>
-
-
 
       <div class="searchZP">
         <small> Organisme </small>
         <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreOrga">
           <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
           <option *ngFor="let label of tabOrganism"> {{label}} </option>
-          <option> test 1 </option>
-          <option> test 2 </option>
           <option [ngValue]=null> Tous </option>
 
         </select>
@@ -48,16 +38,10 @@
         <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreCom">
           <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
           <option *ngFor="let label of tabCom"> {{label}} </option>
-          <option> test 1 </option>
           <option [ngValue]=null> Tous </option>
-
         </select>
-
       </div>
-
-
     </div>
-
 
     <ngx-datatable #table class="material" [rows]="filteredData" [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
       [columnMode]="'force'" [selected]="mapListService.selectedRow" [selectionType]="'single'" (select)="mapListService.onRowSelect($event)"
@@ -66,9 +50,7 @@
 
       <ngx-datatable-column *ngFor="let col of storeService.sftConfig.default_zp_columns" [name]="col.name" [prop]="col.prop" [maxWidth]="col.width">
 
-
       </ngx-datatable-column>
-
 
       <ngx-datatable-column maxWidth="90">
         <ng-template let-row="row" ngx-datatable-cell-template>
@@ -76,7 +58,6 @@
           </button>
         </ng-template>
       </ngx-datatable-column>
-
 
     </ngx-datatable>
 
@@ -87,8 +68,6 @@
       </pnx-modal-download>
 
     </div>
-
-
 
   </div>
 
