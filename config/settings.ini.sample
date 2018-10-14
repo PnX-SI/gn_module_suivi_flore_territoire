@@ -12,7 +12,7 @@ db_port=5432
 db_name=geonature2db
 
 # GeoNature database owner username
-user_pg=geonatuser
+user_pg=geonatadmin
 
 # GeoNature database owner password
 user_pg_pass=my_password
