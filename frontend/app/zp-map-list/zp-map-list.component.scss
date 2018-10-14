@@ -23,6 +23,12 @@
   background-color: rgb(154, 217, 247) !important;
 }
 
+.list-sft {
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 5px;
+}
+
 .searchZP {
   display: flex;
   flex-direction: column;
