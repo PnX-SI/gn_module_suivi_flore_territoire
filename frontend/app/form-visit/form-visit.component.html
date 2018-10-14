@@ -2,31 +2,27 @@
   <!-- MAP  -->
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-    <pnx-map height="95vh">
+    <pnx-map height="94vh">
       <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
       </pnx-geojson>
     </pnx-map>
   </div>
 
-
-
   <!-- FORMULAIRE  -->
 
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container">
-    <h5 class="debLigne"> <i class="fa fa-edit"> <b> Ajouter une visite / Editer cette visite </b></i> </h5>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container form-sft">
+    <h5 class="debLigne"> <i class="fa fa-edit"></i> <b> Ajouter une visite / Editer cette visite </b> </h5>
 
     <div class="list-group-item">
-      <i class="fa fa-map-marker" style="font-size:18px"> Zone de prospection: <span class="info"> {{ idSite }} </span>
-      </i>
+      <i class="fa fa-map-marker" style="font-size:18px"></i> Zone de prospection : <span class="info"> {{ idSite }} </span>
     </div>
 
     <div class="list-group-item">
-      <i class="fa fa-tree" style="font-size:18px"> Espèce prospectée : <span class="info"> {{nomTaxon}} </span>
-      </i>
+      <i class="fa fa-tree" style="font-size:18px"></i> Espèce prospectée : <span class="info"> {{nomTaxon}} </span>
     </div>
 
     <div class=" list-group-item modif">
-      <div> <i class="fa fa-hourglass-2" style="font-size:18px"> Date de la visite : </i> </div>
+      <div> <i class="fa fa-hourglass-2" style="font-size:18px"></i> Date de la visite : </div>
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
         <pnx-date [parentFormControl]="modifGrid.controls.visit_date_min"> </pnx-date>
       </div>
@@ -35,7 +31,7 @@
 
 
     <div class=" list-group-item">
-      <div> <i class="fa fa-group" style="font-size:18px"> Observateur : </i> </div>
+      <div> <i class="fa fa-group" style="font-size:18px"></i> Observateur(s) : </div>
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form" id="newObserver" requir>
         <pnx-observers [parentFormControl]="modifGrid.controls.cor_visit_observer" [bindAllItem]="true" [idMenu]="storeService.sftConfig.id_menu_list_user">
         </pnx-observers>
@@ -45,7 +41,7 @@
 
 
     <div class=" list-group-item">
-      <div> <i class="fa fa-warning" style="font-size:18px"> Type(s) de perturbations : </i> </div>
+      <div> <i class="fa fa-warning" style="font-size:18px"></i> Perturbation(s) : </div>
 
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form" id="newPerturs">
         <pnx-nomenclature [parentFormControl]="modifGrid.controls.cor_visit_perturbation" [multiSelect]="true" keyValue="id_nomenclature"
@@ -56,7 +52,7 @@
     </div>
 
     <div class=" list-group-item">
-      <div> <i class="fa fa-comments" style="font-size:18px"> Commentaires : </i> </div>
+      <div> <i class="fa fa-comments" style="font-size:18px"></i> Commentaires :  </div>
       <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 padding-sm form ">
         <textarea class="form-control" rows="2" id="commentaire" [formControl]="modifGrid.controls.comments"></textarea>
       </div>
@@ -65,17 +61,17 @@
 
 
     <div class="list-group-item">
-      <div> <i class="fa fa-leaf" style="font-size:18px"> Maille(s) présente(s) d'espèce : </i> </div>
+      <div> <i class="fa fa-leaf" style="font-size:18px"></i> Maille(s) de présence : </div>
       <div class="info nbGrid" id="nbPres"> {{storeService.presence}} </div>
     </div>
 
     <div class="list-group-item">
-      <div> <i class="fa fa-ban" style="font-size:18px"> Maille(s) absente(s) d'espèce : </i> </div>
+      <div> <i class="fa fa-ban" style="font-size:18px"></i> Maille(s) d'absence : </div>
       <div class="info nbGrid" id="nbAbs"> {{storeService.absence}} </div>
     </div>
 
     <div class="list-group-item">
-      <div> <i class="fa fa-question-circle" style="font-size:18px"> Maille(s) pas encore visitées : </i> </div>
+      <div> <i class="fa fa-question-circle" style="font-size:18px"></i> Maille(s) non visitées : </div>
       <div class="info nbGrid" id="nbRest"> {{storeService.rest}} </div>
     </div>
     <br/>
@@ -88,10 +84,9 @@
       <button type="button" class="btn btn-light btn-sm fa fa-gear clickable" matTooltip="Comment modifier? " (click)="storeService.openModal(content)">
       </button> <span id="instru"> Instructions </span>
 
-
       <ng-template #content let-c="close" let-d="dismiss">
         <div class="modal-header">
-          <h4 class="modal-title"> Pour saisir les mailles: </h4>
+          <h4 class="modal-title"> Pour saisir les mailles : </h4>
           <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -112,13 +107,9 @@
         </div>
       </ng-template>
 
+      <button class="btn btn-success btn-sm droite" (click)="onModif()" [disabled]=" modifGrid.invalid "> Enregistrer </button>
 
-      <button class="btn btn-success btn-sm droite" (click)="onModif()" [disabled]=" modifGrid.invalid "> Enregistrer les
-        modifications </button>
-
-      <button class="btn btn-primary btn-sm droite" (click)="onVisual() "> Visualiser les visites précédentes</button>
-
-
+      <button class="btn btn-primary btn-sm droite" (click)="onVisual() "> Annuler</button>
 
     </div>
 
