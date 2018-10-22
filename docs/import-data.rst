@@ -7,13 +7,14 @@ Intégrer les mailles
 * Les copier (Edition / Copier les entités selectionnées)
 * Ouvrir la table ``ref_geo.l_areas`` dans QGIS en mode édition
 * Y coller les mailles (Edition / Coller les entités)
-* Ouvrir la table attributaire de ``ref_geo.l_areas`` pour renseigner le id_type de toutes les mailles insérées (Calculatrice de champs / Mettre à jour id_type = 32)
+* Ouvrir la table attributaire de ``ref_geo.l_areas`` pour renseigner le ``id_type`` de toutes les mailles insérées (Calculatrice de champs / Mettre à jour ``id_type = 32``)
 * Enregistrer les modifications de la table ``ref_geo.l_areas``
 
 Intrégrer les ZP
 ----------------
 
 * Importer le SHP dans une table temporaire (``pr_monitoring_flora_territory.zp_tmp2`` dans cet exemple) de la BDD GeoNature avec QGIS
+
 * Remplissez les tables de la BDD à partir de cette table temporaire : 
 
 .. code:: sql
@@ -31,9 +32,9 @@ Intrégrer les ZP
   JOIN pr_monitoring_flora_territory.zp_tmp2 zp ON zp.idzp::character varying = bs.base_site_code
   WHERE bs.id_nomenclature_type_site = ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP');
 
-La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger pour indiquer les communes et mailles 25m de chaque ZP
+La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger pour indiquer les communes et mailles 25m de chaque ZP.
 
-Insérer les sites suivis de ce module dans ``cor_site_application``
+* Insérer les sites suivis de ce module dans ``cor_site_application`` : 
 
 .. code:: sql
 
@@ -49,8 +50,8 @@ Intégrer les visites
 --------------------
 
 * Importer le CSV dans une table temporaire de la BDD avec QGIS (``pr_monitoring_flora_territory.obs_maille_tmp`` dans cet exemple)
-* Identifier les organismes présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT organismes FROM pr_monitoring_flora_territory.obs_maille_tmp``
-* Identifier les observateurs présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT observateu FROM pr_monitoring_flora_territory.obs_maille_tmp`` ou mieux ``SELECT DISTINCT unnest(string_to_array(observateu, '|')) AS observateurs FROM pr_monitoring_flora_territory.obs_maille_tmp ORDER BY observateurs``
+* Identifier les organismes présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT unnest(string_to_array(organismes, '|')) AS organismes FROM pr_monitoring_flora_territory.obs_maille_tmp ORDER BY organismes``
+* Identifier les observateurs présents dans les observations et intégrez ceux manquants dans UsersHub : ``SELECT DISTINCT unnest(string_to_array(observateu, '|')) AS observateurs FROM pr_monitoring_flora_territory.obs_maille_tmp ORDER BY observateurs``
 * Corriger le nom mal formaté : ``UPDATE pr_monitoring_flora_territory.obs_maille_tmp SET observateu = replace(observateu, 'PARCHOUX|Franck', 'PARCHOUX Franck');``
 * Remplissez la table des visites : 
 
@@ -61,21 +62,19 @@ Intégrer les visites
   FROM pr_monitoring_flora_territory.obs_maille_tmp o
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
   
-* Remplissez la table des observateurs (SQL à revoir car il renvoie tous les observateurs pour toutes les visites) : 
+* Remplissez la table des observateurs (SQL à améliorer pour gérer si les noms sont en minuscule ou majuscule) : 
 
 .. code:: sql
 
-   INSERT INTO gn_monitoring.cor_visit_observer
-       (id_base_visit, id_role)
-   WITH myuser AS(SELECT DISTINCT unnest(string_to_array(observateu, '|')) AS obs FROM pr_monitoring_flora_territory.obs_maille_tmp)
-   SELECT DISTINCT v.id_base_visit, role.id_role
-   FROM pr_monitoring_flora_territory.obs_maille_tmp o
-   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
-   JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
-   , myuser 
-   JOIN (SELECT r.nom_role ||' '|| r.prenom_role AS nom, r.id_role
-      FROM utilisateurs.t_roles AS r) as role
-      ON role.nom = myuser.obs
+  INSERT INTO gn_monitoring.cor_visit_observer
+      (id_base_visit, id_role)
+  WITH myuser AS(SELECT unnest(string_to_array(observateu, '|')) AS obs,idzp FROM pr_monitoring_flora_territory.obs_maille_tmp),
+  	roles AS(SELECT nom_role ||' '|| prenom_role AS nom, id_role FROM utilisateurs.t_roles)
+  SELECT DISTINCT v.id_base_visit,r.id_role
+  FROM myuser m
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code = m.idzp
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
+  JOIN roles r ON m.obs=r.nom
   
 * Remplissez la table des observations : 
 
