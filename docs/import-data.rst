@@ -3,7 +3,7 @@ Intégrer les mailles
 --------------------
 
 * Ouvrir le SHP des mailles dans QGIS. Renommer la colonne contenant les noms des mailles en ``area_name``
-* Selectionner toutes les mailles à importer
+* Selectionner toutes les mailles à importer. Verifier que vous n'intégrez pas des mailles déjà présentes
 * Les copier (Edition / Copier les entités selectionnées)
 * Ouvrir la table ``ref_geo.l_areas`` dans QGIS en mode édition
 * Y coller les mailles (Edition / Coller les entités)
