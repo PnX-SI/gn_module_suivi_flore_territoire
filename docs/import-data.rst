@@ -62,14 +62,14 @@ Intégrer les visites
   FROM pr_monitoring_flora_territory.obs_maille_tmp o
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
   
-* Remplissez la table des observateurs (SQL à améliorer pour gérer si les noms sont en minuscule ou majuscule) : 
+* Remplissez la table des observateurs : 
 
 .. code:: sql
 
   INSERT INTO gn_monitoring.cor_visit_observer
       (id_base_visit, id_role)
-  WITH myuser AS(SELECT unnest(string_to_array(observateu, '|')) AS obs,idzp FROM pr_monitoring_flora_territory.obs_maille_tmp),
-  	roles AS(SELECT nom_role ||' '|| prenom_role AS nom, id_role FROM utilisateurs.t_roles)
+  WITH myuser AS(SELECT lower(unnest(string_to_array(observateu, '|'))) AS obs,idzp FROM pr_monitoring_flora_territory.obs_maille_tmp),
+  	roles AS(SELECT lower(nom_role ||' '|| prenom_role) AS nom, id_role FROM utilisateurs.t_roles)
   SELECT DISTINCT v.id_base_visit,r.id_role
   FROM myuser m
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = m.idzp
