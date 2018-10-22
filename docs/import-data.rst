@@ -24,7 +24,8 @@ Intrégrer les ZP
   SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), 'ZP-', '', idzp, now(), ST_Force2D(ST_TRANSFORM(ST_SetSRID(geom, 2154), 4326))
   FROM pr_monitoring_flora_territory.zp_tmp2;
 
-  UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, base_site_code);
+  UPDATE gn_monitoring.t_base_sites SET base_site_name=CONCAT (base_site_name, base_site_code)
+  WHERE CAST (base_site_code AS INTEGER) IN (SELECT indexzp FROM pr_monitoring_flora_territory.zp_tmp2);
 
   INSERT INTO pr_monitoring_flora_territory.t_infos_site (id_base_site, cd_nom)
   SELECT bs.id_base_site, zp.cd_nom
@@ -44,7 +45,8 @@ La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger
     WHERE nom_application = 'suivi_flore_territoire'
   )
   SELECT ti.id_base_site, idapp.id_application
-  FROM pr_monitoring_flora_territory.t_infos_site ti, idapp;
+  FROM pr_monitoring_flora_territory.t_infos_site ti, idapp
+  WHERE id_base_site NOT IN (SELECT id_base_site FROM gn_monitoring.cor_site_application);
 
 Intégrer les visites
 --------------------
