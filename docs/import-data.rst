@@ -95,3 +95,49 @@ Intégrer les visites
   JOIN gn_monitoring.t_base_sites s ON s.base_site_code = o.idzp
   JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
   WHERE presence = 'na' OR presence = 'pr'
+
+Fichiers PNE
+------------
+
+Les fichiers du PNE ont quelques différences. Voici les adaptations des requêtes : 
+
+.. code:: sql
+
+  -- Insérer les ZP
+  INSERT INTO gn_monitoring.t_base_visits (id_base_site, visit_date_min, visit_date_max)
+  SELECT DISTINCT s.id_base_site, date_debut, date_fin
+  FROM pr_monitoring_flora_territory.obs_maille_tmp_remy o
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code::INTEGER = o.indexzp
+  WHERE s.id_base_site=105 -- Limiter à un site manquant dans un second temps
+  ;
+
+  -- Lister les observateurs / Attentino à bien vérifier les observateurs déjà présents
+  SELECT DISTINCT unnest(string_to_array(observateu, ', ')) AS observateurs, organismes 
+  FROM pr_monitoring_flora_territory.obs_maille_tmp_remy ORDER BY observateurs;
+  
+  -- Insérer les observateurs des visites
+  INSERT INTO gn_monitoring.cor_visit_observer
+    (id_base_visit, id_role)
+  WITH myuser AS(SELECT lower(unnest(string_to_array(observateu, ', '))) AS obs,indexzp 
+  FROM pr_monitoring_flora_territory.obs_maille_tmp_remy),
+      roles AS(SELECT lower(prenom_role ||' '|| nom_role) AS nom, id_role FROM utilisateurs.t_roles)
+  SELECT DISTINCT v.id_base_visit,r.id_role
+  FROM myuser m
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code::INTEGER = m.indexzp
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
+  JOIN roles r ON m.obs=r.nom;
+
+  -- Insérer les visites des mailles
+  INSERT INTO pr_monitoring_flora_territory.cor_visit_grid (id_area, id_base_visit, presence)
+  SELECT
+        id_area,
+        id_base_visit,
+        CASE
+       WHEN presence = 0 THEN False
+       WHEN presence = 1 THEN True
+    END as presenceok
+  FROM pr_monitoring_flora_territory.obs_maille_tmp_remy o
+  JOIN ref_geo.l_areas a ON a.area_name = o.id_maille
+  JOIN gn_monitoring.t_base_sites s ON s.base_site_code::INTEGER = o.indexzp
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
+  WHERE (presence = 0 OR presence = 1) AND s.id_base_site=105;
