@@ -11,7 +11,7 @@ Première version du module GeoNature du protocole Suivi flore territoire du ré
 
 Démonstration : http://geonature.fr/docs/img/2018-10-geonature-sft-demo.gif
 
-Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
+Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m, et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
 
 **Fonctionnalités**
 
