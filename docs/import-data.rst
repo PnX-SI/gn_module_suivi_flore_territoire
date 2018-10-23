@@ -96,6 +96,36 @@ Intégrer les visites
   JOIN gn_monitoring.t_base_visits v ON v.id_base_site = s.id_base_site
   WHERE presence = 'na' OR presence = 'pr'
 
+Vérifier les données
+--------------------
+
+.. code:: sql
+
+  -- Nombre de ZP par taxon
+  SELECT s.cd_nom, t.nom_valide, count(*) as nb_zp FROM pr_monitoring_flora_territory.t_infos_site s
+  JOIN taxonomie.taxref t ON t.cd_nom = s.cd_nom
+  GROUP BY s.cd_nom, t.nom_valide;
+  
+  -- Nombre de visites par taxon
+  SELECT s.cd_nom, t.nom_valide, count(*) as nb_visites FROM gn_monitoring.t_base_visits v
+  JOIN pr_monitoring_flora_territory.t_infos_site s ON s.id_base_site = v.id_base_site
+  JOIN taxonomie.taxref t ON t.cd_nom = s.cd_nom
+  GROUP BY s.cd_nom, t.nom_valide;
+  
+  -- Nombre de mailles visitées par taxon
+  SELECT s.cd_nom, t.nom_valide, count(*) as nb_mailles_visitees FROM pr_monitoring_flora_territory.cor_visit_grid cv
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_visit = cv.id_base_visit
+  JOIN pr_monitoring_flora_territory.t_infos_site s ON s.id_base_site = v.id_base_site
+  JOIN taxonomie.taxref t ON t.cd_nom = s.cd_nom
+  GROUP BY s.cd_nom, t.nom_valide;
+  
+  -- Nombre de présences/absences par taxon
+  SELECT s.cd_nom, t.nom_valide, cv.presence, count(*) as nb_presence FROM pr_monitoring_flora_territory.cor_visit_grid cv
+  JOIN gn_monitoring.t_base_visits v ON v.id_base_visit = cv.id_base_visit
+  JOIN pr_monitoring_flora_territory.t_infos_site s ON s.id_base_site = v.id_base_site
+  JOIN taxonomie.taxref t ON t.cd_nom = s.cd_nom
+  GROUP BY s.cd_nom, t.nom_valide, cv.presence;
+
 Fichiers PNE
 ------------
 
