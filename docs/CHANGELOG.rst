@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-0.1.0 (unreleased)
+0.1.0 (2018-10-23)
 ------------------
 
 Première version du module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle, piloté par le CBNA, développée par @Khanh-Chau. 
