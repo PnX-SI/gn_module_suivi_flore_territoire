@@ -1,10 +1,13 @@
 from flask import Blueprint, request, session, current_app
+from sqlalchemy.sql.expression import func
 
-from geonature.utils.errors import GeonatureApiError, InsufficientRightsError
-from pypnusershub.db.tools import get_or_fetch_user_cruved
+from pypnusershub.db.tools import InsufficientRightsError
+
+from geonature.utils.errors import GeonatureApiError
+from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.core.gn_monitoring.models import TBaseVisits
 from geonature.utils.env import DB, ROOT_DIR
-from sqlalchemy.sql.expression import func
+
 
 
 class PostYearError (GeonatureApiError):

@@ -5,7 +5,6 @@
 '''
 
 from marshmallow import Schema, fields
-from geonature.utils.config_schema import GnModuleProdConf
 
 
 export_available_format = ['geojson', 'csv', 'shapefile']
@@ -33,7 +32,7 @@ default_list_visit_columns = [
 zoom_center = [44.982667966765845, 6.062455200884894]
 
 
-class GnModuleSchemaConf(GnModuleProdConf):
+class GnModuleSchemaConf(Schema):
     zp_message = fields.Dict(missing=zp_message)
     list_visit_message = fields.Dict(missing=list_visit_message)
     detail_list_visit_message = fields.Dict(missing=detail_list_visit_message)
@@ -46,3 +45,4 @@ class GnModuleSchemaConf(GnModuleProdConf):
     id_list_taxon = fields.Integer(missing=30)
     export_srid = fields.Integer(missing=2154)
     zoom_center = fields.List(fields.Float(), missing=zoom_center)
+    MODULE_URL = fields.String(missing="suivi_flore_territoire")

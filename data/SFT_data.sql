@@ -25,7 +25,7 @@ VALUES (ref_nomenclatures.get_id_nomenclature_type('TYPE_SITE'), 'ZP', 'Zone de 
 -- ATTENTION: il faut que le zp_tmp.shp soit en 2154, sinon ça donne des erreurs pour afficher les Zp.  
 INSERT INTO gn_monitoring.t_base_sites
 (id_nomenclature_type_site, base_site_name, base_site_description,  base_site_code, first_use_date, geom )
-SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), 'ZP-', '', id, now(), ST_TRANSFORM(ST_SetSRID(geom, MY_SRID_LOCAL), MY_SRID_WORLD)
+SELECT ref_nomenclatures.get_id_nomenclature('TYPE_SITE', 'ZP'), 'ZP-', '', id, now(), ST_TRANSFORM(ST_SetSRID(geom, MY_SRID_LOCAL), 4326)
 FROM pr_monitoring_flora_territory.zp_tmp;
 
 --- update le nom du site pour y ajouter l'identifiant du site
@@ -65,10 +65,16 @@ JOIN pr_monitoring_flora_territory.zp_tmp zp ON zp.id::character varying = bs.ba
 -- JOIN pr_monitoring_flora_territory.zp_tmp zp ON bs.base_site_code  = zp.id::character varying;
                                                                                                                           
 -- Insérer dans cor_site_application les sites suivis de ce module
-INSERT INTO gn_monitoring.cor_site_application 
-WITH idapp AS(
-SELECT id_application FROM utilisateurs.t_applications
-WHERE nom_application = 'suivi_flore_territoire'
+INSERT INTO gn_monitoring.cor_site_module 
+WITH id_module AS(
+SELECT id_module FROM gn_commons.t_modules
+WHERE module_code ILIKE 'sft'
 )
-SELECT ti.id_base_site, idapp.id_application
-FROM pr_monitoring_flora_territory.t_infos_site ti, idapp;
+SELECT ti.id_base_site, id_module.id_module
+FROM pr_monitoring_flora_territory.t_infos_site ti, id_module;
+
+
+
+
+DROP TABLE pr_monitoring_flora_territory.maille_tmp;
+DROP TABLE pr_monitoring_flora_territory.zp_tmp;

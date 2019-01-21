@@ -15,7 +15,7 @@ from geonature.core.gn_synthese.models import synthese_export_serialization
 from geonature.core.gn_monitoring.models import TBaseSites, TBaseVisits, corVisitObserver
 from geonature.core.ref_geo.models import LAreas
 from pypnnomenclature.models import TNomenclatures
-from geonature.core.users.models import TRoles
+from pypnusershub.db.models import User
 
 
 @serializable
@@ -125,12 +125,12 @@ class TVisiteSFT(TBaseVisits):
     )
 
     observers = DB.relationship(
-        'TRoles',
+        'User',
         secondary=corVisitObserver,
         primaryjoin=(
             corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
         ),
-        secondaryjoin=(corVisitObserver.c.id_role == TRoles.id_role),
+        secondaryjoin=(corVisitObserver.c.id_role == User.id_role),
         foreign_keys=[
             corVisitObserver.c.id_base_visit,
             corVisitObserver.c.id_role,

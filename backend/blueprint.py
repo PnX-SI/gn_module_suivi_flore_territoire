@@ -9,18 +9,17 @@ from geojson import FeatureCollection, Feature
 from geoalchemy2.shape import to_shape
 
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
-from pypnusershub.db.tools import (
-    InsufficientRightsError,
-    get_or_fetch_user_cruved,
-)
+from pypnusershub.db.tools import InsufficientRightsError
 
-from pypnusershub import routes as fnauth
+from geonature.core.gn_permissions import decorators as permissions
+from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
-from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteModule, corSiteArea
 from geonature.core.ref_geo.models import LAreas
-from geonature.core.users.models import TRoles, BibOrganismes
+from geonature.core.users.models import BibOrganismes
+from pypnusershub.db.models import User
 
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
 from .repositories import check_user_cruved_visit, check_year_visit
@@ -38,7 +37,6 @@ def get_sites_zp():
     parameters = request.args
     id_type_commune = blueprint.config['id_type_commune']
     # grâce au fichier config
-    print("my id ", id_type_commune)
     q = (
         DB.session.query(
             TInfoSite,
@@ -56,9 +54,9 @@ def get_sites_zp():
         ).outerjoin(
             corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
         ).outerjoin(
-            TRoles, TRoles.id_role == corVisitObserver.c.id_role
+            User, User.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
+            BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
         )
         # get municipalities of a site
         .outerjoin(
@@ -182,7 +180,7 @@ def get_visit(id_visit):
 
 
 @blueprint.route('/visit', methods=['POST'])
-@fnauth.check_auth_cruved('C', True)
+@permissions.check_cruved_scope('R', True)
 @json_resp
 def post_visit(info_role):
     '''
@@ -211,8 +209,8 @@ def post_visit(info_role):
     for v in tab_visit_grid:
         visit_grid = CorVisitGrid(**v)
         visit.cor_visit_grid.append(visit_grid)
-    observers = DB.session.query(TRoles).filter(
-        TRoles.id_role.in_(tab_observer)
+    observers = DB.session.query(User).filter(
+        User.id_role.in_(tab_observer)
     ).all()
     for o in observers:
         visit.observers.append(o)
@@ -221,7 +219,7 @@ def post_visit(info_role):
         user_cruved = get_or_fetch_user_cruved(
             session=session,
             id_role=info_role.id_role,
-            id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
+            module_code='SFT'
         )
         update_cruved = user_cruved['U']
         check_user_cruved_visit(info_role, visit, update_cruved)
@@ -331,9 +329,9 @@ def export_visit():
         )
 
 
-@blueprint.route('/commune/<id_application>', methods=['GET'])
+@blueprint.route('/commune/<id_module>', methods=['GET'])
 @json_resp
-def get_commune(id_application):
+def get_commune(id_module):
     '''
     Retourne toutes les communes présents dans le module
     '''
@@ -341,8 +339,8 @@ def get_commune(id_application):
 
     q = DB.session.query(LAreas.area_name).distinct().outerjoin(
         corSiteArea, LAreas.id_area == corSiteArea.c.id_area).outerjoin(
-        corSiteApplication, corSiteApplication.c.id_base_site == corSiteArea.c.id_base_site).filter(
-        corSiteApplication.c.id_application == id_application)
+        corSiteModule, corSiteModule.c.id_base_site == corSiteArea.c.id_base_site).filter(
+        corSiteModule.c.id_module == id_module)
 
     if 'id_area_type' in params:
         q = q.filter(LAreas.id_type == params['id_area_type'])
@@ -365,9 +363,9 @@ def get_organisme():
     '''
 
     q = DB.session.query(
-        BibOrganismes.nom_organisme, TRoles.nom_role, TRoles.prenom_role).outerjoin(
-        TRoles, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().join(
-        corVisitObserver, TRoles.id_role == corVisitObserver.c.id_role).outerjoin(
+        BibOrganismes.nom_organisme, User.nom_role, User.prenom_role).outerjoin(
+        User, BibOrganismes.id_organisme == User.id_organisme).distinct().join(
+        corVisitObserver, User.id_role == corVisitObserver.c.id_role).outerjoin(
         TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
 
     data = q.all()

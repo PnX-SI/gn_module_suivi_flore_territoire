@@ -1,6 +1,7 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { AppConfig } from '@geonature_config/app.config';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { AppConfig } from "@geonature_config/app.config";
+import { ModuleConfig } from "../module.config";
 
 @Injectable()
 export class DataService {
@@ -12,10 +13,13 @@ export class DataService {
     for (let key in params) {
       myParams = myParams.set(key, params[key]);
     }
-
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/sites`, {
-      params: myParams
-    });
+    console.log(ModuleConfig.MODULE_URL);
+    return this._http.get<any>(
+      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`,
+      {
+        params: myParams
+      }
+    );
   }
 
   getMaille(id_base_site: number, params?: any) {
@@ -32,14 +36,19 @@ export class DataService {
 
   getInfoSite(id_base_site) {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/suivi_flore_territoire/site?id_base_site=${id_base_site}`
+      `${AppConfig.API_ENDPOINT}/${
+        ModuleConfig.MODULE_URL
+      }/site?id_base_site=${id_base_site}`
     );
   }
 
   postVisit(data: any) {
     console.log(data);
 
-    return this._http.post<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit`, data);
+    return this._http.post<any>(
+      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`,
+      data
+    );
   }
 
   getVisits(params: any) {
@@ -49,19 +58,24 @@ export class DataService {
       myParams = myParams.set(key, params[key]);
     }
 
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visits`, {
-      params: myParams
-    });
+    return this._http.get<any>(
+      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits`,
+      {
+        params: myParams
+      }
+    );
   }
 
   getOneVisit(id_visit) {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/suivi_flore_territoire/visit/${id_visit}`
+      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit/${id_visit}`
     );
   }
 
   getOrganisme() {
-    return this._http.get<any>(`${AppConfig.API_ENDPOINT}/suivi_flore_territoire/organisme`);
+    return this._http.get<any>(
+      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/organisme`
+    );
   }
 
   getCommune(id_application: number, params: any) {
@@ -72,7 +86,9 @@ export class DataService {
     }
 
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/suivi_flore_territoire/commune/${id_application}`,
+      `${AppConfig.API_ENDPOINT}/${
+        ModuleConfig.MODULE_URL
+      }/commune/${id_application}`,
       { params: myParams }
     );
   }

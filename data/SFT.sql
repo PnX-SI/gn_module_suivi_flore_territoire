@@ -82,11 +82,12 @@ ALTER TABLE ONLY cor_visit_perturbation
 SELECT 
     v.id_base_visit,
     string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
-    roles.organisme AS organisme
+    org.nom_organisme AS organisme
 FROM gn_monitoring.t_base_visits v
 JOIN gn_monitoring.cor_visit_observer observer ON observer.id_base_visit = v.id_base_visit
 JOIN utilisateurs.t_roles roles ON roles.id_role = observer.id_role
-GROUP BY v.id_base_visit, roles.organisme
+JOIN utilisateurs.bib_organismes org ON roles.id_organisme = org.id_organisme
+GROUP BY v.id_base_visit, org.nom_organisme
 ),
 perturbations AS(
 SELECT 
@@ -102,7 +103,7 @@ SELECT bs.id_base_site,
        a.id_area,
        a.area_name
 FROM ref_geo.l_areas a
-JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, MY_SRID_WORLD), bs.geom)
+JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
 WHERE a.id_type=ref_geo.get_id_area_type('COM')
 )
 -- toutes les mailles d'un site et leur visites
