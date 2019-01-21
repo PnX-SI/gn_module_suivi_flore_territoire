@@ -184,10 +184,14 @@ def get_visit(id_visit):
 @json_resp
 def post_visit(info_role):
     '''
-    Poste une nouvelle visite ou éditer une ancienne
+    Poste une nouvelle visite ou édite une ancienne
     '''
     data = dict(request.get_json())
-    check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
+    # if its not an update we check if there is not aleady a visit this year
+    print('LAAAAAA')
+    print(data)
+    if not data['id_base_visit']:
+        check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
 
     try:
         tab_perturbation = data.pop('cor_visit_perturbation')
@@ -275,7 +279,6 @@ def export_visit():
     features = []
 
     if export_format == 'geojson':
-
         for d in data:
             feature = d.as_geofeature('geom', 'id_area', False)
             features.append(feature)
@@ -303,7 +306,6 @@ def export_visit():
             tab_visit,
             tab_visit[0].keys(),
             ';'
-
         )
 
     else:

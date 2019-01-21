@@ -260,21 +260,18 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.toastr.success("Visite enregistrée", "", {
           positionClass: "toast-top-center"
         });
-        setTimeout(
-          () =>
-            this.router.navigate([
-              `${ModuleConfig.MODULE_URL}/listVisit`,
-              this.idSite
-            ]),
-          1000
-        );
+
+        this.router.navigate([
+          `${ModuleConfig.MODULE_URL}/listVisit`,
+          this.idSite
+        ]);
       },
       error => {
         if (error.status === 403) {
           if (error.error.raisedError === "PostYearError") {
             this.toastr.warning(
-              "Veuillez éditez une ancienne visite ou réactualisez la page pour saisir une nouvelle. ",
-              "Visite Existée Pour Cette Année!",
+              "Veuillez éditez une ancienne visite ",
+              "Une visite existe déjà pour cette année!",
               {
                 positionClass: "toast-top-center"
               },

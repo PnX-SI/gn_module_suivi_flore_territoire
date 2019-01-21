@@ -64,12 +64,13 @@ def check_year_visit(id_base_site, new_visit_date):
     Check if there is already a visit of the same year.
     If yes, observer is not allowed to post the new visit
 
+    Raise a 403 if a visit already exist this year
+
     """
     q_year = DB.session.query(
         func.date_part('year', TBaseVisits.visit_date_min)).filter(
         TBaseVisits.id_base_site == id_base_site)
     tab_old_year = q_year.all()
-    print(tab_old_year)
     year_new_visit = new_visit_date[0:4]
 
     for y in tab_old_year:
