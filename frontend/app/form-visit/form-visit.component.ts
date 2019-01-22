@@ -67,13 +67,13 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       });
     });
 
-    // vérifie s'il existe idVisit --> c' une modif
+    // vérifie s'il existe idVisit --> c'est une modification
     if (this.idVisit !== undefined) {
       this._api.getOneVisit(this.idVisit).subscribe(element => {
         this.visitGrid = element.cor_visit_grid;
         this.storeService.presence = 0;
         this.storeService.absence = 0;
-        // compter l'absence/présence des mailles déjà existant
+        // compter l'absence/présence des mailles déjà existantes
         if (this.visitGrid !== undefined) {
           this.visitGrid.forEach(grid => {
             if (grid.presence == true) {
@@ -270,8 +270,8 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         if (error.status === 403) {
           if (error.error.raisedError === "PostYearError") {
             this.toastr.warning(
-              "Veuillez éditez une ancienne visite ",
-              "Une visite existe déjà pour cette année!",
+              "Veuillez plutôt éditer une ancienne visite ",
+              "Une visite existe déjà sur ce site pour cette année !",
               {
                 positionClass: "toast-top-center"
               },
