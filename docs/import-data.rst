@@ -35,18 +35,18 @@ Intrégrer les ZP
 
 La table ``gn_monitoring.cor_site_area`` est remplie automatiquement par trigger pour indiquer les communes et mailles 25m de chaque ZP.
 
-* Insérer les sites suivis de ce module dans ``cor_site_application`` : 
+* Insérer les sites suivis de ce module dans ``cor_site_module`` : 
 
 .. code:: sql
 
-  INSERT INTO gn_monitoring.cor_site_application 
-  WITH idapp AS(
-    SELECT id_application FROM utilisateurs.t_applications
-    WHERE nom_application = 'suivi_flore_territoire'
+  INSERT INTO gn_monitoring.cor_site_module 
+  WITH idmodule AS(
+    SELECT id_module FROM gn_commons.t_modules
+    WHERE code_module ilike 'SFT'
   )
-  SELECT ti.id_base_site, idapp.id_application
-  FROM pr_monitoring_flora_territory.t_infos_site ti, idapp
-  WHERE id_base_site NOT IN (SELECT id_base_site FROM gn_monitoring.cor_site_application);
+  SELECT ti.id_base_site, idmodule.id_module
+  FROM pr_monitoring_flora_territory.t_infos_site ti, idmodule
+  WHERE id_base_site NOT IN (SELECT id_base_site FROM gn_monitoring.cor_site_module);
 
 Intégrer les visites
 --------------------
