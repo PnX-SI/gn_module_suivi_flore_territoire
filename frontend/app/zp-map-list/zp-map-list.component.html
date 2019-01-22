@@ -9,31 +9,32 @@
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
     <h3> Zones de prospection</h3>
 
-    <div id="blocSearch" class="row row-0 ">
-      <div class="searchZP">
+    <div class="row row-0">
+      <div class="col padding-sm">
         <pnx-taxonomy #taxon label="{{ 'Taxon.Taxon' | translate }}" [parentFormControl]="taxonForm" [idList]="storeService.sftConfig.id_list_taxon"
           [charNumber]="3" [listLength]="20" (onChange)="onTaxonChanged($event);" (onDelete)="onDelete(); onDeleteParams('cd_nom', oldFilterTax )">
         </pnx-taxonomy>
         <!-- <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch"> -->
       </div>
 
-      <div class="searchZP">
+      <div class="col padding-sm">
         <small> Année de visite </small>
-        <input type="number" [formControl]="filtreForm.controls.filtreYear" class="inputSearch" (onDeleteFiltre)="onDelete()">
+        <input type="number" [formControl]="filtreForm.controls.filtreYear" class="form-control form-control-sm"
+         (onDeleteFiltre)="onDelete()">
       </div>
+    </div>
 
-      <div class="searchZP">
+    <div id="bottom-search" class="row row-0 ">
+      <div class="col padding-sm">
         <small> Organisme </small>
         <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreOrga">
           <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
           <option *ngFor="let label of tabOrganism"> {{label}} </option>
           <option [ngValue]=null> Tous </option>
-
         </select>
-
       </div>
 
-      <div class="searchZP">
+      <div class="col padding-sm">
         <small> Commune </small>
         <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreCom">
           <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
