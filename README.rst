@@ -6,12 +6,14 @@ Module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle
 
 .. image :: http://geonature.fr/docs/img/2018-09-sft.jpg
 
-Démonstration : http://geonature.fr/docs/img/2018-10-geonature-sft-demo.gif
+**Démonstration vidéo** : 
+
+.. image :: http://geonature.fr/docs/img/2019-01-geonature-sft-demo.gif
 
 A partir de Zones de Prospection (ZP) prospectées dans le protocole d'inventaire répété Bilan Stationnel (ex-Flore prioritaire), 
 des ZP sont selectionnées pour faire office d'un suivi. Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
 
-Présentation :
+**Présentation** :
 
 * Rapport de stage de Khanh-Chau Nguyen : http://geonature.fr/documents/2018-09-Nguyen-Khanh-Chau-Rapport-stage-M2DCISS.pdf
 * Présentation de soutenance de stage de Khanh-Chau Nguyen : http://geonature.fr/documents/2018-09-Nguyen-Khanh-Chau-Soutenance-stage-M2DCISS.pdf
