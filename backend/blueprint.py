@@ -34,6 +34,7 @@ def get_sites_zp():
     '''
     Retourne la liste des ZP
     '''
+    print('passe la ?')
     parameters = request.args
     id_type_commune = blueprint.config['id_type_commune']
     # grâce au fichier config
@@ -44,7 +45,7 @@ def get_sites_zp():
             Taxonomie.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
-            func.string_agg(LAreas.area_name, ', ')
+            func.string_agg(distinct(LAreas.area_name), ', ')
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
         # get taxonomy lb_nom
