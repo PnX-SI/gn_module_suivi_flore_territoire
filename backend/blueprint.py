@@ -9,24 +9,75 @@ from geojson import FeatureCollection, Feature
 from geoalchemy2.shape import to_shape
 
 from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
-from pypnusershub.db.tools import (
-    InsufficientRightsError,
-    get_or_fetch_user_cruved,
-)
+from pypnusershub.db.tools import InsufficientRightsError
 
-from pypnusershub import routes as fnauth
+from geonature.core.gn_permissions import decorators as permissions
+from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
-from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteApplication, corSiteArea
+from geonature.core.gn_monitoring.models import corVisitObserver, TBaseVisits, TBaseSites, corSiteModule, corSiteArea
 from geonature.core.ref_geo.models import LAreas
-from geonature.core.users.models import TRoles, BibOrganismes
+from geonature.core.users.models import BibOrganismes
+from pypnusershub.db.models import User
 
 from .models import TInfoSite, TVisiteSFT, corVisitPerturbation, CorVisitGrid, Taxonomie, ExportVisits
 from .repositories import check_user_cruved_visit, check_year_visit
 
+import jwt
 
 blueprint = Blueprint('pr_suivi_flore_territoire', __name__)
+
+
+def envoiPost(data):
+    DB.session.rollback()
+        # if its not an update we check if there is not aleady a visit this year
+    print('LAAAAAA')
+    #print(data)
+    if not data['id_base_visit']:
+        check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
+
+    try:
+        tab_perturbation = data.pop('cor_visit_perturbation')
+    except:
+        pass
+    tab_visit_grid = data.pop('cor_visit_grid')
+    tab_observer = data.pop('cor_visit_observer')
+    visit = TVisiteSFT(**data)
+    visit.as_dict(True)
+    # pour que visit prenne en compte des relations
+    # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
+    try:
+        perturs = DB.session.query(TNomenclatures).filter(
+            TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
+        for per in perturs:
+            visit.cor_visit_perturbation.append(per)
+    except:
+        pass
+    for v in tab_visit_grid:
+        visit_grid = CorVisitGrid(**v)
+        visit.cor_visit_grid.append(visit_grid)
+    observers = DB.session.query(User).filter(
+        User.id_role.in_(tab_observer)
+    ).all()
+    for o in observers:
+        visit.observers.append(o)
+
+    if visit.id_base_visit:
+        user_cruved = get_or_fetch_user_cruved(
+            session=session,
+            id_role=info_role.id_role,
+            module_code='SFT'
+        )
+        update_cruved = user_cruved['U']
+        check_user_cruved_visit(info_role, visit, update_cruved)
+        DB.session.merge(visit)
+    else:
+        DB.session.add(visit)
+
+    DB.session.commit()
+
+    return visit.as_dict(recursif=True)
 
 
 @blueprint.route('/sites', methods=['GET'])
@@ -38,7 +89,6 @@ def get_sites_zp():
     parameters = request.args
     id_type_commune = blueprint.config['id_type_commune']
     # grâce au fichier config
-    print("my id ", id_type_commune)
     q = (
         DB.session.query(
             TInfoSite,
@@ -49,22 +99,23 @@ def get_sites_zp():
             func.string_agg(LAreas.area_name, ', ')
         ).outerjoin(
             TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
-        # get taxonomy lb_nom
+            # get taxonomy lb_nom
         ).outerjoin(
             Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom
-        # get organisms of a site
+            # get organisms of a site
         ).outerjoin(
             corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
         ).outerjoin(
-            TRoles, TRoles.id_role == corVisitObserver.c.id_role
+            User, User.id_role == corVisitObserver.c.id_role
         ).outerjoin(
-            BibOrganismes, BibOrganismes.id_organisme == TRoles.id_organisme
+            BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
         )
         # get municipalities of a site
         .outerjoin(
             corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site
         ).outerjoin(
-            LAreas, and_(LAreas.id_area == corSiteArea.c.id_area, LAreas.id_type == id_type_commune)
+            LAreas, and_(LAreas.id_area == corSiteArea.c.id_area,
+                         LAreas.id_type == id_type_commune)
         )
         .group_by(
             TInfoSite, Taxonomie.nom_complet
@@ -93,7 +144,8 @@ def get_sites_zp():
 
         data_year = q_year.all()
 
-        q = q.filter(func.date_part('year', TBaseVisits.visit_date_min) == parameters['year'])
+        q = q.filter(func.date_part(
+            'year', TBaseVisits.visit_date_min) == parameters['year'])
     data = q.all()
 
     features = []
@@ -181,57 +233,42 @@ def get_visit(id_visit):
     return data.as_dict(recursif=True)
 
 
+#def check_cruved_scope_jwt(func):
+#    print('decorator')
+#    def wrapped(*args, **kwargs):
+#        print('OUI')
+#        print(request)
+#        return func(*args, **kwargs)
+#    return wrapped
+
+@blueprint.route('/visitJWT', methods=['POST'])
+@permissions.check_cruved_scope_JWT('R', True)
+@json_resp
+def jwt_visit(info_role):  # info_role
+    '''
+    Poste une nouvelle visite ou édite une ancienne
+    '''
+    data = dict(request.get_json())
+    return envoiPost(data)
+
+
+# @blueprint.route('/test2', methods=['GET'])
+# @check_cruved_scope_jwt #'R', True
+# def test2():  # info_role
+#     print('enter ')
+#     return 'la'
+
+
 @blueprint.route('/visit', methods=['POST'])
-@fnauth.check_auth_cruved('C', True)
+@permissions.check_cruved_scope('R', True)
 @json_resp
 def post_visit(info_role):
     '''
-    Poste une nouvelle visite ou éditer une ancienne
+    Poste une nouvelle visite ou édite une ancienne
     '''
     data = dict(request.get_json())
-    check_year_visit(data['id_base_site'], data['visit_date_min'][0:4])
 
-    try:
-        tab_perturbation = data.pop('cor_visit_perturbation')
-    except:
-        pass
-    tab_visit_grid = data.pop('cor_visit_grid')
-    tab_observer = data.pop('cor_visit_observer')
-    visit = TVisiteSFT(**data)
-    visit.as_dict(True)
-    # pour que visit prenne en compte des relations
-    # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
-    try:
-        perturs = DB.session.query(TNomenclatures).filter(
-            TNomenclatures.id_nomenclature.in_(tab_perturbation)).all()
-        for per in perturs:
-            visit.cor_visit_perturbation.append(per)
-    except:
-        pass
-    for v in tab_visit_grid:
-        visit_grid = CorVisitGrid(**v)
-        visit.cor_visit_grid.append(visit_grid)
-    observers = DB.session.query(TRoles).filter(
-        TRoles.id_role.in_(tab_observer)
-    ).all()
-    for o in observers:
-        visit.observers.append(o)
-
-    if visit.id_base_visit:
-        user_cruved = get_or_fetch_user_cruved(
-            session=session,
-            id_role=info_role.id_role,
-            id_application_parent=current_app.config['ID_APPLICATION_GEONATURE']
-        )
-        update_cruved = user_cruved['U']
-        check_user_cruved_visit(info_role, visit, update_cruved)
-        DB.session.merge(visit)
-    else:
-        DB.session.add(visit)
-
-    DB.session.commit()
-
-    return visit.as_dict(recursif=True)
+    return envoiPost(data)
 
 
 @blueprint.route('/export_visit', methods=['GET'])
@@ -277,7 +314,6 @@ def export_visit():
     features = []
 
     if export_format == 'geojson':
-
         for d in data:
             feature = d.as_geofeature('geom', 'id_area', False)
             features.append(feature)
@@ -305,7 +341,6 @@ def export_visit():
             tab_visit,
             tab_visit[0].keys(),
             ';'
-
         )
 
     else:
@@ -331,9 +366,9 @@ def export_visit():
         )
 
 
-@blueprint.route('/commune/<id_application>', methods=['GET'])
+@blueprint.route('/commune/<id_module>', methods=['GET'])
 @json_resp
-def get_commune(id_application):
+def get_commune(id_module):
     '''
     Retourne toutes les communes présents dans le module
     '''
@@ -341,8 +376,8 @@ def get_commune(id_application):
 
     q = DB.session.query(LAreas.area_name).distinct().outerjoin(
         corSiteArea, LAreas.id_area == corSiteArea.c.id_area).outerjoin(
-        corSiteApplication, corSiteApplication.c.id_base_site == corSiteArea.c.id_base_site).filter(
-        corSiteApplication.c.id_application == id_application)
+        corSiteModule, corSiteModule.c.id_base_site == corSiteArea.c.id_base_site).filter(
+        corSiteModule.c.id_module == id_module)
 
     if 'id_area_type' in params:
         q = q.filter(LAreas.id_type == params['id_area_type'])
@@ -365,9 +400,9 @@ def get_organisme():
     '''
 
     q = DB.session.query(
-        BibOrganismes.nom_organisme, TRoles.nom_role, TRoles.prenom_role).outerjoin(
-        TRoles, BibOrganismes.id_organisme == TRoles.id_organisme).distinct().join(
-        corVisitObserver, TRoles.id_role == corVisitObserver.c.id_role).outerjoin(
+        BibOrganismes.nom_organisme, User.nom_role, User.prenom_role).outerjoin(
+        User, BibOrganismes.id_organisme == User.id_organisme).distinct().join(
+        corVisitObserver, User.id_role == corVisitObserver.c.id_role).outerjoin(
         TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
 
     data = q.all()
