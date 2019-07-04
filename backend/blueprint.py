@@ -46,7 +46,12 @@ blueprint = Blueprint("pr_suivi_flore_territoire", __name__)
 def get_sites_zp():
     """
     Retourne la liste des ZP
+<<<<<<< HEAD
     """
+=======
+    '''
+    print('passe la ?')
+>>>>>>> 250380c07ffd3a627324bf9c00a7d04de55e6e73
     parameters = request.args
     id_type_commune = blueprint.config["id_type_commune"]
     # grâce au fichier config
@@ -56,8 +61,25 @@ def get_sites_zp():
             func.max(TBaseVisits.visit_date_min),
             Taxonomie.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
+<<<<<<< HEAD
             func.string_agg(distinct(BibOrganismes.nom_organisme), ", "),
             func.string_agg(LAreas.area_name, ", "),
+=======
+            func.string_agg(distinct(BibOrganismes.nom_organisme), ', '),
+            func.string_agg(distinct(LAreas.area_name), ', ')
+        ).outerjoin(
+            TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
+        # get taxonomy lb_nom
+        ).outerjoin(
+            Taxonomie, TInfoSite.cd_nom == Taxonomie.cd_nom
+        # get organisms of a site
+        ).outerjoin(
+            corVisitObserver, corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit
+        ).outerjoin(
+            User, User.id_role == corVisitObserver.c.id_role
+        ).outerjoin(
+            BibOrganismes, BibOrganismes.id_organisme == User.id_organisme
+>>>>>>> 250380c07ffd3a627324bf9c00a7d04de55e6e73
         )
         .select_from(
             TInfoSite.__table__.outerjoin(
