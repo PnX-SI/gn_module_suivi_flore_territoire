@@ -1,0 +1,9 @@
+ALTER TABLE DATABASE_SCHEMA.DATABASE_TABLE  
+ALTER COLUMN geom TYPE geometry(MULTIPOLYGON, MY_SRID_LOCAL) 
+USING ST_Force2D(geom);
+
+INSERT INTO ref_geo.l_areas (id_type, area_name, geom, centroid, source)
+SELECT ref_geo.get_id_area_type('M25m'), cd25M, geom, ST_CENTROID(geom), 'INPN'
+FROM DATABASE_SCHEMA.DATABASE_TABLE;
+
+DROP TABLE DATABASE_SCHEMA.DATABASE_TABLE;
