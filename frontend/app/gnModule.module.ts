@@ -28,7 +28,7 @@ const routes: Routes = [
   imports: [
     GN2CommonModule,
     HttpClientXsrfModule.withOptions({
-      git: 'token',
+      cookieName: 'token',
       headerName: 'token'
     }),
     RouterModule.forChild(routes),

@@ -273,9 +273,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
               "Veuillez plutôt éditer une ancienne visite ",
               "Une visite existe déjà sur ce site pour cette année !",
               {
-                positionClass: "toast-top-center"
-              },
-              {
+                positionClass: "toast-top-center",
                 timeOut: 5000
               }
             );
