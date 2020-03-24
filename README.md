@@ -2,11 +2,11 @@
 
 Module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle, piloté par le CBNA. 
 
-.. image :: http://geonature.fr/docs/img/2018-09-sft.jpg
+![SFT module](http://geonature.fr/docs/img/2018-09-sft.jpg)
 
 **Démonstration vidéo** : 
 
-.. image :: http://geonature.fr/docs/img/2019-01-geonature-sft-demo.gif
+![SFT démo](http://geonature.fr/docs/img/2019-01-geonature-sft-demo.gif)
 
 A partir de Zones de Prospection (ZP) prospectées dans le protocole d'inventaire répété Bilan Stationnel (ex-Flore prioritaire), 
 des ZP sont selectionnées pour faire office d'un suivi. Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
@@ -28,12 +28,11 @@ dans ``/home/myuser/``
   * Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](https://geonature.readthedocs.io/fr/latest/admin-manual.html#integrer-des-donnees)
 * Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes suivantes (le nom du module abrégé en "sft" est utilisé comme code) :
 
-::
-
+```
     source venv/bin/activate 
     geonature install_gn_module <mon_chemin_absolu_vers_le_module> /sft`` 
     # Exemple ``geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft``)
-
+```
 
 * Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :
   * les mailles (par défaut 25x25m) correspondant à vos sites ou à l'ensemble de la zone d'étude (si elle est de taille réduite) (`import_meshes.sh`)
@@ -66,8 +65,6 @@ Licence
 * [Licence OpenSource GPL v3](./LICENSE)
 * Copyleft 2020 - Parc National des Écrins - Conservatoire National Botanique Alpin
 
-.. image:: http://geonature.fr/img/logo-pne.jpg
-    :target: http://www.ecrins-parcnational.fr
+[![Logo PNE](http://geonature.fr/img/logo-pne.jpg)](http://www.ecrins-parcnational.fr)
 
-.. image:: http://www.cbn-alpin.fr/images/stories/habillage/logo-cbna.jpg
-    :target: http://www.cbn-alpin.fr
+[![Logo CBNA](http://www.cbn-alpin.fr/images/stories/habillage/logo-cbna.jpg)](http://www.cbn-alpin.fr) 
