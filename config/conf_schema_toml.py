@@ -6,7 +6,6 @@
 
 from marshmallow import Schema, fields
 
-
 export_available_format = ['geojson', 'csv', 'shapefile']
 
 zp_message = {"emptyMessage": "Aucune zone à afficher ", "totalMessage": "zone(s) de prospection au total"}
@@ -26,11 +25,9 @@ default_list_visit_columns = [
     {"name": 'Observateur(s)', "prop": "observers"},
     {"name": 'Présence/ Absence ? ', "prop": "state"},
     # {"name": 'identifiant', "prop": "id_base_visit"}
-
 ]
 
 zoom_center = [44.982667966765845, 6.062455200884894]
-
 
 class GnModuleSchemaConf(Schema):
     zp_message = fields.Dict(missing=zp_message)
@@ -45,4 +42,3 @@ class GnModuleSchemaConf(Schema):
     id_list_taxon = fields.Integer(missing=30)
     export_srid = fields.Integer(missing=2154)
     zoom_center = fields.List(fields.Float(), missing=zoom_center)
-    MODULE_URL = fields.String(missing="suivi_flore_territoire")

@@ -1,22 +1,21 @@
 # Fichier listant les paramètres du module et leurs valeurs par défaut
 
-# Paramètres créés automatiquement au moment de l'installation du module
-
-api_url = '/suivi_flore_territoire'
-id_application = 7
-
-# Paramètres du module
-
+# Coordonnées latitude, longitude permettant d'indiquer le centre des cartes du module
 zoom_center = [44.982667966765845, 6.062455200884894]
 
+# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types` pour l'entrée avec type_name="Mailles25*25m" et type_code="M25m"
 id_type_maille = 32
+# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types` pour l'entrée avec type_name="Communes" et type_code="COM"
 id_type_commune = 25
 id_menu_list_user = 1
+# Valeur du champ `id_liste` dans la table `taxonomie.bib_listes` pour l'entrée avec nom_liste="Suivi Flore Territoire"
 id_list_taxon = 30
+# Type de SRID utilisé pour l'export des données géographiques
 export_srid = 2154
-
+# Liste des types d'export disponible
 export_available_format = ['geojson', 'csv', 'shapefile']
 
+# Gestion des messages configurables
 zp_message = {emptyMessage = "Aucune zone à afficher ", totalMessage = "zone(s) de prospection au total"}
 list_visit_message = {emptyMessage = "Aucune visite sur ce site ", totalMessage = "visites au total"}
 detail_list_visit_message = {emptyMessage = "Aucune autre visite sur ce site ", totalMessage = "visites au total"}
