@@ -5,12 +5,20 @@ zoom_center = [44.982667966765845, 6.062455200884894]
 # Zoom par défaut utilisé pour les cartes du module
 zoom_level = 12
 
-# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types` pour l'entrée avec type_name="Mailles25*25m" et type_code="M25m"
+# Identifiant du datasaet à utiliser pour les données SFT.
+# Valeur du champ `id_dataset` de la table `gn_meta.t_datasets`.
+id_dataset = 1
+# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types`.
+# Par défaut, id pour l'entrée avec type_name="Mailles25*25m" et type_code="M25m"
 id_type_maille = 32
-# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types` pour l'entrée avec type_name="Communes" et type_code="COM"
+# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types`.
+# Par défaut, id pour l'entrée avec type_name="Communes" et type_code="COM"
 id_type_commune = 25
+# Identifiant de la liste d'utilisateurs réalisant des visites pour SFT.
+# Valeur du champ `id_liste` dans la table `utilisateurs.t_listes`.
 id_menu_list_user = 1
-# Valeur du champ `id_liste` dans la table `taxonomie.bib_listes` pour l'entrée avec nom_liste="Suivi Flore Territoire"
+# Valeur du champ `id_liste` dans la table `taxonomie.bib_listes`.
+# Par défaut, id pour l'entrée avec nom_liste="Suivi Flore Territoire"
 id_list_taxon = 30
 # Type de SRID utilisé pour l'export des données géographiques
 export_srid = 2154
