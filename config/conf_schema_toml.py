@@ -42,3 +42,4 @@ class GnModuleSchemaConf(Schema):
     id_list_taxon = fields.Integer(missing=30)
     export_srid = fields.Integer(missing=2154)
     zoom_center = fields.List(fields.Float(), missing=zoom_center)
+    zoom_level = fields.Integer(missing=12)

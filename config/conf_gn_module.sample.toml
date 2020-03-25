@@ -2,6 +2,8 @@
 
 # Coordonnées latitude, longitude permettant d'indiquer le centre des cartes du module
 zoom_center = [44.982667966765845, 6.062455200884894]
+# Zoom par défaut utilisé pour les cartes du module
+zoom_level = 12
 
 # Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types` pour l'entrée avec type_name="Mailles25*25m" et type_code="M25m"
 id_type_maille = 32
