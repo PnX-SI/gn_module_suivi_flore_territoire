@@ -203,6 +203,7 @@ def post_visit(info_role):
     Poste une nouvelle visite ou édite une ancienne
     """
     data = dict(request.get_json())
+
     # if its not an update we check if there is not aleady a visit this year
     if not data["id_base_visit"]:
         check_year_visit(data["id_base_site"], data["visit_date_min"][0:4])
@@ -211,8 +212,14 @@ def post_visit(info_role):
         tab_perturbation = data.pop("cor_visit_perturbation")
     except:
         pass
-    tab_visit_grid = data.pop("cor_visit_grid")
+
+    if "cor_visit_grid" in data:
+        tab_visit_grid = data.pop("cor_visit_grid")
+    else:
+        tab_visit_grid = None
+
     tab_observer = data.pop("cor_visit_observer")
+
     visit = TVisiteSFT(**data)
     visit.as_dict(True)
     # pour que visit prenne en compte des relations
@@ -227,9 +234,12 @@ def post_visit(info_role):
             visit.cor_visit_perturbation.append(per)
     except:
         pass
-    for v in tab_visit_grid:
-        visit_grid = CorVisitGrid(**v)
-        visit.cor_visit_grid.append(visit_grid)
+
+    if tab_visit_grid is not None:
+        for v in tab_visit_grid:
+            visit_grid = CorVisitGrid(**v)
+            visit.cor_visit_grid.append(visit_grid)
+
     observers = DB.session.query(User).filter(User.id_role.in_(tab_observer)).all()
     for o in observers:
         visit.observers.append(o)

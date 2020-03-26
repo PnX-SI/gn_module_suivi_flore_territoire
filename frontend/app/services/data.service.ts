@@ -13,7 +13,7 @@ export class DataService {
     for (let key in params) {
       myParams = myParams.set(key, params[key]);
     }
-    console.log(ModuleConfig.MODULE_URL);
+
     return this._http.get<any>(
       `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`,
       {
@@ -43,8 +43,6 @@ export class DataService {
   }
 
   postVisit(data: any) {
-    console.log(data);
-
     return this._http.post<any>(
       `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`,
       data

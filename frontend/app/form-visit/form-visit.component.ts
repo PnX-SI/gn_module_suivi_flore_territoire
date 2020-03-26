@@ -59,18 +59,22 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.mapService.map.doubleClickZoom.disable();
-    // récupère nom de l'espèce
 
+    // Get Taxon name
     this._api.getInfoSite(this.idSite).subscribe(info => {
       this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
         this.nomTaxon = taxon.nom_valide;
       });
     });
 
-    // vérifie s'il existe idVisit --> c'est une modification
+    this.modifGrid = this.formService.initFormSFT();
+
+    // Check if is an update or an insert
     if (this.idVisit !== undefined) {
       this._api.getOneVisit(this.idVisit).subscribe(element => {
-        this.visitGrid = element.cor_visit_grid;
+        if (element.cor_visit_grid !== undefined) {
+          this.visitGrid = element.cor_visit_grid;
+        }
         this.storeService.presence = 0;
         this.storeService.absence = 0;
         // compter l'absence/présence des mailles déjà existantes
@@ -122,6 +126,8 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           comments: element.comments
         });
       });
+    } else {
+      this.visitGrid = [];
     }
 
     this._api
@@ -165,11 +171,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
         feature.state = 1;
         this.storeService.getMailleNoVisit();
-        this.visitGrid.forEach(dataG => {
-          if (feature.id == dataG.id_area) {
-            dataG.presence = true;
-          }
-        });
         this.visitModif[feature.id] = true;
       },
 
@@ -183,13 +184,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         } else {
           this.storeService.absence += 1;
         }
+
         feature.state = 2;
         this.storeService.getMailleNoVisit();
-        this.visitGrid.forEach(dataG => {
-          if (feature.id == dataG.id_area) {
-            dataG.presence = false;
-          }
-        });
         this.visitModif[feature.id] = false;
       },
 
@@ -200,13 +197,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         } else if (feature.state == 2) {
           this.storeService.absence -= 1;
         }
+
         feature.state = 0;
         this.storeService.getMailleNoVisit();
-        this.visitGrid.forEach(dataG => {
-          if (feature.id == dataG.id_area) {
-            dataG.presence = false;
-          }
-        });
         this.visitModif[feature.id] = false;
       }
     });
@@ -218,7 +211,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
   onModif() {
     const formModif = Object.assign({}, this.modifGrid.value);
-
     formModif["id_base_site"] = this.idSite;
     formModif["id_dataset"] = ModuleConfig.id_dataset;
     formModif["id_module"] = ModuleConfig.ID_MODULE;
@@ -229,13 +221,24 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     formModif["visit_date_max"] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value
     );
-
+    
     for (let key in this.visitModif) {
-      this.visitGrid.push({
-        id_base_visit: this.idVisit,
-        presence: this.visitModif[key],
-        id_area: key
+      let idAreaUpdated = Number(key);
+      let needToInsert = true;
+      this.visitGrid.forEach(existingGrid => {
+        if (existingGrid.id_area == idAreaUpdated) {
+          existingGrid.presence = this.visitModif[key];
+          needToInsert = false;
+        }
+          
       });
+      if (needToInsert) {
+        this.visitGrid.push({
+          id_base_visit: Number(this.idVisit),
+          presence: this.visitModif[key],
+          id_area: Number(key)
+        });
+      }
     }
 
     formModif["cor_visit_grid"] = this.visitGrid;
