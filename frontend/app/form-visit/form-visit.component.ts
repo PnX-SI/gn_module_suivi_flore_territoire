@@ -28,9 +28,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   public idVisit;
   public idSite;
   public namePertur = [];
-  public visitGrid = []; // tableau de l'objet maille visité : [{id_area: qqc, presence: true/false}]
+  public visitGrid = []; // Data on meshes
   public tabObserver = [];
-  public visitModif = {}; // l'objet maille visité (modifié)
+  public visitModif = {}; // Visited meshes object
   public disabledAfterPost = false;
 
   @ViewChild("geojson")
@@ -67,7 +67,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       });
     });
 
+    // Initialize
     this.modifGrid = this.formService.initFormSFT();
+    this.storeService.initialize();
 
     // Check if is an update or an insert
     if (this.idVisit !== undefined) {
@@ -75,9 +77,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         if (element.cor_visit_grid !== undefined) {
           this.visitGrid = element.cor_visit_grid;
         }
-        this.storeService.presence = 0;
-        this.storeService.absence = 0;
-        // compter l'absence/présence des mailles déjà existantes
+        // Count absence and presence of existing meshes
         if (this.visitGrid !== undefined) {
           this.visitGrid.forEach(grid => {
             if (grid.presence == true) {
@@ -155,7 +155,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       });
     }
 
-    // évenement quand modifier statut de maille
+    // Handle events on map meshes
     layer.on({
       click: event1 => {
         layer.setStyle(this.storeService.myStylePresent);
@@ -214,7 +214,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     formModif["id_base_site"] = this.idSite;
     formModif["id_dataset"] = ModuleConfig.id_dataset;
     formModif["id_module"] = ModuleConfig.ID_MODULE;
-    //  formModif['visit_date_min'] = this.dateParser.format(formModif['visit_date_min']);
+    
     formModif["visit_date_min"] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value
     );
@@ -290,7 +290,8 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
       }
     );
-    // griser le bouton après avoir posté la visite
+    
+    // Disable submit button after post
     this.disabledAfterPost = true;
   }
 }

@@ -8,7 +8,6 @@ import { ModuleConfig } from "../module.config";
 @Injectable()
 export class StoreService {
   public currentLayer: Layer;
-
   public sftConfig = ModuleConfig;
 
   public myStylePresent = {
@@ -25,16 +24,23 @@ export class StoreService {
     weight: 3
   };
 
-  public presence = 0;
-  public absence = 0;
-  public total = 0;
-  public rest = 0;
-  public urlLoad = `${AppConfig.API_ENDPOINT}/${
-    ModuleConfig.MODULE_URL
-  }/export_visit`;
+  public presence;
+  public absence;
+  public total;
+  public rest;
+  public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
   public queryString = new HttpParams();
 
-  constructor(private _modalService: NgbModal) {}
+  constructor(private _modalService: NgbModal) {
+    this.initialize();
+  }
+
+  initialize() {
+    this.presence = 0;
+    this.absence = 0;
+    this.rest = 0;
+    this.total = 0;
+  }
 
   getMailleNoVisit() {
     this.rest = this.total - this.absence - this.presence;
