@@ -57,7 +57,7 @@ def get_sites_zp():
             Taxonomie.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(BibOrganismes.nom_organisme), ", "),
-            func.string_agg(LAreas.area_name, ", "),
+            func.string_agg(distinct(LAreas.area_name), ", "),
         )
         .select_from(
             TInfoSite.__table__.outerjoin(
