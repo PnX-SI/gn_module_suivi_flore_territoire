@@ -51,14 +51,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params["idSite"];
-
     this.idVisit = this.activatedRoute.snapshot.params["idVisit"];
-
-    this.modifGrid = this.formService.initFormSFT();
-  }
-
-  ngAfterViewInit() {
-    this.mapService.map.doubleClickZoom.disable();
 
     // Get Taxon name
     this._api.getInfoSite(this.idSite).subscribe(info => {
@@ -77,6 +70,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         if (element.cor_visit_grid !== undefined) {
           this.visitGrid = element.cor_visit_grid;
         }
+
         // Count absence and presence of existing meshes
         if (this.visitGrid !== undefined) {
           this.visitGrid.forEach(grid => {
@@ -88,33 +82,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           });
         }
 
-        let typePer;
-        let tabVisitPerturb = element.cor_visit_perturbation;
-
-        if (tabVisitPerturb !== undefined) {
-          tabVisitPerturb.forEach(per => {
-            if (per === tabVisitPerturb[tabVisitPerturb.length - 1]) {
-              typePer = per.label_fr + ". ";
-            } else {
-              typePer = per.label_fr + ", ";
-            }
-            this.namePertur.push(typePer);
-          });
-        }
-
+        // Date
         this.date = element.visit_date_min;
 
-        let fullNameObserver;
-
-        element.observers.forEach(name => {
-          if (name === element.observers[element.observers.length - 1]) {
-            fullNameObserver = name.nom_complet + ". ";
-          } else {
-            fullNameObserver = name.nom_complet + ", ";
-          }
-          this.tabObserver.push(fullNameObserver);
-        });
-
+        // Update data binded object
         this.modifGrid.patchValue({
           id_base_site: this.idSite,
           id_base_visit: this.idVisit,
@@ -140,6 +111,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.storeService.total = this.zps.features.length;
         this.storeService.getMailleNoVisit();
       });
+  }
+
+  ngAfterViewInit() {
+    this.mapService.map.doubleClickZoom.disable();
   }
 
   onEachFeature(feature, layer) {
