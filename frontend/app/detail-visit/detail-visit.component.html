@@ -1,6 +1,5 @@
 <div class="row row-0">
    <!-- MAP  -->
-
    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
       <pnx-map height="94vh">
          <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
@@ -8,75 +7,125 @@
       </pnx-map>
    </div>
 
-   <!-- INFO CETTE VISITE -->
-
+   <!-- INFO VISIT -->
    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container detail-sft">
-      <h5> <i class="fa fa-binoculars"></i> <b> Informations de la visite </b> </h5>
+      <h5>
+         <i class="fa fa-binoculars"></i>
+         <b> Informations de la visite </b>
+      </h5>
       <div>
          <ul class="list-group">
-            <li class="list-group-item"> <i class="fa fa-map-marker" style="font-size:18px"></i>
-                  Zone de prospection : <span class="info"> {{ idSite }} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-tree" style="font-size:18px"></i>
-                  Espèce prospectée : <span class="info"> {{nomTaxon}} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-group" style="font-size:18px"></i>
-                  Observateur(s) : <span class="info" *ngFor="let obs of tabObserver"> {{obs}} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-calendar" style="font-size:18px"></i>
-                  Date de la visite : <span class="info"> {{date}} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-warning" style="font-size:18px"></i>
-                  Perturbation(s) : <span class="info" *ngFor="let per of tabPertur"> {{per}} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-leaf" style="font-size:18px"></i>
-                  Maille(s) de présence : <span class="info"> {{storeService.presence}} </span> </li>
-            <li class="list-group-item"><i class="fa fa-ban" style="font-size:18px"></i>
-                  Maille(s) d'absence : <span class="info"> {{storeService.absence}} </span> </li>
-            <li class="list-group-item"> <i class="fa fa-question-circle" style="font-size:18px"></i>
-                  Maille(s) non visitées : <span class="info"> {{storeService.rest}} </span> </li>
-            <li class="list-group-item"> <i class="	fa fa-comments" style="font-size:18px"></i>
-                  Commentaires : <span class="info"> {{comments}} </span> </li>
+            <li class="list-group-item">
+               <i class="fa fa-map-marker" style="font-size:18px"></i>
+               Zone de prospection :
+               <span class="info"> {{ idSite }} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-tree" style="font-size:18px"></i>
+               Espèce prospectée :
+               <span class="info"> {{nomTaxon}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-group" style="font-size:18px"></i>
+               Observateur(s) :
+               <span class="info" *ngFor="let obs of tabObserver"> {{obs}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-calendar" style="font-size:18px"></i>
+               Date de la visite :
+               <span class="info"> {{date}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-warning" style="font-size:18px"></i>
+               Perturbation(s) :
+               <span class="info" *ngFor="let per of tabPertur"> {{per}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-leaf" style="font-size:18px"></i>
+               Maille(s) de présence :
+               <span class="info"> {{storeService.presence}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-ban" style="font-size:18px"></i>
+               Maille(s) d'absence :
+               <span class="info"> {{storeService.absence}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="fa fa-question-circle" style="font-size:18px"></i>
+               Maille(s) non visitées :
+               <span class="info"> {{storeService.rest}} </span>
+            </li>
+            <li class="list-group-item">
+               <i class="	fa fa-comments" style="font-size:18px"></i>
+               Commentaires :
+               <span class="info"> {{comments}} </span>
+            </li>
          </ul>
       </div>
 
       <div id="end-btn">
-         <pnx-modal-download [pathDownload]='storeService.urlLoad' [exportFormat]='storeService.sftConfig.export_available_format'
-            [queryString]='storeService.queryString' labelButton='Télécharger cette visite'></pnx-modal-download>
+         <pnx-modal-download
+            [pathDownload]='storeService.urlLoad'
+            [exportFormat]='storeService.sftConfig.export_available_format'
+            [queryString]='storeService.queryString'
+            labelButton='Télécharger cette visite'>
+         </pnx-modal-download>
 
-         <button type="button" class="btn btn-success box-shadow btn-sm " id="add-btn" (click)="onEditHere()">
+         <button
+            type="button"
+            class="btn btn-success box-shadow btn-sm "
+            id="add-btn"
+            (click)="onEditHere()">
             <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
-            Editer cette visite
+            Éditer cette visite
          </button>
-
-
       </div>
 
-      <!-- LES AUTRES VISITES  -->
-
-      <h5> <i class="fa fa-search-plus"></i> <b> Les autres visites </b></h5>
+      <!-- OTHER VISITS  -->
+      <h5>
+         <i class="fa fa-search-plus"></i>
+         <b> Les autres visites </b>
+      </h5>
       <div>
-         <ngx-datatable class="material" [rows]="rows" [columnMode]="'force'" [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
-            [limit]="6" [messages]="storeService.sftConfig.detail_list_visit_message">
+         <ngx-datatable
+            class="material"
+            [rows]="rows"
+            [columnMode]="'force'"
+            [headerHeight]="50"
+            [footerHeight]="50"
+            [rowHeight]="'auto'"
+            [limit]="6"
+            [messages]="storeService.sftConfig.detail_list_visit_message">
 
             <ngx-datatable-column maxWidth="100">
                <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button type="button" class="btn btn-info fa fa-info-circle" (click)="onInfo(row.id_base_visit)" title="Visualiser">
+                  <button
+                     type="button"
+                     class="btn btn-info fa fa-info-circle"
+                     (click)="onInfo(row.id_base_visit)"
+                     title="Visualiser">
                   </button>
                </ng-template>
             </ngx-datatable-column>
 
             <ngx-datatable-column maxWidth="100">
                <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button type="button" class="btn btn-success fa fa-edit" (click)="onEditOther(row.id_base_visit)" title="Editer">
+                  <button
+                     type="button"
+                     class="btn btn-success fa fa-edit"
+                     (click)="onEditOther(row.id_base_visit)"
+                     title="Éditer">
                   </button>
                </ng-template>
             </ngx-datatable-column>
 
-            <ngx-datatable-column *ngFor="let col of storeService.sftConfig.default_list_visit_columns" [name]="col.name" [prop]="col.prop"
+            <ngx-datatable-column
+               *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
+               [name]="col.name"
+               [prop]="col.prop"
                maxWidth="220">
-
             </ngx-datatable-column>
-
          </ngx-datatable>
-
       </div>
-
    </div>
-
 </div>

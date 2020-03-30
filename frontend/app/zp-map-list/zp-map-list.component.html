@@ -1,75 +1,107 @@
 <div class="row row-0">
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-    <pnx-map height="94vh" [center]="storeService.sftConfig.zoom_center" [zoom]="storeService.sftConfig.zoom_level">
-      <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+    <pnx-map
+      height="94vh"
+      [center]="storeService.sftConfig.zoom_center"
+      [zoom]="storeService.sftConfig.zoom_level">
+        <pnx-geojson
+          [onEachFeature]="onEachFeature.bind(this)"
+          [geojson]="zps">
       </pnx-geojson>
     </pnx-map>
   </div>
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
-    <h3> Zones de prospection</h3>
+    <h3>Zones de prospection</h3>
 
     <div class="row row-0">
       <div class="col padding-sm">
-        <pnx-taxonomy #taxon label="{{ 'Taxon.Taxon' | translate }}" [parentFormControl]="taxonForm" [idList]="storeService.sftConfig.id_list_taxon"
-          [charNumber]="3" [listLength]="20" (onChange)="onTaxonChanged($event);" (onDelete)="onDelete(); onDeleteParams('cd_nom', oldFilterTax )">
+        <pnx-taxonomy
+          #taxon label="{{ 'Taxon.Taxon' | translate }}"
+          [parentFormControl]="taxonForm"
+          [idList]="storeService.sftConfig.id_list_taxon"
+          [charNumber]="3"
+          [listLength]="20"
+          (onChange)="onTaxonChanged($event);"
+          (onDelete)="onDelete(); onDeleteParams('cd_nom', oldFilterTax )">
         </pnx-taxonomy>
-        <!-- <input [ngModel]="searchTaxon" (ngModelChange)="onSearchTaxon($event)" class="inputSearch"> -->
       </div>
 
       <div class="col padding-sm">
         <small> Année de visite </small>
-        <input type="number" [formControl]="filtreForm.controls.filtreYear" class="form-control form-control-sm"
-         (onDeleteFiltre)="onDelete()">
+        <input
+          type="number"
+          [formControl]="filtreForm.controls.filtreYear"
+          class="form-control form-control-sm"
+          (onDeleteFiltre)="onDelete()" />
       </div>
     </div>
 
     <div id="bottom-search" class="row row-0 ">
       <div class="col padding-sm">
         <small> Organisme </small>
-        <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreOrga">
-          <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
-          <option *ngFor="let label of tabOrganism"> {{label}} </option>
-          <option [ngValue]=null> Tous </option>
+        <select
+          class="form-control form-control-sm"
+          name="monSelect"
+          [formControl]="filtreForm.controls.filtreOrga">
+            <option [ngValue]=null> -- Sélectionner un organisme -- </option>
+            <option *ngFor="let label of tabOrganism"> {{label}} </option>
         </select>
       </div>
 
       <div class="col padding-sm">
         <small> Commune </small>
-        <select class="form-control form-control-sm" name="monSelect" [formControl]="filtreForm.controls.filtreCom">
-          <option [ngValue]=null> -- Sélectionnez un filtre -- </option>
-          <option *ngFor="let label of tabCom"> {{label}} </option>
-          <option [ngValue]=null> Tous </option>
+        <select
+          class="form-control form-control-sm"
+          name="monSelect"
+          [formControl]="filtreForm.controls.filtreCom">
+            <option [ngValue]=null> -- Sélectionner une commune -- </option>
+            <option *ngFor="let label of tabCom"> {{label}} </option>
         </select>
       </div>
     </div>
 
-    <ngx-datatable #table class="material" [rows]="filteredData" [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'"
-      [columnMode]="'force'" [selected]="mapListService.selectedRow" [selectionType]="'single'" (select)="mapListService.onRowSelect($event)"
-      [rowClass]="mapListService.getRowClass" [offset]="mapListService.page.pageNumber" [limit]="mapListService.page.size"
+    <ngx-datatable
+      #table class="material"
+      [rows]="filteredData"
+      [headerHeight]="50"
+      [footerHeight]="50"
+      [rowHeight]="'auto'"
+      [columnMode]="'force'"
+      [selected]="mapListService.selectedRow"
+      [selectionType]="'single'"
+      (select)="mapListService.onRowSelect($event)"
+      [rowClass]="mapListService.getRowClass"
+      [offset]="mapListService.page.pageNumber"
+      [limit]="mapListService.page.size"
       [messages]="storeService.sftConfig.zp_message">
 
-      <ngx-datatable-column *ngFor="let col of storeService.sftConfig.default_zp_columns" [name]="col.name" [prop]="col.prop" [maxWidth]="col.width">
-
+      <ngx-datatable-column
+        *ngFor="let col of storeService.sftConfig.default_zp_columns"
+        [name]="col.name"
+        [prop]="col.prop"
+        [maxWidth]="col.width">
       </ngx-datatable-column>
 
       <ngx-datatable-column maxWidth="90">
         <ng-template let-row="row" ngx-datatable-cell-template>
-          <button type="button" class="btn btn-info fa fa-eye" (click)="onInfo(row.id_base_site)" title="Visualiser">
+          <button
+            type="button"
+            class="btn btn-info fa fa-eye"
+            (click)="onInfo(row.id_base_site)"
+            title="Visualiser">
           </button>
         </ng-template>
       </ngx-datatable-column>
-
     </ngx-datatable>
 
     <div id="end-btn">
-
-      <pnx-modal-download [pathDownload]='storeService.urlLoad' [exportFormat]='storeService.sftConfig.export_available_format'
-        [queryString]='storeService.queryString' labelButton='Télécharger les visites'>
+      <pnx-modal-download
+        [pathDownload]="storeService.urlLoad"
+        [exportFormat]="storeService.sftConfig.export_available_format"
+        [queryString]="storeService.queryString"
+        labelButton="Télécharger les visites">
       </pnx-modal-download>
-
     </div>
-
   </div>
-
 </div>
