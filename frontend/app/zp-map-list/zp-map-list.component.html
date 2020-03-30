@@ -44,7 +44,7 @@
           class="form-control form-control-sm"
           name="monSelect"
           [formControl]="filtreForm.controls.filtreOrga">
-            <option [ngValue]=null> -- Sélectionner un organisme -- </option>
+            <option [ngValue]=null> Tous </option>
             <option *ngFor="let label of tabOrganism"> {{label}} </option>
         </select>
       </div>
@@ -55,7 +55,7 @@
           class="form-control form-control-sm"
           name="monSelect"
           [formControl]="filtreForm.controls.filtreCom">
-            <option [ngValue]=null> -- Sélectionner une commune -- </option>
+            <option [ngValue]=null> Toutes </option>
             <option *ngFor="let label of tabCom"> {{label}} </option>
         </select>
       </div>
