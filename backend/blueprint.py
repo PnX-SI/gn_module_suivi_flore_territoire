@@ -383,17 +383,26 @@ def get_organisme():
     Retourne la liste de tous les organismes présents
     """
 
-    q = (
-        DB.session.query(BibOrganismes.nom_organisme, User.nom_role, User.prenom_role)
-        .outerjoin(User, BibOrganismes.id_organisme == User.id_organisme)
-        .distinct()
-        .join(corVisitObserver, User.id_role == corVisitObserver.c.id_role)
-        .outerjoin(
-            TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
+    query = (
+        select([
+            BibOrganismes.nom_organisme.distinct(),
+            User.nom_role,
+            User.prenom_role
+        ])
+        .select_from(
+            User.__table__.outerjoin(BibOrganismes,
+                User.id_organisme == BibOrganismes.id_organisme
+            )
+            .join(corVisitObserver,
+                User.id_role == corVisitObserver.c.id_role
+            )
+            .outerjoin(TVisiteSFT,
+                corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
+            )
         )
     )
+    data = DB.engine.execute(query)
 
-    data = q.all()
     tab_orga = []
     for d in data:
         info_orga = dict()
