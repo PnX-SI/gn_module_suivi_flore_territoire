@@ -117,22 +117,25 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.mapListService.enableMapListConnexion(this.mapService.getMap());
 
-    this._api.getOrganisme().subscribe(elem => {
-      elem.forEach(orga => {
-        this.tabOrganism.push(orga.nom_organisme);
-        this.tabOrganism.sort((a, b) => {
-          return a.localeCompare(b);
+    this._api.getOrganisme()
+      .subscribe(elem => {
+        elem.forEach(orga => {
+          if (this.tabOrganism.indexOf(orga.nom_organisme) === -1) {
+            this.tabOrganism.push(orga.nom_organisme);
+          }
+          this.tabOrganism.sort((a, b) => {
+            return a.localeCompare(b);
+          });
         });
       });
-    });
 
-    this._api
-      .getCommune(ModuleConfig.ID_MODULE, {
-        id_area_type: this.storeService.sftConfig.id_type_commune
-      })
+    let params = {id_area_type: this.storeService.sftConfig.id_type_commune};
+    this._api.getCommune(ModuleConfig.ID_MODULE, params)
       .subscribe(info => {
         info.forEach(com => {
-          this.tabCom.push(com.nom_commune);
+          if (this.tabCom.indexOf(com.nom_commune) === -1) {
+            this.tabCom.push(com.nom_commune);
+          }
           this.tabCom.sort((a, b) => {
             return a.localeCompare(b);
           });
@@ -198,7 +201,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onSetParams(param: string, value) {
-    //  ajouter le queryString pour télécharger les données
+    // Add filter query string to download data
     this.storeService.queryString = this.storeService.queryString.set(
       param,
       value
@@ -206,7 +209,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onDeleteParams(param: string, value) {
-    // effacer le queryString (de filtre)pour télécharger
+    // Remove filter query string to download data
     this.storeService.queryString = this.storeService.queryString.delete(
       param,
       value
