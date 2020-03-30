@@ -10,3 +10,4 @@ venv/
 settings.ini
 conf_gn_module.toml
 module.config.ts
+tsconfig.json
