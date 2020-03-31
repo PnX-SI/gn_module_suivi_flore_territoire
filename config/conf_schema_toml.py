@@ -8,23 +8,31 @@ from marshmallow import Schema, fields
 
 export_available_format = ['geojson', 'csv', 'shapefile']
 
-zp_message = {"emptyMessage": "Aucune zone à afficher ", "totalMessage": "zone(s) de prospection au total"}
-list_visit_message = {"emptyMessage": "Aucune visite sur ce site ", "totalMessage": "visites au total"}
-detail_list_visit_message = {"emptyMessage": "Aucune autre visite sur ce site ", "totalMessage": "visites au total"}
+zp_message = {
+    "emptyMessage": "Aucune zone à afficher ",
+    "totalMessage": "zone(s) de prospection au total"
+}
+list_visit_message = {
+    "emptyMessage": "Aucune visite sur ce site ",
+    "totalMessage": "visites au total"
+}
+detail_list_visit_message = {
+    "emptyMessage": "Aucune autre visite sur ce site ",
+    "totalMessage": "visites au total"
+}
 
 default_zp_columns = [
     {"name": 'Identifiant', "prop": 'id_base_site', "width": 90},
     {"name": 'Taxon', "prop": 'nom_taxon', "width": 350},
     {"name": 'Nombre de visites', "prop": 'nb_visit', "width": 120},
     {"name": 'Date de la dernière visite', "prop": 'date_max', "width": 160},
-    {"name": 'Organisme', "prop": 'organisme', "width": 200}
+    {"name": 'Organisme', "prop": 'organisme', "width": 200},
 ]
 
 default_list_visit_columns = [
     {"name": 'Date', "prop": 'visit_date_min'},
     {"name": 'Observateur(s)', "prop": "observers"},
     {"name": 'Présence/ Absence ? ', "prop": "state"},
-    # {"name": 'identifiant', "prop": "id_base_visit"}
 ]
 
 zoom_center = [44.982667966765845, 6.062455200884894]
