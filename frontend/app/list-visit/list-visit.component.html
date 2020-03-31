@@ -79,24 +79,28 @@
             [offset]="mapListService.page.pageNumber"
             [limit]="mapListService.page.size">
 
-            <ngx-datatable-column maxWidth="90">
+            <ngx-datatable-column
+               name="Voir"
+               maxWidth="90">
                <ng-template let-row="row" ngx-datatable-cell-template>
                   <button
                      type="button"
-                     class="btn btn-info fa fa-info-circle"
+                     class="btn btn-info fa fa-eye"
                      (click)="onInfo(row.id_base_visit)"
                      title="Visualiser">
                   </button>
                </ng-template>
             </ngx-datatable-column>
 
-            <ngx-datatable-column maxWidth="90">
+            <ngx-datatable-column
+               name="Éditer"
+               maxWidth="90">
                <ng-template let-row="row" ngx-datatable-cell-template>
                   <button
                      type="button"
                      class="btn btn-success fa fa-edit"
                      (click)="onEdit(row.id_base_visit)"
-                     title="Editer">
+                     title="Éditer">
                   </button>
                </ng-template>
             </ngx-datatable-column>
@@ -105,8 +109,13 @@
                *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
                [name]="col.name"
                [prop]="col.prop"
+               [cellTemplate]="col.cellTemplate"
                maxWidth="220">
             </ngx-datatable-column>
+
+            <ng-template #observersCellTpl let-row="row" ngx-datatable-cell-template>
+               <span title="{{ row.observersFull }}">{{ row.observers }}</span>
+            </ng-template>
          </ngx-datatable>
       </div>
 

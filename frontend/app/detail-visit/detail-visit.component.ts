@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from "@angular/core";
+import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 
 import { MapService } from "@geonature_common/map/map.service";
@@ -8,6 +8,7 @@ import { GeojsonComponent } from "@geonature_common/map/geojson/geojson.componen
 import { StoreService } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
 import { DataService } from "../services/data.service";
+import { ObserversService } from '../services/observers.service';
 
 @Component({
   selector: "pnx-detail-visit",
@@ -15,6 +16,7 @@ import { DataService } from "../services/data.service";
   styleUrls: ["./detail-visit.component.scss"]
 })
 export class DetailVisitComponent implements OnInit, AfterViewInit {
+
   public zps;
   public nomTaxon;
   public date;
@@ -22,16 +24,17 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   public idSite;
   public tabPertur = [];
   public visitGrid = [];
-  public tabObserver = [];
+  public observers = '';
 
   public rows = [];
 
   public dataListVisit = [];
   public comments;
-  // public queryString = new HttpParams();
 
   @ViewChild("geojson")
   geojson: GeojsonComponent;
+  @ViewChild('observersCellTpl')
+  observersCellTpl: TemplateRef<any>;
 
   constructor(
     public mapService: MapService,
@@ -39,7 +42,8 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     public activatedRoute: ActivatedRoute,
     public storeService: StoreService,
     public router: Router,
-    public dataFormService: DataFormService
+    public dataFormService: DataFormService,
+    private observersService: ObserversService,
   ) {}
 
   ngOnInit() {
@@ -86,17 +90,10 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           });
         }
 
-        let fullNameObs;
-        this.tabObserver = [];
-
-        element.observers.forEach(obs => {
-          if (obs == element.observers[element.observers.length - 1]) {
-            fullNameObs = obs.nom_complet + ". ";
-          } else {
-            fullNameObs = obs.nom_complet + ", ";
-          }
-          this.tabObserver.push(fullNameObs);
-        });
+        this.observers = this.observersService
+          .initialize()
+          .addObservers(element.observers)
+          .getObserversFull();
 
         this.date = element.visit_date_min;
         this.idSite = element.id_base_site;
@@ -120,16 +117,22 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           });
         });
 
+        this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+          if (col.prop === 'observers') {
+            col.cellTemplate = this.observersCellTpl;
+          }
+        });
+
         this._api.getVisits({ id_base_site: this.idSite }).subscribe(donnee => {
           donnee.forEach(visit => {
-            let fullName;
-            visit.observers.forEach(obs => {
-              fullName = obs.nom_role + " " + obs.prenom_role;
-            });
-            visit.observers = fullName;
+            visit.observers = this.observersService
+              .initialize()
+              .addObservers(visit.observers)
+              .getObserversAbbr();
+            visit.observersFull = this.observersService.getObserversFull();
+
             let pres = 0;
             let abs = 0;
-
             if (visit.cor_visit_grid !== undefined) {
               visit.cor_visit_grid.forEach(maille => {
                 if (maille.presence) {
@@ -139,7 +142,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                 }
               });
             }
-
             visit.state = pres + "P / " + abs + "A ";
           });
 

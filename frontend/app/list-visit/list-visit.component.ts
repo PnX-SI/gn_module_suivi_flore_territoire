@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from "@angular/core";
+import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef} from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
 
@@ -10,6 +10,7 @@ import { DataService } from "../services/data.service";
 
 import { StoreService } from "../services/store.service";
 import { ModuleConfig } from "../module.config";
+import { ObserversService } from '../services/observers.service';
 
 @Component({
   selector: "pnx-list-visit",
@@ -17,6 +18,7 @@ import { ModuleConfig } from "../module.config";
   styleUrls: ["./list-visit.component.scss"]
 })
 export class ListVisitComponent implements OnInit, AfterViewInit {
+
   public zps;
   public nomTaxon;
   public currentZp = {};
@@ -30,6 +32,8 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   public descriSite;
   @ViewChild("geojson")
   geojson: GeojsonComponent;
+  @ViewChild('observersCellTpl')
+  observersCellTpl: TemplateRef<any>;
 
   constructor(
     public mapService: MapService,
@@ -37,7 +41,8 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     public activatedRoute: ActivatedRoute,
     public storeService: StoreService,
     public router: Router,
-    public mapListService: MapListService
+    public mapListService: MapListService,
+    private observersService: ObserversService,
   ) {}
 
   ngOnInit() {
@@ -47,6 +52,12 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       "id_base_site",
       this.idSite
     );
+
+    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+        if (col.prop === 'observers') {
+          col.cellTemplate = this.observersCellTpl;
+        }
+    });
 
     this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
       info.features.forEach(el => {
@@ -71,14 +82,12 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
 
     this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
       data.forEach(visit => {
-        let fullName;
-        visit.observers.forEach(obs => {
-          fullName = obs.nom_role + " " + obs.prenom_role;
-        });
-        visit.observers = fullName;
+        this.observersService.addObservers(visit.observers)
+        visit.observers = this.observersService.getObserversAbbr();
+        visit.observersFull = this.observersService.getObserversFull();
+
         let pres = 0;
         let abs = 0;
-
         if (visit.cor_visit_grid !== undefined) {
           visit.cor_visit_grid.forEach(maille => {
             if (maille.presence) {
@@ -88,7 +97,6 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
             }
           });
         }
-
         visit.state = pres + "P / " + abs + "A ";
       });
 
