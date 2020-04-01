@@ -23,6 +23,9 @@ export class ObserversService {
     }
 
     addObservers(rawObservers :any[]): this {
+        if (rawObservers === undefined) {
+            return this;
+        }
         rawObservers.forEach(rawObserver => {
             this.observers.push({
                 firstname: rawObserver.prenom_role,
@@ -35,13 +38,19 @@ export class ObserversService {
     }
 
     getObserversFull(): string {
-        let names = this.fullNames.join(', ') + '.';
-
-        return names.replace(/, ([^,]+)$/, ' & $1')
+        let names = '⚠ Aucun';
+        if (this.fullNames.length > 0) {
+            names = this.fullNames.join(', ') + '.';
+            names = names.replace(/, ([^,]+)$/, ' & $1');
+        }
+        return names;
     }
 
     getObserversAbbr(): string {
-        let abbr = this.abbrNames.join(', ');
+        let abbr = '⚠ Aucun';
+        if (this.abbrNames.length > 0) {
+            abbr = this.abbrNames.join(', ');
+        }
         if (this.abbrNames.length > this.MAX_NAMES) {
             let firstAbbrlNames = this.abbrNames.slice(0, this.MAX_NAMES);
             abbr = firstAbbrlNames.join(', ') + ' ' + this.getMore();

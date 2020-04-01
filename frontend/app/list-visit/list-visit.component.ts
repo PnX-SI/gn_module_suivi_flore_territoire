@@ -80,27 +80,30 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
         this.storeService.total = nbMaille.features.length;
       });
 
-    this._api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
-      data.forEach(visit => {
-        this.observersService.addObservers(visit.observers)
-        visit.observers = this.observersService.getObserversAbbr();
-        visit.observersFull = this.observersService.getObserversFull();
+    this._api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
+      this.computeVisitsInfos(visits)
+      this.rows = visits;
+    });
+  }
 
-        let pres = 0;
-        let abs = 0;
-        if (visit.cor_visit_grid !== undefined) {
-          visit.cor_visit_grid.forEach(maille => {
-            if (maille.presence) {
-              pres += 1;
-            } else {
-              abs += 1;
-            }
-          });
-        }
-        visit.state = pres + "P / " + abs + "A ";
-      });
+  private computeVisitsInfos(visits) {
+    visits.forEach(visit => {
+      this.observersService.initialize().addObservers(visit.observers)
+      visit.observers = this.observersService.getObserversAbbr();
+      visit.observersFull = this.observersService.getObserversFull();
 
-      this.rows = data;
+      let pres = 0;
+      let abs = 0;
+      if (visit.cor_visit_grid !== undefined) {
+        visit.cor_visit_grid.forEach(maille => {
+          if (maille.presence) {
+            pres += 1;
+          } else {
+            abs += 1;
+          }
+        });
+      }
+      visit.state = pres + "P / " + abs + "A ";
     });
   }
 

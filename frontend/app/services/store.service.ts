@@ -8,22 +8,9 @@ import { ModuleConfig } from "../module.config";
 @Injectable()
 export class StoreService {
   public currentLayer: Layer;
-  public sftConfig = ModuleConfig;
-
-  public myStylePresent = {
-    color: "#008000",
-    fill: true,
-    fillOpacity: 0.2,
-    weight: 3
-  };
-
-  public myStyleAbsent = {
-    color: "#8B0000",
-    fill: true,
-    fillOpacity: 0.2,
-    weight: 3
-  };
-
+  public sftConfig;
+  public myStylePresent;
+  public myStyleAbsent;
   public presence;
   public absence;
   public total;
@@ -36,10 +23,36 @@ export class StoreService {
   }
 
   initialize() {
+    this.defineMeshesStyle();
+    this.initialzeMeshesCounters();
+    this.initializeModuleConfig();
+  }
+
+  private defineMeshesStyle() {
+    this.myStylePresent = {
+      color: "#008000",
+      fill: true,
+      fillOpacity: 0.2,
+      weight: 3
+    };
+
+    this.myStyleAbsent = {
+      color: "#8B0000",
+      fill: true,
+      fillOpacity: 0.2,
+      weight: 3
+    };
+  }
+
+  private initialzeMeshesCounters() {
     this.presence = 0;
     this.absence = 0;
     this.rest = 0;
     this.total = 0;
+  }
+
+  private initializeModuleConfig() {
+    this.sftConfig = ModuleConfig;
   }
 
   getMailleNoVisit() {
