@@ -16,16 +16,21 @@ export class StoreService {
   public total;
   public rest;
   public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
-  public queryString = new HttpParams();
+  public queryString;
 
   constructor(private _modalService: NgbModal) {
     this.initialize();
   }
 
   initialize() {
+    this.initializeQueryString();
     this.defineMeshesStyle();
     this.initialzeMeshesCounters();
     this.initializeModuleConfig();
+  }
+
+  private initializeQueryString() {
+    this.queryString = new HttpParams();
   }
 
   private defineMeshesStyle() {

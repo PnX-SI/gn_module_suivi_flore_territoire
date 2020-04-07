@@ -23,7 +23,7 @@
           [charNumber]="3"
           [listLength]="20"
           (onChange)="onTaxonChanged($event);"
-          (onDelete)="onDelete(); onDeleteParams('cd_nom', oldFilterTax )">
+          (onDelete)="onDeleteParams('cd_nom', actualTaxonNameId); onDelete();">
         </pnx-taxonomy>
       </div>
 
@@ -81,9 +81,15 @@
         [name]="col.name"
         [prop]="col.prop"
         [maxWidth]="col.width">
+        <ng-template let-column="col" ngx-datatable-header-template>
+          <span [title]="col.title">{{col.name}}</span>
+        </ng-template>
       </ngx-datatable-column>
 
-      <ngx-datatable-column maxWidth="90">
+      <ngx-datatable-column
+        maxWidth="90"
+        name="Voir"
+        title="Accéder aux visites du site">
         <ng-template let-row="row" ngx-datatable-cell-template>
           <button
             type="button"

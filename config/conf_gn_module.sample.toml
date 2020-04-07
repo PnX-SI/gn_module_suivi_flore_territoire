@@ -32,11 +32,11 @@ detail_list_visit_message = {emptyMessage = "Aucune autre visite sur ce site ", 
 
 # Colonnes à afficher dans la table des sites sur la page d'accueil
 default_zp_columns = [
-    { name = "Identifiant", prop = "id_base_site", width = "90"},
-    { name = "Taxon", prop = "nom_taxon", width = "350"},
-    { name = "Nombre de visites", prop = "nb_visit", width = "120"},
-    { name = "Date de la dernière visite", prop = "date_max", width = "160"},
-    { name = "Organisme", prop = "organisme", width = "200"}
+    { name = "Id", title = "Identifiant du site", prop = "id_base_site", width = "90"},
+    { name = "Taxon", title = "Nom du taxon", prop = "nom_taxon", width = "350"},
+    { name = "Nombre visites", title = "Nombre de visites", prop = "nb_visit", width = "120"},
+    { name = "Dernière visite", title = "Date de la dernière visite", prop = "date_max", width = "160"},
+    { name = "Organisme", title = "Organismes des observateurs des visites", prop = "organisme", width = "200"}
 ]
 # Colonnes à afficher dans la table des visites sur la page d'un site
 default_list_visit_columns = [

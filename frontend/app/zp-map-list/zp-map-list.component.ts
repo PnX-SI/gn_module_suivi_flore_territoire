@@ -36,8 +36,8 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     id_area_type: ModuleConfig.id_type_commune
   };
 
-  public oldFilterDate;
-  public oldFilterTax;
+  public actualDate;
+  public actualTaxonNameId;
   public tabCom = [];
   @Output()
   onDeleteFiltre = new EventEmitter<any>();
@@ -53,7 +53,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.mapListService.idName = "id_infos_site";
-
+    this.storeService.initialize();
     this.filtreForm = this._fb.group({
       filtreYear: null,
       filtreOrga: null,
@@ -61,7 +61,8 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
     });
 
     this.onChargeList(this.paramApp);
-    //  quand on fait la recherche
+
+    // Year
     this.filtreForm.controls.filtreYear.valueChanges
       .filter(input => input !== null && input.toString().length === 4)
       .subscribe(year => {
@@ -69,14 +70,14 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       });
 
     this.filtreForm.controls.filtreYear.valueChanges
-      // quand on efface le filtre
       .filter(input => !input || input === null || input === "")
       .subscribe(year => {
-        this.onDeleteParams("year", this.oldFilterDate);
+        this.onDeleteParams("year", this.actualDate);
         this.onDeleteFiltre.emit();
         this.onDelete();
       });
 
+    // Organism
     this.filtreForm.controls.filtreOrga.valueChanges
       .filter(select => !select || select !== null)
       .subscribe(org => {
@@ -91,6 +92,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
         this.onDelete();
       });
 
+    // Municipality
     this.filtreForm.controls.filtreCom.valueChanges
       .filter(select => !select || select !== null)
       .subscribe(com => {
@@ -104,14 +106,6 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
         this.onDeleteFiltre.emit();
         this.onDelete();
       });
-  }
-
-  onChargeList(param) {
-    this._api.getZp(param).subscribe(data => {
-      this.zps = data;
-      this.mapListService.loadTableData(data);
-      this.filteredData = this.mapListService.tableData;
-    });
   }
 
   ngAfterViewInit() {
@@ -143,6 +137,14 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       });
   }
 
+  onChargeList(param) {
+    this._api.getZp(this.storeService.queryString).subscribe(data => {
+      this.zps = data;
+      this.mapListService.loadTableData(data);
+      this.filteredData = this.mapListService.tableData;
+    });
+  }
+
   onEachFeature(feature, layer) {
     this.mapListService.layerDict[feature.id] = layer;
 
@@ -162,42 +164,41 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   }
 
   onSearchDate(event) {
+    this.onSetParams("year", event);
     this.onChargeList({
       id_application: ModuleConfig.ID_MODULE,
       year: event
     });
-    this.oldFilterDate = event;
-
-    this.onSetParams("year", event);
-  }
-
-  onDelete() {
-    this.onChargeList(this.paramApp);
+    this.actualDate = event;
   }
 
   onSearchOrganisme(event) {
+    this.onSetParams("organisme", event);
     this.onChargeList({
       id_application: ModuleConfig.ID_MODULE,
       organisme: event
     });
-    this.onSetParams("organisme", event);
   }
 
   onTaxonChanged(event) {
+    this.onSetParams("cd_nom", event.item.cd_nom);
+    this.actualTaxonNameId = event.item.cd_nom;
     this.onChargeList({
       id_application: ModuleConfig.ID_MODULE,
       cd_nom: event.item.cd_nom
     });
-    this.onSetParams("cd_nom", event.item.cd_nom);
-    this.oldFilterTax = event.item.cd_nom;
   }
 
   onSearchCom(event) {
+    this.onSetParams("commune", event);
     this.onChargeList({
       id_application: ModuleConfig.ID_MODULE,
       commune: event
     });
-    this.onSetParams("commune", event);
+  }
+
+  onDelete() {
+    this.onChargeList(this.paramApp);
   }
 
   onSetParams(param: string, value) {

@@ -7,30 +7,24 @@ import { ModuleConfig } from "../module.config";
 export class DataService {
   constructor(private _http: HttpClient) {}
 
-  getZp(params) {
-    let myParams = new HttpParams();
-
-    for (let key in params) {
-      myParams = myParams.set(key, params[key]);
-    }
-
+  getZp(wsParams) {
     return this._http.get<any>(
       `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`,
       {
-        params: myParams
+        params: wsParams
       }
     );
   }
 
   getMaille(id_base_site: number, params?: any) {
-    let myParams = new HttpParams();
+    let wsParams = new HttpParams();
 
     for (let key in params) {
-      myParams = myParams.set(key, params[key]);
+      wsParams = wsParams.set(key, params[key]);
     }
     return this._http.get<any>(
       `${AppConfig.API_ENDPOINT}/gn_monitoring/siteareas/${id_base_site}`,
-      { params: myParams }
+      { params: wsParams }
     );
   }
 
@@ -50,16 +44,16 @@ export class DataService {
   }
 
   getVisits(params: any) {
-    let myParams = new HttpParams();
+    let wsParams = new HttpParams();
 
     for (let key in params) {
-      myParams = myParams.set(key, params[key]);
+      wsParams = wsParams.set(key, params[key]);
     }
 
     return this._http.get<any>(
       `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits`,
       {
-        params: myParams
+        params: wsParams
       }
     );
   }
@@ -77,17 +71,17 @@ export class DataService {
   }
 
   getCommune(id_application: number, params: any) {
-    let myParams = new HttpParams();
+    let wsParams = new HttpParams();
 
     for (let key in params) {
-      myParams = myParams.set(key, params[key]);
+      wsParams = wsParams.set(key, params[key]);
     }
 
     return this._http.get<any>(
       `${AppConfig.API_ENDPOINT}/${
         ModuleConfig.MODULE_URL
       }/commune/${id_application}`,
-      { params: myParams }
+      { params: wsParams }
     );
   }
 }

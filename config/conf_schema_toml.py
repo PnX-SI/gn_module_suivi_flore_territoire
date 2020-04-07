@@ -22,11 +22,11 @@ detail_list_visit_message = {
 }
 
 default_zp_columns = [
-    {"name": "Identifiant", "prop": "id_base_site", "width": 90},
-    {"name": "Taxon", "prop": "nom_taxon", "width": 350},
-    {"name": "Nombre de visites", "prop": "nb_visit", "width": 120},
-    {"name": "Date de la dernière visite", "prop": "date_max", "width": 160},
-    {"name": "Organisme", "prop": "organisme", "width": 200},
+    {"name": "Id", "title": "Identifiant du site", "prop": "id_base_site", "width": 90},
+    {"name": "Taxon", "title": "Nom du taxon", "prop": "nom_taxon", "width": 350},
+    {"name": "Nombre visites", "title": "Nombre de visites", "prop": "nb_visit", "width": 120},
+    {"name": "Dernière visite", "title": "Date de la dernière visite", "prop": "date_max", "width": 160},
+    {"name": "Organismes", "title": "Organismes des observateurs des visites", "prop": "organisme", "width": 200},
 ]
 
 default_list_visit_columns = [
