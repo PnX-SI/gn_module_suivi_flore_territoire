@@ -6,7 +6,7 @@ set -eo pipefail
 # DESC: Usage help
 # ARGS: None
 # OUTS: None
-function printScriptUsage() { 
+function printScriptUsage() {
     cat << EOF
 Usage: ./import_taxons.sh [options]
 Update settings.ini, section "Import taxons" before run this script.
@@ -76,8 +76,8 @@ function main() {
     #+----------------------------------------------------------------------------------------------------------+
     # Start script
     printInfo "Taxons import script started at: ${fmt_time_start}"
-    
-    if [[ -n ${verbose-} ]]; then 
+
+    if [[ -n ${verbose-} ]]; then
         readonly psql_verbosity="${psql_verbose_opts-}"
     else
         readonly psql_verbosity="${psql_quiet_opts-}"
@@ -98,14 +98,15 @@ function main() {
 
 function importTaxons() {
     printMsg "Import taxons list into « taxonomie.bib_noms » and « taxonomie.cor_nom_liste »"
-    
+
     local head="$(csvtool head 1 "${taxons_csv_path}")"
     stdbuf -oL csvtool drop 1 "${taxons_csv_path}"  |
         while IFS= read -r line; do
             local name_id="$(printf "${head}\n${line}" | csvtool namedcol cd_nom - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
             local name_ref="$(printf "${head}\n${line}" | csvtool namedcol cd_ref - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
             local name="$(printf "${head}\n${line}" | csvtool namedcol name - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-            
+            local comment="$(printf "${head}\n${line}" | csvtool namedcol comment - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
+
             printVerbose "Inserting taxon: '${name_id}' (${name})"
             export PGPASSWORD="${user_pg_pass}"; \
                 psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" ${psql_verbosity-} \
@@ -113,9 +114,10 @@ function importTaxons() {
                     -v nameRef="${name_ref}" \
                     -v name="${name}" \
                     -v taxonListName="${taxon_list_name}" \
+                    -v comment="${comment}" \
                     -f "${data_dir}/import_taxon.sql"
-            
-            if ! [[ -n ${verbose-} ]]; then 
+
+            if ! [[ -n ${verbose-} ]]; then
                 (( tasks_done += 1 ))
                 displayProgressBar ${tasks_count} ${tasks_done} "inserting"
             fi
@@ -125,21 +127,21 @@ function importTaxons() {
 
 function deleteTaxons() {
     printMsg "Delete taxons listed in CSV file from  « taxonomie.cor_nom_liste » (not in « taxonomie.bib_noms »)"
-    
+
     local head="$(csvtool head 1 "${taxons_csv_path}")"
     stdbuf -oL csvtool drop 1 "${taxons_csv_path}"  |
         while IFS= read -r line; do
             local name_id="$(printf "${head}\n${line}" | csvtool namedcol cd_nom - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
             local name="$(printf "${head}\n${line}" | csvtool namedcol name - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-            
+
             printVerbose "Deleting taxon: '${name_id}' (${name})"
             export PGPASSWORD="${user_pg_pass}"; \
             psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" ${psql_verbosity-} \
                 -v taxonListName="${taxon_list_name}" \
                 -v nameId="${name_id}" \
                 -f "${data_dir}/delete_taxons.sql"
-            
-            if ! [[ -n ${verbose-} ]]; then 
+
+            if ! [[ -n ${verbose-} ]]; then
                 (( tasks_done += 1 ))
                 displayProgressBar ${tasks_count} ${tasks_done} "deleting"
             fi

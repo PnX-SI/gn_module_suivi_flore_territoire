@@ -47,8 +47,6 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    console.log("INIT");
-
     this.idVisit = this.activatedRoute.snapshot.params["idVisit"];
   }
 

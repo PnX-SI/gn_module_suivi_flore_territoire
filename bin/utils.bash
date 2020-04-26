@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# A Bash script with many useful functions. This file is suitable for sourcing 
-# into other scripts and so only contains functions which are unlikely to need 
+# A Bash script with many useful functions. This file is suitable for sourcing
+# into other scripts and so only contains functions which are unlikely to need
 # modification. It omits the following functions:
 # - main()
 # - parseScriptOptions()
@@ -29,7 +29,7 @@ function initScript() {
     # Script time
     readonly time_start="$(date +%s)"
     readonly fmt_time_start="$(date -d @${time_start} "+%Y-%m-%d %H:%M:%S")"
-    
+
     # Useful paths
     readonly orig_cwd="$PWD"
     readonly script_path="${BASH_SOURCE[1]}"
@@ -48,7 +48,7 @@ function initScript() {
     readonly var_dir="${root_dir}/var"
     readonly log_dir="${var_dir}/log"
     readonly tmp_dir="${var_dir}/tmp"
-    
+
     #+----------------------------------------------------------------------------+
     # Shell colors
     readonly RCol="\e[0m";# Text Reset
@@ -302,7 +302,6 @@ function displayProgressBar() {
     # Calculate number of fill/empty slots in the bar
     local progress="$(echo "${progress_bar_width} / ${task_count} * ${tasks_done}" | bc -l)  "
     local fill="${progress%.*}"
-    #echo "fill:$fill"
     if [[ ${fill} -gt ${progress_bar_width} ]]; then
         local fill=${progress_bar_width}
     fi
@@ -310,10 +309,15 @@ function displayProgressBar() {
 
     # Percentage Calculation
     local percent="$(echo "100 / ${task_count} * ${tasks_done}" | bc -l)"
-    local percent="${percent%.*}"
-    #echo "percent:$percent"
-    if [[ $(echo "${percent} > 100" | bc -l) -gt 0 ]]; then
-        local percent="100"
+    # Check if percent is greater than 0 based on string because
+    # number like ".98808030112923462933" rase an error "(standard_in) 1: syntax error"
+    if [[ "${percent}" == .* ]]; then
+        local percent="0"
+    else
+        local percent="${percent%.*}"
+        if [[ $(echo "${percent} > 100" | bc -l) -gt 0 ]]; then
+            local percent="100"
+        fi
     fi
 
     # Output to screen
@@ -321,4 +325,20 @@ function displayProgressBar() {
     printf "%${fill}s" '' | tr ' ' "=" >&3
     printf "%${empty}s" '' | tr ' ' "." >&3
     printf "] ${percent}%% - ${text} " >&3
+}
+
+# DESC: Trim spaces at beginning and ending of a string
+# ARGS: $1 (required): string to trim spaces
+# OUTS: None
+# SOURCE:
+trim() {
+    if [[ $# -lt 1 ]]; then
+        exitScript 'Missing required argument to ${FUNCNAME}()!' 2
+    fi
+    local var="$*"
+    # remove leading whitespace characters
+    var="${var#"${var%%[![:space:]]*}"}"
+    # remove trailing whitespace characters
+    var="${var%"${var##*[![:space:]]}"}"
+    printf '%s' "$var"
 }

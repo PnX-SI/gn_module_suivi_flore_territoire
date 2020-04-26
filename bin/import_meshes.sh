@@ -6,7 +6,7 @@ set -eo pipefail
 # DESC: Usage help
 # ARGS: None
 # OUTS: None
-function printScriptUsage() { 
+function printScriptUsage() {
     cat << EOF
 Usage: ./import_meshes.sh [options]
 Update settings.ini, section "Import meshes" before run this script.
@@ -75,7 +75,7 @@ function main() {
 
     #+----------------------------------------------------------------------------------------------------------+
     printInfo "Meshes import script started at: ${fmt_time_start}"
-    
+    loadShapeToPostgresql
     if [[ "${action}" = "import" ]]; then
         importMeshes
     elif [[ "${action}" = "delete" ]]; then
@@ -88,8 +88,6 @@ function main() {
 }
 
 function importMeshes() {
-    loadShapeToPostgresql
-
     printMsg "Insert meshes into « ref_geo.l_areas »"
     export PGPASSWORD="${user_pg_pass}"; \
         psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
@@ -104,8 +102,6 @@ function importMeshes() {
 }
 
 function deleteMeshes() {
-    loadShapeToPostgresql
-
     printMsg "Delete meshes listed in '${meshes_shape_path##*/}' SHP file from « ref_geo.l_areas » and linked tables"
     export PGPASSWORD="${user_pg_pass}"; \
         psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
@@ -116,7 +112,7 @@ function deleteMeshes() {
             -f "${data_dir}/delete_meshes.sql"
 }
 
-function loadShapeToPostgresql() {        
+function loadShapeToPostgresql() {
     printMsg "Export meshes SHP to PostGis and create meshes temporary table"
     export PGPASSWORD="${user_pg_pass}"; \
         shp2pgsql -c -s ${srid_local} "${meshes_shape_path}" "${module_schema}.${meshes_tmp_table}" \
