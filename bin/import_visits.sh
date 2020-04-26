@@ -84,7 +84,6 @@ function main() {
     fi
 
     createTmpTables
-    #importCsvData
     importCsvDataByCopy
 
     if [[ "$action" = "import" ]]; then
@@ -112,90 +111,6 @@ function createTmpTables() {
             -v visitsObserversTmpTable="${visits_table_tmp_observers}" \
             -v datasetId="${dataset_id}" \
             -f "${data_dir}/import_visits_tmp_tables.sql"
-}
-
-function importCsvData() {
-    visit_id=0
-    declare -g -A persons
-    printMsg "Import visits data into tmp tables"
-    local head="$(csvtool head 1 "${visits_csv_path}")"
-    local readonly tasks_count="$(($(csvtool height "${visits_csv_path}") - 1))"
-    local tasks_done=0
-    # Don't use pipe that run "while" in sub shell, use substitution (see below "done") to access to persons variable
-    while IFS= read -r line; do
-        local site_code="$(printf "$head\n$line" | csvtool namedcol ${visits_column_id} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local meshe_code="$(printf "$head\n$line" | csvtool namedcol ${visits_column_meshe} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local observers="$(printf "$head\n$line" | csvtool namedcol ${visits_column_observer} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local organisms="$(printf "$head\n$line" | csvtool namedcol ${visits_column_organism} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local date_start="$(printf "$head\n$line" | csvtool namedcol ${visits_column_date_start} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local date_end="$(printf "$head\n$line" | csvtool namedcol ${visits_column_date_end} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-        local status="$(printf "$head\n$line" | csvtool namedcol ${visits_column_status} - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-
-        # Clean and format data
-        (( visit_id+=1 ))
-        site_code=$(trim "${site_code}")
-        meshe_code=$(trim "${meshe_code}")
-        date_start=$(trim "${date_start//\//-}")
-        date_end=$(trim "${date_end//\//-}")
-        status=$(trim "${status}")
-        #echo "|${site_code}|${meshe_code}|${date_start}|${date_end}|${status}|"
-
-        # Associate observers and organisms
-        local observers_concat=$(trim "${observers// /_}")
-        local observers_list=(${observers_concat//|/ })
-        local organisms_concat=$(trim "${organisms// /_}")
-        local organisms_list=(${organisms_concat//|/ })
-
-        printVerbose "Insert temporary visit: ${visit_id}"
-        export PGPASSWORD="${user_pg_pass}"; \
-            psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" ${psql_verbosity} \
-                -v moduleSchema="${module_schema}" \
-                -v visitsTmpTable="${visits_table_tmp_visits}" \
-                -v visitId="${visit_id}" \
-                -v siteCode="${site_code}" \
-                -v dateStart="${date_start}" \
-                -v dateEnd="${date_end}" \
-                -v mesheCode="${meshe_code}" \
-                -v presence="${status}" \
-                -f "${data_dir}/import_visits_tmp.sql"
-
-        for i in "${!observers_list[@]}"; do
-            # Create hash of full observer name as index
-            local idx=$(printf "%s" "${observers_list[i]}" | tr '[:upper:]' '[:lower:]' | md5sum | cut -d " " -f 1)
-            local firstname="${observers_list[i]#*_}"
-            local lastname="${observers_list[i]%_*}"
-            local organism="${organisms_list[i]}"
-
-            printVerbose "\tInsert temporary observers and links to visit: ${firstname} ${lastname}"
-            export PGPASSWORD="${user_pg_pass}"; \
-                psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" ${psql_verbosity} \
-                    -v moduleSchema="${module_schema}" \
-                    -v visitsOberserversTmpTable="${visits_table_tmp_observers}" \
-                    -v visitsHasOberserversTmpTable="${visits_table_tmp_has_observers}" \
-                    -v md5Sum="${idx}" \
-                    -v firstname="${firstname}" \
-                    -v lastname="${lastname}" \
-                    -v organism="${organism}" \
-                    -v visitId="${visit_id}" \
-                    -f "${data_dir}/import_visits_tmp_observers.sql"
-
-            if ! [[ ${persons["${idx}"]+muahaha} ]]; then
-                declare -A person
-                person["firstname"]="${observers_list[i]#*_}"
-                person["lastname"]="${observers_list[i]%_*}"
-                person["organism"]="${organisms_list[i]}"
-                local string=$(declare -p person)
-                persons["${idx}"]=${string}
-            fi
-        done
-
-        (( tasks_done+=1 ))
-        if ! [[ -n ${verbose-} ]]; then
-            displayProgressBar $tasks_count $tasks_done "importing tmp data"
-        fi
-
-    done < <(stdbuf -oL csvtool drop 1 "${visits_csv_path}")
-    echo
 }
 
 function importCsvDataByCopy() {
