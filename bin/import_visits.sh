@@ -69,7 +69,7 @@ function main() {
     redirectOutput "${visits_import_log}"
 
     checkSuperuser
-    commands=("psql" "csvtool")
+    commands=("psql")
     checkBinary "${commands[@]}"
 
     #+----------------------------------------------------------------------------------------------------------+

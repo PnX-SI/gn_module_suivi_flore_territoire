@@ -1,6 +1,6 @@
-cd_nom,cd_ref,name
-97133,97133,"Reine des Alpes, Chardon bleu"
-115458,115458,Potentille du Dauphiné
-127469,127469,Trèfle des rochers
-84791,84791,
-122959,717782,
+cd_nom,cd_ref,name,comment
+97133,97133,"Reine des Alpes, Chardon bleu","Sample data"
+115458,115458,Potentille du Dauphiné,"Sample data"
+127469,127469,Trèfle des rochers,"Sample data"
+84791,84791,,"Sample data"
+122959,717782,,"Sample data"
