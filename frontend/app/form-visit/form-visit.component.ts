@@ -32,6 +32,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   public tabObserver = [];
   public visitModif = {}; // Visited meshes object
   public disabledAfterPost = false;
+  public firstFileLayerMessage = true;
 
   @ViewChild("geojson")
   geojson: GeojsonComponent;
@@ -180,6 +181,14 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // display help toaster for filelayer
+  displayFileLayerInfoMessage() {
+    if (this.firstFileLayerMessage) {
+      this._commonService.translateToaster("info", "Map.FileLayerInfoSynthese");
+    }
+    this.firstFileLayerMessage = false;
+  }
+
   onVisual() {
     this.router.navigate([`${ModuleConfig.MODULE_URL}/listVisit`, this.idSite]);
   }
@@ -189,14 +198,14 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     formModif["id_base_site"] = this.idSite;
     formModif["id_dataset"] = ModuleConfig.id_dataset;
     formModif["id_module"] = ModuleConfig.ID_MODULE;
-    
+
     formModif["visit_date_min"] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value
     );
     formModif["visit_date_max"] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value
     );
-    
+
     for (let key in this.visitModif) {
       let idAreaUpdated = Number(key);
       let needToInsert = true;
@@ -205,7 +214,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           existingGrid.presence = this.visitModif[key];
           needToInsert = false;
         }
-          
+
       });
       if (needToInsert) {
         this.visitGrid.push({
@@ -265,7 +274,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
       }
     );
-    
+
     // Disable submit button after post
     this.disabledAfterPost = true;
   }

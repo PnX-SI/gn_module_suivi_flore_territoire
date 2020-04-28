@@ -52,3 +52,4 @@ class GnModuleSchemaConf(Schema):
     export_srid = fields.Integer(missing=2154)
     zoom_center = fields.List(fields.Float(), missing=zoom_center)
     zoom_level = fields.Integer(missing=12)
+    map_gpx_color = fields.String(default="green")

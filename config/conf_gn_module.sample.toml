@@ -4,6 +4,8 @@
 zoom_center = [44.982667966765845, 6.062455200884894]
 # Zoom par défaut utilisé pour les cartes du module
 zoom_level = 12
+# Couleur des traces et points du fichier GPX chargé sur la carte lors de l'édition d'une visite
+map_gpx_color = "green"
 
 # Identifiant du datasaet à utiliser pour les données SFT.
 # Valeur du champ `id_dataset` de la table `gn_meta.t_datasets`.
@@ -23,7 +25,7 @@ id_list_taxon = 30
 # Type de SRID utilisé pour l'export des données géographiques
 export_srid = 2154
 # Liste des types d'export disponible
-export_available_format = ['geojson', 'csv', 'shapefile']
+export_available_format = ["geojson", "csv", "shapefile"]
 
 # Gestion des messages configurables
 zp_message = {emptyMessage = "Aucune zone à afficher ", totalMessage = "zone(s) de prospection au total"}

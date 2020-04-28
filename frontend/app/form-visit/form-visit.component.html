@@ -7,6 +7,12 @@
         [onEachFeature]="onEachFeature.bind(this)"
         [geojson]="zps">
       </pnx-geojson>
+
+      <pnx-leaflet-filelayer
+        [editMode]="false"
+        (onLoad)="displayFileLayerInfoMessage()"
+        [style]="{'color': storeService.sftConfig.map_gpx_color}">
+      </pnx-leaflet-filelayer>
     </pnx-map>
   </div>
 
