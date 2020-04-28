@@ -1,15 +1,91 @@
 # Importer des données dans Suivi Flore Territoire
 
-Plusieurs script sont disponibles pour importer les données suivantes :
- - taxons (`import_taxons.sh`)
- - nomenclatures (`import_nomenclatures.sh`)
- - mailles (`import_meshes.sh`)
- - sites (`import_sites.sh`)
- - visites (`import_visits.sh`)
+Plusieurs scripts sont disponibles pour importer les données manipulées dans le module SFT. Les données sources à importer doivent être fourni au format CSV (encodage UTF-8) ou Shape en fonction du type de données
+ suivantes :
+ - taxons (`import_taxons.sh`) : CSV
+ - nomenclatures (`import_nomenclatures.sh`) : CSV
+ - mailles (`import_meshes.sh`) : Shape
+ - sites (`import_sites.sh`) : Shape
+ - visites (`import_visits.sh`) : CSv
+
+Chacun de ces scripts est disponibles dans le dossier `bin/`.
+
+Avant de lancer les scripts, il est nécessaires de correctement les paramètrer à l'aide du fichier `config/settings.ini`. Une section de paramètres concerne chacun d'entre eux. Ces paramètres permettent entre autre d'indiquer :
+ - le chemin et le nom vers le fichier source
+ - le chemin et le nom du fichier de log où les informations sur l'execution du script seront stockées
+ - le nom des tables temporaires dans lesquelles les données sources sont stockées avant import dans les tables de GeoNature
+ - pour les fichiers source de type Shape, les noms des champs des attributs des objets géographiques (mailles, sites)
+ - pour les fichiers source de type CSV, les noms des colonnes (visites)
+
+## Format des données
+Voici le détail des champs des fichiers CSV ou Shape attendus par défaut :
+
+### Taxons (CSV)
+
+Description des colonnes attendues dans le fichier CSV contenant la iste des taxons suivis dans SFT :
+
+ - **cd_nom** : code TaxRef du nom du taxon suivi dans SFT
+ - **cd_ref** : code TaxRef du nom de référence du taxon suivi dans SFT
+ - **name** : nom français à utiliser lors de l'affichage des listes d'autocomplétion.
+ - **comment** : commentaire associé au nom
+
+### Nomenclatures (CSV)
+
+Description des colonnes attendues dans le fichier CSV contenant la liste des nomenclatures utilisées dans SFT (les types de perturbation des sites) :
+
+ - **type_nomenclature_code** : code du type de nomeclature à laquelle correspond cette valeur de nomenclature. Ex. : *TYPE_PERTURBATION*.
+ - **cd_nomenclature** : code de la nomenclature. Ex. : *GeF*.
+ - **mnemonique** : libellé court de la nomenclature. Ex. *Gestion par le feu*.
+ - **label_default** : libellé par défaut de la nomenclature. Ex. *Gestion par le feu*.
+ - **definition_default** : définition courte par défaut de la nomenclature. Ex. *Type de perturbation : gestion par le feu*.
+ - **label_fr** : libellé en français de la nomenclature. Ex. *Gestion par le feu*.
+ - **definition_fr** : définition courte en français de la nomenclature. Ex. *Type de perturbation : gestion par le feu*.
+ - **cd_nomenclature_broader** : code de la nomenclature parente si elle existe. Utiliser 0 si la nomenclature n'pas de parente.
+ - **hierarchy**: hiérarchie de code numérique sur 3 chiffres séparés par des points. Doit débuter par un point. Ex. *.001* pour une valeur n'ayant pas de parent ou *.001.002* pour la seconde valeur *.002* de la valeur parente *.001*.
+
+### Mailles (Shape)
+
+Description des paramètres de configuration permettant d'indiquer les noms des champs utilisés dans les attributs des objets géographiques du fichier Shape pour les mailles des sites :
+
+ - **meshes_name_column** : nom du champ dans les attributs des objets géographiques du fichier Shape contenant le code de la maille.
+
+Autres paramètres :
+- **meshes_geom_column** : nom du champ contenant la géométrie de la maille dans la table temporaire créé dans Postgresql. Ce champ n'a pas à apparaitre dans les attributs des objets géographique. Par défaut, l'utilitaire employé par le script (*shp2pgsql*) créé une colonne ayant pour libellé *geom* en se basant sur les infos géographiques du fichier Shape.
+ - **meshes_tmp_table** : nom de la table temporaire contenant les mailles créée dans Postgresql.
+ - **meshes_source** : permet d'indiquer l'organisme fournissant la géométrie des mailles.
+
+### Sites (Shape)
+
+Description des paramètres de configuration permettant d'indiquer les noms des champs utilisés dans les attributs des objets géographiques du fichier Shape pour les sites :
+
+ - **site_code_column** : nom du champ contenant le code du site.
+ - **site_taxon_column** : nom du champ contenant le code TaxRef du nom (*cd_nom*) du taxon étudié sur ce site.
+ - **site_desc_column** : nom du champ contenant la description du site.
+
+Autres paramètres :
+ - **site_geom_column** : nom du champ contenant la géométrie du site dans la table temporaire créé dans Postgresql. Ce champ n'a pas à apparaitre dans les attributs des objets géographique. Par défaut, l'utilitaire employé par le script (*shp2pgsql*) créé une colonne ayant pour libellé *geom* en se basant sur les infos géographiques du fichier Shape.
+ - **sites_tmp_table** : nom de la table temporaire contenant les sites créée dans Postgresql.
+
+### Visites (CSV)
+Description des colonnes attendues dans le fichier CSV contenant la liste des visites. Les nom des colonnes peuvent modifié à l'aide des paramètres du fichier de configuration indiqués ici entre parenthèses :
+
+ - **idzp** (*visits_column_id*) : identifiant du site où a eu lieu la visite.
+ - **cd25m** (*visits_column_meshe*) : code de la maille où a eu lieu la visite.
+ - **observateu** (*visits_column_observer*) : liste des observateurs au format "NOM Prénom" séparés par des pipes "|". L'ordre doit correspondre à l'ordre des organismes du champ *organimes*.
+ - **organismes** (*visits_column_organism*) : liste des organimes séparés par des pipes "|". L'ordre doit correspondre à l'ordre des observateurs du champ *observateu*.
+ - **date_deb** (*visits_column_date_start*) : date de début de la visite.
+ - **date_fin** (*visits_column_date_end*) : date de fin de la visite. Elle sera identique à *date_deb* si la visite a eu lieu sur un seul jour.
+ - **presence** (*visits_column_status*) : permet d'indiquer la 'presence' (pr), l'absence (ab) ou l nom observation (na) du taxon sur la maille.
+
+ Autres paramètres :
+ - **visits_table_tmp_visits** : nom de la table temporaire contenant les visites par maille.
+ - **visits_table_tmp_has_observers** : nom de la table temporaire contenant les liens entre visites et observateurs.
+ - **visits_table_tmp_observers** : nom de la table temporaire contenant les prénoms nom des observateurs et leur organisme.
+
 
 ## Options des scripts d'import
 
-Chacun de ces scripts est disponibles dans le dossier `bin/`. Il possèdent tous les options suivantes :
+Il possèdent tous les options suivantes :
  - `-h` (`--help`) : pour afficher l'aide du script.
  - `-v` (`--verbosity`) : le script devient verbeux est affiche plus de messages concernant le travail qu'il accomplit.
  - `-x` (`--debug`) : le mode débogage de Bash est activé.
@@ -18,8 +94,6 @@ Chacun de ces scripts est disponibles dans le dossier `bin/`. Il possèdent tous
 
 ## Procédure
 
-Avant de lancer les scripts, il est nécessaires de correctement les paramètrer à l'aide du fichier `config/settings.ini`. Une section de paramètres concerne chacun d'entre eux.
-
 Afin que les triggers présents sur les tables soient déclenchés dans le bon ordre et que les scripts trouvent bien les données de référence dont ils ont besoin, il est conseillé de réaliser les imports dans cet ordre :
  1. taxons
  2. nomenclatures
@@ -27,4 +101,9 @@ Afin que les triggers présents sur les tables soient déclenchés dans le bon o
  4. sites
  5. visites
 
-Une fois l'ensemble des imports réalisés vous pouvez vérifier les données présentent dans la base à l'aide de l'interface du module mais aussi via le script `import_checks.sh`.
+Pour lancer un script, ouvrir un terminal et se placer dans le dossier `bin/` du module SFT.
+Ex. pour lancer le script des visites :
+ - en importation : `./import_visits.sh`
+ - en suppression des imports précédents : `./import_visits.sh -d`
+
+Une fois l'ensemble des imports réalisés vous pouvez vérifier les données présentent dans la base à l'aide de l'interface du module mais aussi via le script suivant : `./import_checking.sh`
