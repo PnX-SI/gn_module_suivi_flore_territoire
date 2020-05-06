@@ -18,19 +18,22 @@
 
   <!-- FORMULAIRE  -->
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container form-sft">
+
+    <sft-breadcrumbs></sft-breadcrumbs>
+
     <h5 class="debLigne">
       <i class="fa fa-edit"></i>
-      <b> Ajouter une visite / Editer cette visite </b>
+      <b> Ajouter une visite / Éditer cette visite </b>
     </h5>
 
     <div class="list-group-item">
       <i class="fa fa-map-marker fa-lg"></i>
-      Zone de prospection :
+      Identifiant du site :
       <span class="info"> {{ idSite }} </span>
     </div>
 
     <div class="list-group-item">
-      <i class="fa fa-tree fa-lg"></i>
+      <i class="fa fa-leaf fa-lg"></i>
       Espèce prospectée :
       <span class="info"> {{nomTaxon}} </span>
     </div>
@@ -91,7 +94,7 @@
     </div>
 
     <div class="list-group-item">
-      <i class="fa fa-leaf fa-lg"></i>
+      <i class="fa fa-check-circle-o fa-lg"></i>
       Maille(s) de présence :
       <span class="info nbGrid" id="nbPres">
         {{storeService.presence}}
@@ -107,7 +110,7 @@
     </div>
 
     <div class="list-group-item">
-      <i class="fa fa-question-circle fa-lg"></i>
+      <i class="fa fa-question-circle-o fa-lg"></i>
       Maille(s) non visitées :
       <span class="info nbGrid" id="nbRest">
         {{storeService.rest}}

@@ -8,23 +8,100 @@ import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 
 import { DataService } from './services/data.service';
 import { StoreService } from './services/store.service';
-import { DetailVisitComponent } from './detail-visit/detail-visit.component';
+import { FormService } from './services/form.service';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { ZpMapListComponent } from './zp-map-list/zp-map-list.component';
 import { ListVisitComponent } from './list-visit/list-visit.component';
-import { FormService } from './services/form.service';
+import { DetailVisitComponent } from './detail-visit/detail-visit.component';
 import { FormVisitComponent } from './form-visit/form-visit.component';
 
-// my module routing
+// Module routing and breadcrumbs
 const routes: Routes = [
-  { path: '', component: ZpMapListComponent },
-  { path: 'listVisit/:idSite', component: ListVisitComponent },
-  { path: 'editVisit/:idSite', component: FormVisitComponent },
-  { path: 'infoVisit/:idVisit', component: DetailVisitComponent },
-  { path: 'editVisit/:idSite/visit/:idVisit', component: FormVisitComponent }
+  {
+    path: '',
+    redirectTo: 'sites',
+    pathMatch: 'full',
+  },
+  {
+    path: 'sites',
+    data: {
+      breadcrumb: {
+        label: 'Accueil SFT',
+        title: 'Liste des sites du module Suivi Flore Territoire.',
+        iconClass: 'fa fa-home',
+      }
+    },
+    children: [
+      {
+        path: '',
+        component: ZpMapListComponent,
+      },
+      {
+        path: ':idSite',
+        data: {
+          breadcrumb: {
+            label: 'Site: :idSite',
+            title: 'Détail d\'un site du module Suivi Flore Territoire.',
+            iconClass: 'fa fa-map-marker',
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: ListVisitComponent,
+          },
+          {
+            path: 'visits/add',
+            component: FormVisitComponent,
+            data: {
+              breadcrumb: {
+                label: 'Ajout visite',
+                title: 'Ajout d\'une visite du module Suivi Flore Territoire.',
+                iconClass: 'fa fa-plus-circle',
+              }
+            }
+          },
+          {
+            path: 'visits/:idVisit',
+            data: {
+              breadcrumb: {
+                label: 'Visite : :idVisit',
+                title: 'Détail d\'une visite du module Suivi Flore Territoire.',
+                iconClass: 'fa fa-binoculars',
+              }
+            },
+            children: [
+              {
+                path: '',
+                component: DetailVisitComponent,
+              },
+               {
+                  path: 'edit',
+                  component: FormVisitComponent,
+                  data: {
+                    breadcrumb: {
+                      label: 'Édition',
+                      title: 'Édition d\'une visite du module Suivi Flore Territoire.',
+                      iconClass: 'fa fa-pencil-square-o',
+                    }
+                  }
+                },
+            ]
+          },
+        ]
+      },
+    ]
+  },
 ];
 
 @NgModule({
-  declarations: [ZpMapListComponent, ListVisitComponent, DetailVisitComponent, FormVisitComponent],
+  declarations: [
+    BreadcrumbsComponent,
+    ZpMapListComponent,
+    ListVisitComponent,
+    DetailVisitComponent,
+    FormVisitComponent,
+  ],
   imports: [
     GN2CommonModule,
     HttpClientXsrfModule.withOptions({

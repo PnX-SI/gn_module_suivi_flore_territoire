@@ -10,6 +10,14 @@
    </div>
 
    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
+
+      <sft-breadcrumbs></sft-breadcrumbs>
+
+      <h3>
+         <i class="fa fa-map-marker" aria-hidden="true"></i>
+         Informations du site
+      </h3>
+
       <ul class="nav nav-tabs" role="tablist">
          <li class="nav-item">
             <a
@@ -27,7 +35,7 @@
                data-toggle="tab"
                href="#details"
                role="tab">
-               <i class="fa fa-search police"> </i>
+               <i class="fa fa-search-plus police"> </i>
                Détails
             </a>
          </li>
@@ -36,18 +44,27 @@
       <div class="tab-content">
          <div class="tab-pane active modal-header list-group-item" id="infoGen" role="tabpanel">
             <p>
-               <span> Code site : </span>
-               <span class="strong"> {{idSite}} </span>
+               <i class="fa fa-map-marker" aria-hidden="true"></i>
+               <span> Nom du site : </span>
+               <span class="strong"> {{nomSite}} </span>
             </p>
             <p>
+               <i class="fa fa-tag" aria-hidden="true"></i>
+               <span> Code du site : </span>
+               <span class="strong"> {{codeSite}} </span>
+            </p>
+            <p>
+               <i class="fa fa-leaf" aria-hidden="true"></i>
                <span> Espèce suivie : </span>
                <span class="strong"> {{nomTaxon}} </span>
             </p>
             <p>
+               <i class="fa fa-map" aria-hidden="true"></i>
                <span> Commune : </span>
                <span class="strong"> {{nomCommune}} </span>
             </p>
             <p>
+               <i class="fa fa-th" aria-hidden="true"></i>
                <span> Nombre de mailles : </span>
                <span class="strong"> {{storeService.total}} </span>
             </p>
@@ -55,10 +72,12 @@
 
          <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
             <p>
-               <span> Nom du site : </span>
-               <span class="strong"> {{nomSite}} </span>
+               <i class="fa fa-key" aria-hidden="true"></i>
+               <span> Identifiant du site : </span>
+               <span class="strong"> {{idSite}} </span>
             </p>
             <p>
+               <i class="fa fa-align-justify" aria-hidden="true"></i>
                <span> Description du site : </span>
                <span class="strong"> {{descriSite}} </span>
             </p>

@@ -2,61 +2,67 @@
    <!-- MAP  -->
    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
       <pnx-map height="94vh">
-         <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+         <pnx-geojson #geojson
+            [onEachFeature]="onEachFeature.bind(this)"
+            [geojson]="zps">
          </pnx-geojson>
       </pnx-map>
    </div>
 
    <!-- INFO VISIT -->
    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container detail-sft">
-      <h5>
+
+      <sft-breadcrumbs></sft-breadcrumbs>
+
+      <h3>
          <i class="fa fa-binoculars"></i>
-         <b> Informations de la visite </b>
-      </h5>
+         Informations de la visite
+      </h3>
+
       <div>
          <ul class="list-group">
             <li class="list-group-item">
-               <i class="fa fa-map-marker fa-lg"></i>
-               Zone de prospection :
+               <i class="fa fa-map-marker" aria-hidden="true"></i>
+               Identifiant du site :
                <span class="info"> {{ idSite }} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-tree fa-lg"></i>
+               <i class="fa fa-leaf" aria-hidden="true"></i>
                Espèce prospectée :
                <span class="info"> {{nomTaxon}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-group fa-lg" ></i>
+               <i class="fa fa-group" aria-hidden="true"></i>
                Observateur(s) :
                <span class="info"> {{observers}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-calendar fa-lg"></i>
+               <i class="fa fa-calendar" aria-hidden="true"></i>
                Date de la visite :
                <span class="info"> {{date}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-warning fa-lg"></i>
+               <i class="fa fa-warning" aria-hidden="true"></i>
                Perturbation(s) :
                <span class="info" *ngFor="let per of tabPertur"> {{per}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-leaf fa-lg"></i>
+               <i class="fa fa-check-circle-o" aria-hidden="true"></i>
                Maille(s) de présence :
                <span class="info"> {{storeService.presence}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-ban fa-lg"></i>
+               <i class="fa fa-ban" aria-hidden="true"></i>
                Maille(s) d'absence :
                <span class="info"> {{storeService.absence}} </span>
             </li>
             <li class="list-group-item">
-               <i class="fa fa-question-circle fa-lg"></i>
+               <i class="fa fa-question-circle-o" aria-hidden="true"></i>
                Maille(s) non visitées :
                <span class="info"> {{storeService.rest}} </span>
             </li>
             <li class="list-group-item">
-               <i class="	fa fa-comments fa-lg"></i>
+               <i class="fa fa-comments" aria-hidden="true"></i>
                Commentaires :
                <span class="info"> {{comments}} </span>
             </li>
@@ -65,15 +71,15 @@
 
       <div id="end-btn">
          <pnx-modal-download
-            [pathDownload]='storeService.urlLoad'
-            [exportFormat]='storeService.sftConfig.export_available_format'
-            [queryString]='storeService.queryString'
-            labelButton='Télécharger cette visite'>
+            [pathDownload]="storeService.urlLoad"
+            [exportFormat]="storeService.sftConfig.export_available_format"
+            [queryString]="storeService.queryString"
+            labelButton="Télécharger cette visite">
          </pnx-modal-download>
 
          <button
             type="button"
-            class="btn btn-success box-shadow btn-sm "
+            class="btn btn-success box-shadow btn-sm"
             id="add-btn"
             (click)="onEditHere()">
             <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
@@ -82,10 +88,10 @@
       </div>
 
       <!-- OTHER VISITS  -->
-      <h5>
+      <h4>
          <i class="fa fa-search-plus"></i>
-         <b> Les autres visites </b>
-      </h5>
+         Autres visites
+      </h4>
       <div>
          <ngx-datatable
             class="material"

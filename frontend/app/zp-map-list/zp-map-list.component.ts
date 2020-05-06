@@ -158,7 +158,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   onInfo(id_base_site) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/listVisit`,
+      `${ModuleConfig.MODULE_URL}/sites`,
       id_base_site
     ]);
   }

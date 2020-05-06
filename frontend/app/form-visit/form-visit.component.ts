@@ -190,7 +190,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   }
 
   onVisual() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/listVisit`, this.idSite]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
   }
 
   onModif() {
@@ -251,7 +251,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         });
 
         this.router.navigate([
-          `${ModuleConfig.MODULE_URL}/listVisit`,
+          `${ModuleConfig.MODULE_URL}/sites`,
           this.idSite
         ]);
       },

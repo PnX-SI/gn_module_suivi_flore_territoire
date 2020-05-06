@@ -29,6 +29,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   public show = false;
   public nomCommune;
   public nomSite;
+  public codeSite;
   public descriSite;
   @ViewChild("geojson")
   geojson: GeojsonComponent;
@@ -62,6 +63,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
       info.features.forEach(el => {
         this.nomSite = el.properties.base_site.base_site_name;
+        this.codeSite = el.properties.base_site.base_site_code;
         this.descriSite = el.properties.base_site.base_site_description;
 
         if (this.descriSite !== "" || this.nomSite !== "") {
@@ -131,18 +133,29 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
 
   onEdit(id_visit) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/editVisit`,
+      `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
-      "visit",
-      id_visit
+      "visits",
+      id_visit,
+      "edit"
     ]);
   }
 
   onInfo(id_visit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/infoVisit`, id_visit]);
+    this.router.navigate([
+      `${ModuleConfig.MODULE_URL}/sites`,
+      this.idSite,
+      "visits",
+      id_visit
+    ]);
   }
 
   onAdd() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/editVisit`, this.idSite]);
+    this.router.navigate([
+      `${ModuleConfig.MODULE_URL}/sites`,
+      this.idSite,
+      "visits",
+      "add"
+    ]);
   }
 }

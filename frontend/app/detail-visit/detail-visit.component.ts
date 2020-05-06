@@ -170,24 +170,31 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   onEditHere() {
     this.activatedRoute.params.subscribe(params => {
       this.router.navigate([
-        `${ModuleConfig.MODULE_URL}/editVisit`,
+        `${ModuleConfig.MODULE_URL}/sites`,
         this.idSite,
-        "visit",
-        params.idVisit
+        "visits",
+        params.idVisit,
+        "edit"
       ]);
     });
   }
 
   onEditOther(id_visit) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/editVisit`,
+      `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
-      "visit",
-      id_visit
+      "visits",
+      id_visit,
+      "edit"
     ]);
   }
 
   onInfo(id_visit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/infoVisit`, id_visit]);
+    this.router.navigate([
+      `${ModuleConfig.MODULE_URL}/sites`,
+      this.idSite,
+      "visits",
+      id_visit
+    ]);
   }
 }
