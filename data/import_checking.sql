@@ -75,8 +75,8 @@ FROM distinct_meshes_nb;
 \echo 'Number of sites by taxon'
 SELECT s.cd_nom, t.nom_valide, COUNT(*) AS nb_sites
 FROM :moduleSchema.t_infos_site AS s
-JOIN taxonomie.taxref AS t
-    ON t.cd_nom = s.cd_nom
+    JOIN taxonomie.taxref AS t
+        ON t.cd_nom = s.cd_nom
 GROUP BY s.cd_nom, t.nom_valide
 ORDER BY t.nom_valide ;
 
@@ -84,10 +84,10 @@ ORDER BY t.nom_valide ;
 \echo 'Number of visits by taxon'
 SELECT s.cd_nom, t.nom_valide, COUNT(*) AS nb_visites
 FROM gn_monitoring.t_base_visits AS v
-JOIN :moduleSchema.t_infos_site AS s
-    ON s.id_base_site = v.id_base_site
-JOIN taxonomie.taxref AS t
-    ON t.cd_nom = s.cd_nom
+    JOIN :moduleSchema.t_infos_site AS s
+        ON s.id_base_site = v.id_base_site
+    JOIN taxonomie.taxref AS t
+        ON t.cd_nom = s.cd_nom
 GROUP BY s.cd_nom, t.nom_valide
 ORDER BY t.nom_valide ;
 
@@ -95,12 +95,12 @@ ORDER BY t.nom_valide ;
 \echo 'Number of visited meshes by taxon'
 SELECT s.cd_nom, t.nom_valide, COUNT(*) AS nb_mailles_visitees
 FROM :moduleSchema.cor_visit_grid AS cv
-JOIN gn_monitoring.t_base_visits AS v
-    ON v.id_base_visit = cv.id_base_visit
-JOIN :moduleSchema.t_infos_site AS s
-    ON s.id_base_site = v.id_base_site
-JOIN taxonomie.taxref AS t
-    ON t.cd_nom = s.cd_nom
+    JOIN gn_monitoring.t_base_visits AS v
+        ON v.id_base_visit = cv.id_base_visit
+    JOIN :moduleSchema.t_infos_site AS s
+        ON s.id_base_site = v.id_base_site
+    JOIN taxonomie.taxref AS t
+        ON t.cd_nom = s.cd_nom
 GROUP BY s.cd_nom, t.nom_valide
 ORDER BY t.nom_valide ;
 
@@ -108,11 +108,11 @@ ORDER BY t.nom_valide ;
 \echo 'Number of persences/absences by taxon'
 SELECT s.cd_nom, t.nom_valide, cv.presence, COUNT(*) AS nb_presence
 FROM :moduleSchema.cor_visit_grid AS cv
-JOIN gn_monitoring.t_base_visits AS v
-    ON v.id_base_visit = cv.id_base_visit
-JOIN :moduleSchema.t_infos_site AS s
-    ON s.id_base_site = v.id_base_site
-JOIN taxonomie.taxref AS t
-    ON t.cd_nom = s.cd_nom
+    JOIN gn_monitoring.t_base_visits AS v
+        ON v.id_base_visit = cv.id_base_visit
+    JOIN :moduleSchema.t_infos_site AS s
+        ON s.id_base_site = v.id_base_site
+    JOIN taxonomie.taxref AS t
+        ON t.cd_nom = s.cd_nom
 GROUP BY s.cd_nom, t.nom_valide, cv.presence
 ORDER BY t.nom_valide ;

@@ -104,6 +104,7 @@ function importSites() {
             -v siteCodeColumn="${site_code_column}" \
             -v siteTaxonColumn="${site_taxon_column}" \
             -v siteDescColumn="${site_desc_column}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/import_sites.sql"
 }
 
@@ -116,6 +117,8 @@ function deleteSites() {
             -v moduleSchema="${module_schema}" \
             -v sitesTmpTable="${sites_tmp_table}" \
             -v siteCodeColumn="${site_code_column}" \
+            -v siteTaxonColumn="${site_taxon_column}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/delete_sites.sql"
 }
 

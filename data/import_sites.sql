@@ -14,14 +14,13 @@ INSERT INTO gn_monitoring.t_base_sites
         CONCAT(:'siteTypeCode', '-', :siteCodeColumn::character varying),
         :siteDescColumn,
         :siteCodeColumn,
-        NOW(),
+        DATE(:'importDate'),
         ST_TRANSFORM(ST_SetSRID(:siteGeomColumn, :sridLocal), :sridWorld)
-    FROM :moduleSchema.:sitesTmpTable
+    FROM :moduleSchema.:sitesTmpTable AS st
 WHERE NOT EXISTS (
-    SELECT id_base_site
+    SELECT 'X'
     FROM gn_monitoring.t_base_sites AS bs
-        JOIN :moduleSchema.:sitesTmpTable AS st
-            ON (bs.base_site_code = st.:siteCodeColumn::varchar)
+    WHERE bs.base_site_code = st.:siteCodeColumn::character varying
 ) ;
 
 -- Add extended site infos in 't_infos_sites'

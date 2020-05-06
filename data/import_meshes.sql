@@ -5,14 +5,15 @@ ALTER TABLE :moduleSchema.:meshesTmpTable
     ALTER COLUMN :meshGeomColumn TYPE geometry(MULTIPOLYGON, :sridLocal)
     USING ST_Force2D(:meshGeomColumn);
 
-INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source)
+INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source, comment)
     SELECT
         ref_geo.get_id_area_type(:'meshesCode'),
         :meshNameColumn,
         :meshNameColumn,
         :meshGeomColumn,
         ST_Centroid(:meshGeomColumn),
-        :'meshesSource'
+        :'meshesSource',
+        CONCAT('SFT import date: ', :'importDate')
     FROM :moduleSchema.:meshesTmpTable AS m
 WHERE NOT EXISTS (
     SELECT 'X'

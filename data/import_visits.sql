@@ -22,17 +22,8 @@ WHERE vt.site_code = sites.site_code;
 -- Update meshe id in temporary visit table
 WITH meshes AS (
     SELECT a.id_area AS id, a.area_code AS code
-    FROM gn_commons.t_modules AS m
-        JOIN gn_monitoring.cor_site_module As sm
-            ON (m.id_module = sm.id_module)
-        JOIN gn_monitoring.cor_site_area AS sa
-            ON (sm.id_base_site = sa.id_base_site)
-        JOIN ref_geo.l_areas AS a
-            ON (sa.id_area = a.id_area)
-        JOIN ref_geo.bib_areas_types AS bat
-            ON (a.id_type = bat.id_type)
-    WHERE module_code ILIKE :'moduleCode'
-        AND bat.type_code ILIKE :'meshesCode'
+    FROM ref_geo.l_areas AS a
+    WHERE a.comment ILIKE 'SFT import%'
 )
 UPDATE :moduleSchema.:visitsTmpTable AS vt SET
     meshe_id = meshes.id
@@ -50,11 +41,11 @@ INSERT INTO gn_monitoring.t_base_visits (
     comments
 )
 SELECT DISTINCT
-    site_id,
-    dataset_id,
-    module_id,
-    date_min,
-    date_max,
+    vt.site_id,
+    vt.dataset_id,
+    vt.module_id,
+    vt.date_min,
+    vt.date_max,
     ''
 FROM :moduleSchema.:visitsTmpTable AS vt
 WHERE NOT EXISTS (
@@ -169,14 +160,16 @@ INSERT INTO utilisateurs.t_roles (
     nom_role,
     id_organisme,
     active,
-    remarques
+    remarques,
+    champs_addi
 )
     SELECT
         firstname,
         lastname,
         organism_id,
         false,
-        'Added by SFT import_visits.sh script.'
+        'Added by SFT import_visits.sh script.',
+        json_build_object('sft', json_build_object('importDate', :'importDate'))
     FROM :moduleSchema.:visitsObserversTmpTable AS ot
     WHERE ot.role_id IS NULL AND ot.organism_id IS NOT NULL
 ON CONFLICT DO NOTHING;
@@ -208,6 +201,9 @@ INSERT INTO utilisateurs.cor_role_liste (id_role, id_liste)
     WHERE role_added = True
 ON CONFLICT DO NOTHING;
 
+
+COMMIT;
+BEGIN;
 
 -- Insert in gn_monitoring.cor_visit_observer
 INSERT INTO gn_monitoring.cor_visit_observer (id_base_visit, id_role)

@@ -23,6 +23,7 @@ DELETE FROM ref_geo.li_grids
         SELECT id_area FROM ref_geo.l_areas
         WHERE id_type = ref_geo.get_id_area_type(:'meshesCode')
             AND area_name IN (SELECT :meshNameColumn FROM :moduleSchema.:meshesTmpTable)
+            AND comment = CONCAT('SFT import date: ', :'importDate')
     ) ;
 
 DELETE FROM gn_monitoring.cor_site_area
@@ -30,12 +31,15 @@ DELETE FROM gn_monitoring.cor_site_area
         SELECT id_area FROM ref_geo.l_areas
         WHERE id_type = ref_geo.get_id_area_type(:'meshesCode')
             AND area_name IN (SELECT :meshNameColumn FROM :moduleSchema.:meshesTmpTable)
+            AND comment = CONCAT('SFT import date: ', :'importDate')
     ) ;
 
 -- Delete meshes in ref_geo.l_areas
 DELETE FROM ref_geo.l_areas
     WHERE id_type = ref_geo.get_id_area_type(:'meshesCode')
-    AND area_name IN (SELECT :meshNameColumn FROM :moduleSchema.:meshesTmpTable) ;
+        AND area_name IN (SELECT :meshNameColumn FROM :moduleSchema.:meshesTmpTable)
+        AND comment = CONCAT('SFT import date: ', :'importDate')
+        ;
 
 -- Clean database: remove temporary table
 DROP TABLE :moduleSchema.:meshesTmpTable;

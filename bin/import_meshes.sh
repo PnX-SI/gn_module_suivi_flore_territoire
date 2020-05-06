@@ -98,6 +98,7 @@ function importMeshes() {
             -v meshesCode="${meshes_code}" \
             -v moduleSchema="${module_schema}" \
             -v meshesTmpTable="${meshes_tmp_table}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/import_meshes.sql"
 }
 
@@ -109,6 +110,7 @@ function deleteMeshes() {
             -v meshesTmpTable="${meshes_tmp_table}" \
             -v meshesCode="${meshes_code}" \
             -v meshNameColumn="${meshes_name_column}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/delete_meshes.sql"
 }
 

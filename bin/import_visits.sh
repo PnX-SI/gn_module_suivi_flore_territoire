@@ -136,6 +136,7 @@ function importVisits() {
             -v moduleCode="${module_code}" \
             -v meshesCode="${meshes_code}" \
             -v observersListId="${observers_list_id}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/import_visits.sql"
 }
 
@@ -162,6 +163,7 @@ function deleteVisits() {
             -v moduleCode="${module_code}" \
             -v meshesCode="${meshes_code}" \
             -v observersListId="${observers_list_id}" \
+            -v importDate="${import_date}" \
             -f "${data_dir}/delete_visits.sql"
 }
 

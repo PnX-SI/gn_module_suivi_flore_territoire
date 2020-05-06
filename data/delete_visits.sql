@@ -13,7 +13,7 @@ SET site_id = sites.id
 FROM sites
 WHERE vt.site_code = sites.site_code;
 
--- Update module and site id in temporary visit table
+-- Update visit, dataset, module and meshe id in temporary visit table
 WITH visits AS (
     SELECT
         bv.id_base_visit AS id,
@@ -81,15 +81,8 @@ WITH users AS (
             ON (r.id_role = rl.id_role)
     WHERE r.identifiant IS NULL
         AND r.active = False
-        AND r.remarques = 'Added by SFT import_visits.sh script.'
-        AND r.id_role NOT IN (
-            SELECT DISTINCT id_role
-            FROM gn_monitoring.cor_visit_observer
-            WHERE id_base_visit NOT IN (
-                SELECT visit_id FROM :moduleSchema.:visitsTmpTable
-            )
-        )
-        AND rl.id_liste = :'observersListId' 
+        AND champs_addi @> json_build_object('sft', json_build_object('importDate', :'importDate'))::jsonb
+        AND rl.id_liste = :'observersListId'
 )
 UPDATE :moduleSchema.:visitsObserversTmpTable AS ot
 SET role_added = True
@@ -105,11 +98,8 @@ WITH not_added_organisms AS (
     WHERE id_organisme IS NOT NULL
 		AND (
 			active = True
-	        OR id_role IN (
-	            SELECT DISTINCT id_role
-	            FROM utilisateurs.cor_role_liste
-	            WHERE id_liste != :'observersListId'
-	        )
+	        OR NOT(champs_addi @> json_build_object('sft', json_build_object('importDate', :'importDate'))::jsonb)
+            OR champs_addi IS NULL
 	    )
 ), roles_with_organism_added AS (
 	SELECT DISTINCT role_id AS id
