@@ -6,23 +6,27 @@ Plusieurs scripts sont disponibles pour importer les données manipulées dans l
  - nomenclatures (`import_nomenclatures.sh`) : CSV
  - mailles (`import_meshes.sh`) : Shape
  - sites (`import_sites.sh`) : Shape
- - visites (`import_visits.sh`) : CSv
+ - visites (`import_visits.sh`) : CSV
 
 Chacun de ces scripts est disponibles dans le dossier `bin/`.
 
 Avant de lancer les scripts, il est nécessaires de correctement les paramètrer à l'aide du fichier `config/settings.ini`. Une section de paramètres concerne chacun d'entre eux. Ces paramètres permettent entre autre d'indiquer :
- - le chemin et le nom vers le fichier source
- - le chemin et le nom du fichier de log où les informations sur l'execution du script seront stockées
- - le nom des tables temporaires dans lesquelles les données sources sont stockées avant import dans les tables de GeoNature
- - pour les fichiers source de type Shape, les noms des champs des attributs des objets géographiques (mailles, sites)
- - pour les fichiers source de type CSV, les noms des colonnes (visites)
+ - le chemin et le nom vers le fichier source (CSV ou Shape)
+ - le chemin et le nom du fichier de log où les informations affichées durant son execution seront aussi stockées
+ - le nom des tables temporaires dans lesquelles les données sources sont stockées avant import dans les tables de GeoNature. Elles sont toutes crées dans le schema du module.
+ - pour les fichiers source de type Shape (mailles, sites), les noms des champs des attributs des objets géographiques
+ - pour les fichiers source de type CSV (visites), les noms des colonnes
+
+ Enfin, pour chaque import le paramètre *import_date* doit être correctement renseigné avec une date au format `yyyy-mm-dd` distincte. Cette date permet d'associer dans la base de données, les mailles, sites, visites mais aussi utilisateurs (=`role`) et organismes à l'import courant.  
+ Laisser en commentaire dans le fichier `settings.ini` les dates utilisées pour chaque import.  
+ Vous n'ête en aucun obligé d'utiliser la date courante, vous être libre de choisir celle qui vous convient le mieux.
 
 ## Format des données
 Voici le détail des champs des fichiers CSV ou Shape attendus par défaut :
 
 ### Taxons (CSV)
 
-Description des colonnes attendues dans le fichier CSV contenant la iste des taxons suivis dans SFT :
+Description des colonnes attendues dans le fichier CSV contenant la liste des taxons suivis dans SFT :
 
  - **cd_nom** : code TaxRef du nom du taxon suivi dans SFT
  - **cd_ref** : code TaxRef du nom de référence du taxon suivi dans SFT
@@ -69,7 +73,7 @@ Autres paramètres :
 ### Visites (CSV)
 Description des colonnes attendues dans le fichier CSV contenant la liste des visites. Les nom des colonnes peuvent modifié à l'aide des paramètres du fichier de configuration indiqués ici entre parenthèses :
 
- - **idzp** (*visits_column_id*) : identifiant du site où a eu lieu la visite.
+ - **idzp** (*visits_column_id*) : identifiant ou code alphanumérique du site où a eu lieu la visite. Le même site référencé dans 2 imports distincts doit avoir le même identifiant dans ce champ. Deux sites différents ne doivent en aucun cas posséder le même identifiant.
  - **cd25m** (*visits_column_meshe*) : code de la maille où a eu lieu la visite.
  - **observateu** (*visits_column_observer*) : liste des observateurs au format "NOM Prénom" séparés par des pipes "|". L'ordre doit correspondre à l'ordre des organismes du champ *organimes*.
  - **organismes** (*visits_column_organism*) : liste des organimes séparés par des pipes "|". L'ordre doit correspondre à l'ordre des observateurs du champ *observateu*.
@@ -94,12 +98,15 @@ Il possèdent tous les options suivantes :
 
 ## Procédure
 
-Afin que les triggers présents sur les tables soient déclenchés dans le bon ordre et que les scripts trouvent bien les données de référence dont ils ont besoin, il est conseillé de réaliser les imports dans cet ordre :
- 1. taxons
- 2. nomenclatures
- 3. mailles
- 4. sites
- 5. visites
+Afin que les triggers présents sur les tables soient déclenchés dans le bon ordre et que les scripts trouvent bien les données de référence dont ils ont besoin, il est obligatoire de lancer les scripts dans cet ordre :
+ 1. taxons : `import_taxons.sh`
+ 2. nomenclatures : `import_nomenclatures.sh`
+ 3. mailles : `import_meshes.sh`
+ 4. sites : `import_sites.sh`
+ 5. visites : `import_visits.sh`
+
+Attention, la désinstallation des données importées se fait dans le sens inverse. Il faut commencer par les visites puis passer aux sites...  
+Concernant la désinstallation, il s'agit d'une manipulation délicate à utiliser principalement sur une base de données de test ou lors du développement du module. En production, nous vons conseillons fortement d'éviter son utilisation mais si vous y êtes contraint, sauvegarder votre base de données avant.
 
 Pour lancer un script, ouvrir un terminal et se placer dans le dossier `bin/` du module SFT.
 Ex. pour lancer le script des visites :
