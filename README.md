@@ -48,16 +48,15 @@ dans ``/home/myuser/``
     * Lancer la commande de mise à jour de configuration du module (abrégé ici en "sft")  : ``geonature update_module_configuration sft``
 * Vous pouvez sortir du venv en lançant la commande ``deactivate``
 
-Désinstallation
-===============
+## Désinstallation
+
 * Utiliser le script `bin/uninstall_db.sh` en vous plaçant dans le dossier bin puis en éxecutant : `./uninstall_db.sh`
 * Cette action va supprimer toutes les données et structures en lien avec le module SFT dans la base de données.
 * Vous pouvez ensuite supprimer le lien symbolique dans le dossier ``geonature/external_modules/``
 
-Licence
-=======
+## Licence
 
-* [Licence OpenSource GPL v3](./LICENSE)
+* [Licence OpenSource GPL v3](./LICENSE.txt)
 * Copyleft 2020 - Parc National des Écrins - Conservatoire National Botanique Alpin
 
 [![Logo PNE](http://geonature.fr/img/logo-pne.jpg)](http://www.ecrins-parcnational.fr)
