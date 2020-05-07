@@ -104,6 +104,39 @@ FROM :moduleSchema.cor_visit_grid AS cv
 GROUP BY s.cd_nom, t.nom_valide
 ORDER BY t.nom_valide ;
 
+\echo 'Number of unvisited meshes by taxon'
+WITH sft_module AS (
+	SELECT id_module
+	FROM gn_commons.t_modules
+	WHERE module_code ILIKE :'moduleCode'
+	LIMIT 1
+)
+SELECT tis.cd_nom, t.nom_valide, COUNT(*) AS nb_mailles_non_visitees
+FROM sft_module, gn_monitoring.t_base_sites AS tbs
+	JOIN gn_monitoring.cor_site_module AS sm
+		ON (sm.id_base_site = tbs.id_base_site)
+    JOIN gn_monitoring.cor_site_area AS csa
+	    ON (csa.id_base_site = tbs.id_base_site)
+    JOIN ref_geo.l_areas AS a
+        ON (csa.id_area = a.id_area)
+    JOIN ref_geo.bib_areas_types AS bat
+	    ON (a.id_type = bat.id_type)
+    JOIN :moduleSchema.t_infos_site AS tis
+    	ON (tbs.id_base_site = tis.id_base_site)
+   	JOIN taxonomie.taxref AS t
+        ON (t.cd_nom = tis.cd_nom)
+WHERE bat.type_code ILIKE :'meshesCode'
+	AND sm.id_module = sft_module.id_module
+	AND NOT EXISTS (
+		SELECT 'X' -- SELECT list mostly irrelevant; can just be empty in Postgres
+		FROM :moduleSchema.cor_visit_grid AS cv
+			JOIN gn_monitoring.t_base_visits AS v
+		        ON (v.id_base_visit = cv.id_base_visit)
+		WHERE cv.id_area = a.id_area
+			AND v.id_base_site = tbs.id_base_site
+	)
+GROUP BY tis.cd_nom, t.nom_valide
+ORDER BY t.nom_valide ;
 
 \echo 'Number of persences/absences by taxon'
 SELECT s.cd_nom, t.nom_valide, cv.presence, COUNT(*) AS nb_presence
