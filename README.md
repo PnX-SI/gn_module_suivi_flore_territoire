@@ -24,13 +24,13 @@ dans ``/home/myuser/``
 * Dézippez la dans ``/home/myuser/`` (``unzip X.Y.Z.zip``)
 * Créez et adaptez le fichier ``config/settings.ini`` à partir de ``config/settings.sample.ini`` :
   * Commande pour copier le fichier : ``cp config/settings.sample.ini config/settings.ini``
-  * Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](https://geonature.readthedocs.io/fr/latest/admin-manual.html#integrer-des-donnees)
+  * Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](http://docs.geonature.fr/admin-manual.html#integrer-des-donnees)
 * Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes suivantes (le nom du module abrégé en "sft" est utilisé comme code) :
 
 ```
     source venv/bin/activate
     geonature install_gn_module <mon_chemin_absolu_vers_le_module> <url_relative_du_module>
-    # Exemple geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft)
+    # Exemple : geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft
 ```
 
 * Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :
