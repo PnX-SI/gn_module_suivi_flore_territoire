@@ -1,6 +1,7 @@
 # Suivi Flore Territoire
 
-Module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle, piloté par le CBNA.
+Module GeoNature du protocole Suivi flore territoire
+ 
 
 ![SFT module](http://geonature.fr/docs/img/2018-09-sft.jpg)
 
@@ -17,7 +18,7 @@ Module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle
 
 ## Installation
 
-* Installez GeoNature (https://github.com/PnX-SI/GeoNature)
+* Installez GeoNature (https://github.com/PnX-SI/GeoNature) en version 2.3.0 ou supérieure.
 * Téléchargez la dernière version stable du module (``wget https://github.com/PnX-SI/gn_module_suivi_flore_territoire/archive/X.Y.Z.zip``)
 dans ``/home/myuser/``
 * Dézippez la dans ``/home/myuser/`` (``unzip X.Y.Z.zip``)
@@ -28,8 +29,8 @@ dans ``/home/myuser/``
 
 ```
     source venv/bin/activate
-    geonature install_gn_module <mon_chemin_absolu_vers_le_module> /sft``
-    # Exemple ``geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft``)
+    geonature install_gn_module <mon_chemin_absolu_vers_le_module> <url_relative_du_module>
+    # Exemple geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft)
 ```
 
 * Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :

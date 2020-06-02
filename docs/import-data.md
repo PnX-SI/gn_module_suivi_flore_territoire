@@ -12,14 +12,14 @@ Chacun de ces scripts est disponibles dans le dossier `bin/`.
 
 Avant de lancer les scripts, il est nécessaires de correctement les paramètrer à l'aide du fichier `config/settings.ini`. Une section de paramètres concerne chacun d'entre eux. Ces paramètres permettent entre autre d'indiquer :
  - le chemin et le nom vers le fichier source (CSV ou Shape)
- - le chemin et le nom du fichier de log où les informations affichées durant son execution seront aussi stockées
+ - le chemin et le nom du fichier de log où les informations affichées durant son execution seront enregistrées
  - le nom des tables temporaires dans lesquelles les données sources sont stockées avant import dans les tables de GeoNature. Elles sont toutes crées dans le schema du module.
  - pour les fichiers source de type Shape (mailles, sites), les noms des champs des attributs des objets géographiques
  - pour les fichiers source de type CSV (visites), les noms des colonnes
 
  Enfin, pour chaque import le paramètre *import_date* doit être correctement renseigné avec une date au format `yyyy-mm-dd` distincte. Cette date permet d'associer dans la base de données, les mailles, sites, visites mais aussi utilisateurs (=`role`) et organismes à l'import courant.  
  Laisser en commentaire dans le fichier `settings.ini` les dates utilisées pour chaque import.  
- Vous n'ête en aucun obligé d'utiliser la date courante, vous être libre de choisir celle qui vous convient le mieux.
+ Vous n'ête en aucun cas obligé d'utiliser la date courante, vous être libre de choisir celle qui vous convient le mieux.
 
 ## Format des données
 Voici le détail des champs des fichiers CSV ou Shape attendus par défaut :
@@ -93,8 +93,8 @@ Il possèdent tous les options suivantes :
  - `-h` (`--help`) : pour afficher l'aide du script.
  - `-v` (`--verbosity`) : le script devient verbeux est affiche plus de messages concernant le travail qu'il accomplit.
  - `-x` (`--debug`) : le mode débogage de Bash est activé.
- - `-c` (--config) : permet d'indiquer le chemin vers un fichier de configuration spécifique. Par défaut, c'est le fichier `config/settings.ini` qui est utilisé.
- - `-d` (`--delete`) : chacun des imports peut être annulé avec option. Attention, il faut s'assurer que le script est correctement configuré avec les paramètres correspondant à l'import que vous souhaitez annuler.
+ - `-c` (`--config`) : permet d'indiquer le chemin vers un fichier de configuration spécifique. Par défaut, c'est le fichier `config/settings.ini` qui est utilisé.
+ - `-d` (`--delete`) : chacun des imports peut être annulé avec cette option. Attention, il faut s'assurer que le script est correctement configuré avec les paramètres correspondant à l'import que vous souhaitez annuler.
 
 ## Procédure
 
@@ -106,7 +106,7 @@ Afin que les triggers présents sur les tables soient déclenchés dans le bon o
  5. visites : `import_visits.sh`
 
 Attention, la désinstallation des données importées se fait dans le sens inverse. Il faut commencer par les visites puis passer aux sites...  
-Concernant la désinstallation, il s'agit d'une manipulation délicate à utiliser principalement sur une base de données de test ou lors du développement du module. En production, nous vons conseillons fortement d'éviter son utilisation mais si vous y êtes contraint, sauvegarder votre base de données avant.
+Concernant la désinstallation, il s'agit d'une manipulation délicate à utiliser principalement sur une base de données de test ou lors du développement du module. En production, nous vous conseillons fortement d'éviter son utilisation. Si vous y êtes contraint, veuillez sauvegarder votre base de données auparavant.
 
 Pour lancer un script, ouvrir un terminal et se placer dans le dossier `bin/` du module SFT.
 Ex. pour lancer le script des visites :
