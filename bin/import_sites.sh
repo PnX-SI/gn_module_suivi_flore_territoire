@@ -8,7 +8,7 @@ set -eo pipefail
 # OUTS: None
 function printScriptUsage() {
     cat << EOF
-Usage: ./import_sites.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
 Update settings.ini, section "Import sites" before run this script.
 
      -h | --help: display this help

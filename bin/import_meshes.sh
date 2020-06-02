@@ -8,7 +8,7 @@ set -eo pipefail
 # OUTS: None
 function printScriptUsage() {
     cat << EOF
-Usage: ./import_meshes.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
 Update settings.ini, section "Import meshes" before run this script.
 
      -h | --help: display this help
@@ -117,7 +117,7 @@ function deleteMeshes() {
 function loadShapeToPostgresql() {
     printMsg "Export meshes SHP to PostGis and create meshes temporary table"
     export PGPASSWORD="${user_pg_pass}"; \
-        shp2pgsql -c -s ${srid_local} "${meshes_shape_path}" "${module_schema}.${meshes_tmp_table}" \
+        shp2pgsql -d -s ${srid_local} "${meshes_shape_path}" "${module_schema}.${meshes_tmp_table}" \
         | psql -h "${db_host}" -U "${user_pg}" -d "${db_name}"
 }
 

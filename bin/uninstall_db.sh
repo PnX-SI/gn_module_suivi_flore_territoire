@@ -9,9 +9,9 @@ set -euo pipefail
 # DESC: Usage help
 # ARGS: None
 # OUTS: None
-function printScriptUsage() { 
+function printScriptUsage() {
     cat << EOF
-Usage: ./uninstall_db.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
      -h | --help: display this help
      -v | --verbose: display more infos
      -x | --debug: display debug script infos
@@ -66,11 +66,11 @@ function main() {
     checkSuperuser
     commands=("psql")
     checkBinary "${commands[@]}"
-    
+
     #+----------------------------------------------------------------------------------------------------------+
     # Start script
     printInfo "SFT UNinstall DB script started at: ${fmt_time_start}"
-    
+
     #+----------------------------------------------------------------------------------------------------------+
     printPretty "${Red}ALL data, tables and schema will be destroy. Are you sure to uninstall SFT? ('Y' or 'N')"
     read -r reply

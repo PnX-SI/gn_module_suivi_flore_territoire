@@ -8,7 +8,7 @@ set -eo pipefail
 # OUTS: None
 function printScriptUsage() {
     cat << EOF
-Usage: ./import_visits.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
 Update settings.ini, section "Import visits" before run this script.
      -h | --help: display this help
      -v | --verbose: display more information on what script is doing

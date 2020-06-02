@@ -8,9 +8,9 @@ set -euo pipefail
 # DESC: Usage help
 # ARGS: None
 # OUTS: None
-function printScriptUsage() { 
+function printScriptUsage() {
     cat << EOF
-Usage: ./install_db.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
      -h | --help: display this help
      -v | --verbose: display more infos
      -x | --debug: display debug script infos

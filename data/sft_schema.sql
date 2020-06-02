@@ -5,15 +5,17 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+BEGIN;
+
 CREATE SCHEMA :moduleSchema;
 
 SET search_path = :moduleSchema, pg_catalog, public;
 
 SET default_with_oids = false;
 
-------------------------
---TABLES AND SEQUENCES--
-------------------------
+-- -----------------------------------------------------------------------------
+-- Tables and sequences
+
 CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
@@ -54,9 +56,9 @@ ALTER TABLE ONLY cor_visit_perturbation
     PRIMARY KEY (id_base_visit, id_nomenclature_perturbation);
 
 
----------------
---FOREIGN KEY--
----------------
+-- -----------------------------------------------------------------------------
+-- Foreign keys
+
 ALTER TABLE ONLY t_infos_site
     ADD CONSTRAINT fk_t_infos_site_id_base_site
     FOREIGN KEY (id_base_site)
@@ -95,9 +97,9 @@ ALTER TABLE ONLY cor_visit_perturbation
     ON UPDATE CASCADE;
 
 
----------------
---VIEW--
----------------
+-- -----------------------------------------------------------------------------
+-- View
+
 -- Create view to export visits
 CREATE OR REPLACE VIEW :moduleSchema.export_visits AS WITH
     observers AS (
@@ -170,9 +172,11 @@ FROM gn_monitoring.t_base_sites sites
 WHERE ar.id_type = ref_geo.get_id_area_type(:'meshesCode')
 ORDER BY visits.id_base_visit;
 
-------------
---TRIGGERS--
-------------
+-- -----------------------------------------------------------------------------
+-- Triggers
+
 -- Idée:
 -- + Un trigger pour vérifier si id_nomenclature_perturbation dans la table cor_visit_perturbation
 --   correspond bien à celui stocké dans t_nomenclatures.
+
+COMMIT;

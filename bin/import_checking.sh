@@ -8,7 +8,7 @@ set -eo pipefail
 # OUTS: None
 function printScriptUsage() {
     cat << EOF
-Usage: ./import_checking.sh [options]
+Usage: ./$(basename $BASH_SOURCE) [options]
      -h | --help: display this help
      -v | --verbose: display more information on what script is doing
      -x | --debug: enable Bash mode debug

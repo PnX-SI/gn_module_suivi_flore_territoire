@@ -115,7 +115,7 @@ COMMIT;
 
 BEGIN;
 
--- DELETE FROM pr_monitoring_flora_territory.cor_visit_grid
+-- DELETE FROM cor_visit_grid
 DELETE FROM :moduleSchema.cor_visit_grid
 USING :moduleSchema.:visitsTmpTable AS vt
 WHERE id_base_visit = vt.visit_id

@@ -29,7 +29,8 @@ DELETE FROM :moduleSchema.t_infos_site AS tis
             JOIN gn_monitoring.t_base_sites AS bs
                 ON (tmp.:siteCodeColumn::character varying = bs.base_site_code)
         WHERE tis.id_base_site = bs.id_base_site
-        AND tis.cd_nom = tmp.:siteTaxonColumn
+            AND tis.cd_nom = tmp.:siteTaxonColumn
+            AND first_use_date = :'importDate'
     );
 
 

@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Encoding : UTF-8
+# SFT install Env script.
+#
+# Documentation : https://github.com/PnX-SI/gn_module_suivi_flore_territoire
 set -euo pipefail
 
 # DESC: Usage help
 # ARGS: None
 # OUTS: None
-function printScriptUsage() { 
+function printScriptUsage() {
     cat << EOF
-Usage: ./import_meshes.sh [options]
+Usage: ./$(basename $BASH_SOURCE)[options]
      -h | --help: display this help
      -v | --verbose: display more infos
      -x | --debug: display debug script infos
@@ -38,7 +41,7 @@ function parseScriptOptions() {
             "h") printScriptUsage ;;
             "v") readonly verbose=true ;;
             "x") readonly debug=true; set -x ;;
-            "c") setting_file_path=${OPTARG} ;;
+            "c") setting_file_path="${OPTARG}" ;;
             *) exitScript "ERROR : parameter invalid ! Use -h option to know more." 1 ;;
         esac
     done
@@ -49,50 +52,32 @@ function parseScriptOptions() {
 # OUTS: None
 function main() {
     #+----------------------------------------------------------------------------------------------------------+
-    # Define global constants and variables
-    
-    #+----------------------------------------------------------------------------------------------------------+
     # Load utils
     source "$(dirname "${BASH_SOURCE[0]}")/utils.bash"
 
+    #+----------------------------------------------------------------------------------------------------------+
+    # Init script
     initScript "${@}"
     parseScriptOptions "${@}"
     loadScriptConfig "${setting_file_path-}"
-    redirectOutput "${log_dir}/$(date +'%F')_test.log"    
+    redirectOutput "${install_log}"
+
+    checkSuperuser
 
     #+----------------------------------------------------------------------------------------------------------+
     # Start script
-    printInfo "Test script started at: ${fmt_time_start}"
-    
-    checkSuperuser
-    checkBinary "sudo"
-    commands=("psql" "shp2pgsql" "csvtool")
-    checkBinary "${commands[@]}"
+    printInfo "SFT install ENV script started at: ${fmt_time_start}"
 
-    printPretty "Test printPretty green" ${Gre}
-    printMsg "Test section"
-    printError "Test erreur"
-    printInfo "Test infos"
-    printVerbose "Test texte verbeux"
+    #+----------------------------------------------------------------------------------------------------------+
+    installPackagesDependencies
 
-    head="$(csvtool head 1 "$import_dir/taxons.csv")"
-    stdbuf -oL csvtool drop 1 "$import_dir/taxons.csv"  |
-        while IFS= read -r line; do
-            col="$(printf "$head\n$line" | csvtool namedcol name - | sed 1d | sed -e 's/^"//' -e 's/"$//')"
-            echo "'$col'"
-        done
-
-    count=100
-    done=0
-    while [ $done -le $count ]; do
-        (( done += 1 ))
-        displayProgressBar $count $done
-        sleep 0.01
-    done
-    echo
-    
     #+----------------------------------------------------------------------------------------------------------+
     displayTimeElapsed
+}
+
+function installPackagesDependencies() {
+    printMsg "Install packages used by imports"
+    sudo apt-get install wget csvtool
 }
 
 main "${@}"
