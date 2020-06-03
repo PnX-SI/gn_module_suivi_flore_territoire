@@ -77,7 +77,7 @@ function main() {
 
 function installPackagesDependencies() {
     printMsg "Install packages used by imports"
-    sudo apt-get install wget csvtool
+    sudo apt-get install -y wget csvtool
 }
 
 main "${@}"
