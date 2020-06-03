@@ -2,16 +2,16 @@
 
 ## v1.0.0 (unreleased)
 
-Première version stable du module compatible avec GeoNature v2.3.2.
+Première version stable du module compatible avec GeoNature version 2.3.2 et plus.
 
 **Fonctionnalités**
-* Ajout de scripts d'import (suppression) pour les taxons, les nomenclatures, les mailles, les sites et les visites
+* Ajout de scripts d'import (et de suppression) pour les taxons, les nomenclatures, les mailles, les sites et les visites
 * Ajout d'un paramètre pour le niveau de zoom par défaut des cartes du module.uninstall.sh (issue #45)
 * Ajout d'un script de désinstallation du module (`uninstall.sh`)
 * Mise à jour de la documentation et du changelog (issue #22)
 * Affichage abrégé de l'ensemble des observateurs sur la liste des visites et complet sur le fiche (issue #41)
 * Prise en compte de l'abscence d'observateur associé à une visite dans la liste et la fiche d'une visite (issue #40)
-* Prise en compte de l'id d'une liste d'utilisateurs dédiée pour le module SFT (issue #35)
+* Prise en compte de l'identifiant d'une liste d'utilisateurs dédiée pour le module SFT (issue #35)
 
 **Corrections**
 * Amélioraton du script d'installation (issue #33)
@@ -30,7 +30,7 @@ Première version stable du module compatible avec GeoNature v2.3.2.
 
 Première version du module GeoNature du protocole Suivi flore territoire du réseau Flore Sentinelle, piloté par le CBNA, développée par @Khanh-Chau.
 
-.. image :: http://geonature.fr/docs/img/2018-09-sft.jpg
+![SFT screenshot](http://geonature.fr/docs/img/2018-09-sft.jpg)
 
 Démonstration : http://geonature.fr/docs/img/2018-10-geonature-sft-demo.gif
 
