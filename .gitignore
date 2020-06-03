@@ -5,7 +5,7 @@ __pycache__/*
 
 log/
 var/
-venv/
+venv
 
 settings.ini
 conf_gn_module.toml
