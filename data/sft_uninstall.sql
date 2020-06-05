@@ -119,6 +119,14 @@ DELETE FROM ref_nomenclatures.t_nomenclatures WHERE cd_nomenclature = :'siteType
 -- -----------------------------------------------------------------------------
 -- GN_COMMONS
 
+-- Unlink module from dataset
+DELETE FROM gn_commons.cor_module_dataset
+    WHERE id_module = (
+        SELECT id_module
+        FROM gn_commons.t_modules
+        WHERE module_code ILIKE :'moduleCode'
+    ) ;
+
 -- Uninstall module (unlink this module of GeoNature)
 DELETE FROM gn_commons.t_modules
     WHERE module_code ILIKE :'moduleCode';
