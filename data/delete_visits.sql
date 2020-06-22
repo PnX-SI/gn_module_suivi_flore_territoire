@@ -1,7 +1,9 @@
 -- Script SQL to delete visits from temporary tables (use with `import_visits.sh -d`)
 BEGIN;
 
--- Update module and site id in temporary visit table
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Update module and site id in temporary visit table'
 WITH sites AS (
     SELECT
         id_base_site AS id,
@@ -13,7 +15,9 @@ SET site_id = sites.id
 FROM sites
 WHERE vt.site_code = sites.site_code;
 
--- Update visit, dataset, module and meshe id in temporary visit table
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Update visit, dataset, module and meshe id in temporary visit table'
 WITH visits AS (
     SELECT
         bv.id_base_visit AS id,
@@ -48,7 +52,8 @@ WHERE vt.site_id = v.id_site
     AND vt.date_max = v.date_max ;
 
 
--- Update organism and role id in temporary observers table
+\echo '--------------------------------------------------------------------------------'
+\echo 'Update organism and role id in temporary observers table'
 WITH users AS (
     SELECT
         r.id_role AS id,
@@ -71,7 +76,8 @@ WHERE
     AND u.organism ILIKE ot.organism;
 
 
--- Update roles added with current import only
+\echo '--------------------------------------------------------------------------------'
+\echo 'Update roles added with current import only'
 -- TODO: find a better way to mark users added by current import
 WITH users AS (
     SELECT
@@ -90,7 +96,8 @@ FROM users AS u
 WHERE u.id = ot.role_id ;
 
 
--- Update organisms added with current import only
+\echo '--------------------------------------------------------------------------------'
+\echo 'Update organisms added with current import only'
 -- TODO: find a better way to mark organism added by current import
 WITH not_added_organisms AS (
     SELECT DISTINCT id_organisme AS id
@@ -115,13 +122,16 @@ COMMIT;
 
 BEGIN;
 
--- DELETE FROM cor_visit_grid
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from cor_visit_grid'
 DELETE FROM :moduleSchema.cor_visit_grid
 USING :moduleSchema.:visitsTmpTable AS vt
 WHERE id_base_visit = vt.visit_id
     AND id_area = vt.meshe_id;
 
--- DELETE FROM gn_monitoring.cor_visit_observer
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from gn_monitoring.cor_visit_observer'
 DELETE FROM gn_monitoring.cor_visit_observer AS o
 WHERE EXISTS (
     SELECT DISTINCT vt.visit_id, vo.role_id
@@ -134,28 +144,38 @@ WHERE EXISTS (
         AND vo.role_id = o.id_role
 );
 
--- DELETE FROM utilisateurs.cor_role_list
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from utilisateurs.cor_role_list'
 DELETE FROM utilisateurs.cor_role_liste
 USING :moduleSchema.:visitsObserversTmpTable AS o
 WHERE id_role = o.role_id
     AND id_liste = :'observersListId'
     AND o.role_added = True;
 
--- DELETE FROM utilisateurs.t_roles
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from utilisateurs.t_roles'
 DELETE FROM utilisateurs.t_roles
 USING :moduleSchema.:visitsObserversTmpTable AS vo
 WHERE id_role = vo.role_id
     AND role_added = True ;
 
--- DELETE FROM utilisateurs.bib_organismes
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from utilisateurs.bib_organismes'
 DELETE FROM utilisateurs.bib_organismes
 USING :moduleSchema.:visitsObserversTmpTable AS vo
 WHERE id_organisme = vo.organism_id
     AND organism_added = True ;
 
--- DELETE FROM gn_monitoring.t_base_visits
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Delete from gn_monitoring.t_base_visits'
 DELETE FROM gn_monitoring.t_base_visits
 USING :moduleSchema.:visitsTmpTable AS vt
 WHERE id_base_visit = vt.visit_id ;
 
+
+-- ----------------------------------------------------------------------------
 COMMIT;

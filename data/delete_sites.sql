@@ -1,6 +1,7 @@
 BEGIN;
 
--- Remove link between sites and the SFT module
+\echo '--------------------------------------------------------------------------------'
+\echo 'Remove link between sites and the SFT module'
 DELETE FROM gn_monitoring.cor_site_module
     WHERE id_base_site IN (
         SELECT bs.id_base_site
@@ -10,7 +11,9 @@ DELETE FROM gn_monitoring.cor_site_module
         WHERE bs.first_use_date = :'importDate'
     ) ;
 
--- Remove links between sites and areas
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Remove links between sites and areas'
 DELETE FROM gn_monitoring.cor_site_area
     WHERE id_base_site IN (
         SELECT bs.id_base_site
@@ -20,7 +23,9 @@ DELETE FROM gn_monitoring.cor_site_area
         WHERE bs.first_use_date = :'importDate'
     ) ;
 
--- Remove extended site infos
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Remove extended site infos'
 -- TODO: check if that taxon is not use by a other visit from an other import
 DELETE FROM :moduleSchema.t_infos_site AS tis
     WHERE EXISTS (
@@ -34,7 +39,8 @@ DELETE FROM :moduleSchema.t_infos_site AS tis
     );
 
 
--- Remove base sites
+\echo '--------------------------------------------------------------------------------'
+\echo 'Remove base sites'
 DELETE FROM gn_monitoring.t_base_sites
     WHERE base_site_code IN (
         SELECT :siteCodeColumn::character varying FROM :moduleSchema.:sitesTmpTable
@@ -44,4 +50,5 @@ DELETE FROM gn_monitoring.t_base_sites
 -- Clean database : remove temporary table
 DROP TABLE :moduleSchema.:sitesTmpTable ;
 
+-- ----------------------------------------------------------------------------
 COMMIT;

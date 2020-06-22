@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Encoding : UTF-8
-# SFT UNinstall Database script.
+# SFT module UNinstall Database script.
 # WARNING : all DATA and structure will be removed.
 #
 # Documentation : https://github.com/PnX-SI/gn_module_suivi_flore_territoire
@@ -69,10 +69,10 @@ function main() {
 
     #+----------------------------------------------------------------------------------------------------------+
     # Start script
-    printInfo "SFT UNinstall DB script started at: ${fmt_time_start}"
+    printInfo "Module UNinstall DB script started at: ${fmt_time_start}"
 
     #+----------------------------------------------------------------------------------------------------------+
-    printPretty "${Red}ALL data, tables and schema will be destroy. Are you sure to uninstall SFT? ('Y' or 'N')"
+    printPretty "${Red}ALL data, tables and schema will be destroy. Are you sure to uninstall SFT module? ('Y' or 'N')"
     read -r reply
     echo # Move to a new line
     if [[ ! "${reply}" =~ ^[Yy]$ ]];then
@@ -80,7 +80,7 @@ function main() {
     fi
 
     #+----------------------------------------------------------------------------------------------------------+
-    printMsg "Delete SFT schema and all data linked from GeoNature database"
+    printMsg "Delete module schema and all data linked from GeoNature database"
     export PGPASSWORD="${user_pg_pass}"; \
         psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
             -v moduleSchema="${module_schema}" \
@@ -90,6 +90,14 @@ function main() {
             -v perturbationCode="${perturbation_code}" \
             -v siteTypeCode="${site_type_code}" \
             -f "${data_dir}/sft_uninstall.sql"
+
+    #+----------------------------------------------------------------------------------------------------------+
+    printMsg "Remove GeoNature external link to this module"
+    local gn_config_dir="${geonature_settings_path%/*}"
+    local gn_dir="${gn_config_dir%/*}"
+    local gn_el_dir="${gn_dir}/external_modules"
+    cd "${gn_el_dir}"
+    rm -f "${module_code}"
 
     #+----------------------------------------------------------------------------------------------------------+
     displayTimeElapsed

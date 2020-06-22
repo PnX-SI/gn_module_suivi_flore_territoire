@@ -155,20 +155,57 @@ function printVerbose() {
     fi
 }
 
-# DESC: Load config file
-# ARGS: $1 (optional): Config file path (default ${conf_dir}/settings.ini)
-# OUTS: All variables and constants from config file.
-function loadScriptConfig() {
-    local default_setting_file_path=$(realpath ${conf_dir}/settings.ini)
-    local config_path=${1:-$default_setting_file_path}
-    if [[ -f "${config_path}" ]] ; then
-        source "${config_path}"
-        printVerbose "Loading config '${config_path}': ${Gre-}OK" ${Gra-}
+
+# DESC: Load default config file
+# ARGS: None
+# OUTS: All variables and constants from default config file.
+function loadDefaultScriptConfig() {
+    local default_setting_file_path=$(realpath "${conf_dir}/settings.default.ini")
+    if [[ -f "${default_setting_file_path}" ]] ; then
+        source "${default_setting_file_path}"
+        printVerbose "Loading default settings '${default_setting_file_path}': ${Gre-}OK" ${Gra-}
     else
-        printError "Config file '${config_path}' not found."
-        exitScript "Please configure the script by renaming the file '${conf_dir}/settings.sample.ini' to '${conf_dir}/settings.ini'." 1
+        printError "Config file '${default_setting_file_path}' not found."
+        exitScript "Please restore default configuration file '${default_setting_file_path}' from source." 1
     fi
 }
+
+# DESC: Load user config file
+# ARGS: $1 (optional): User config file path (default ${conf_dir}/settings.ini)
+# OUTS: All variables and constants from user config file.
+function loadUserScriptConfig() {
+    local default_user_setting_file_path=$(realpath "${conf_dir}/settings.ini")
+    local config_path=${1:-$default_user_setting_file_path}
+    if [[ -f "${config_path}" ]] ; then
+        source "${config_path}"
+        printVerbose "Loading user settings '${config_path}': ${Gre-}OK" ${Gra-}
+    else
+        printVerbose "Optional user settings config file not found at '${config_path}'"
+    fi
+}
+
+# DESC: Load GEoNature config file
+# ARGS: None
+# OUTS: All variables and constants from GeoNature config file.
+function loadGeoNatureConfig() {
+    if [[ -f "${geonature_settings_path}" ]] ; then
+        source "${geonature_settings_path}"
+        printVerbose "Loading GeoNature settings '${geonature_settings_path}': ${Gre-}OK" ${Gra-}
+    else
+        printError "Config file '${geonature_settings_path}' not found."
+        exitScript "Please configure GeoNature settings.ini file." 1
+    fi
+}
+
+# DESC: Load all script config files in right order : default then user settings files
+# ARGS: $1 (optional): User config file path (default ${conf_dir}/settings.ini)
+# OUTS: All variables and constants from default and user config file.
+function loadScriptConfig() {
+    loadDefaultScriptConfig
+    loadUserScriptConfig "${1}"
+    loadGeoNatureConfig
+}
+
 
 # DESC: Redirect output
 #       Send stdout and stderr in Terminal and a log file

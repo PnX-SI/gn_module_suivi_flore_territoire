@@ -2,12 +2,15 @@
 BEGIN;
 
 
+\echo '--------------------------------------------------------------------------------'
+\echo 'Fix temporary meshes table geometry'
 ALTER TABLE :moduleSchema.:meshesTmpTable
     ALTER COLUMN :meshGeomColumn TYPE geometry(MULTIPOLYGON, :sridLocal)
     USING ST_Force2D(:meshGeomColumn);
 
 
--- Insert into l_areas
+\echo '--------------------------------------------------------------------------------'
+\echo 'Insert meshes into l_areas'
 INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, source, comment)
     SELECT
         ref_geo.get_id_area_type(:'meshesCode'),
@@ -25,15 +28,16 @@ INSERT INTO ref_geo.l_areas (id_type, area_name, area_code, geom, centroid, sour
     ) ;
 
 
--- Insert into li_grids
+\echo '--------------------------------------------------------------------------------'
+\echo 'Insert meshes into li_grids'
 INSERT INTO ref_geo.li_grids
-    SELECT
+    SELECT DISTINCT ON (a.area_code)
         a.area_code,
         a.id_area,
-        ST_XMin(ST_Extent(a.geom)),
-        ST_XMax(ST_Extent(a.geom)),
-        ST_YMin(ST_Extent(a.geom)),
-        ST_YMax(ST_Extent(a.geom))
+        ST_XMin(a.geom),
+        ST_XMax(a.geom),
+        ST_YMin(a.geom),
+        ST_YMax(a.geom)
     FROM ref_geo.l_areas AS a
         JOIN :moduleSchema.:meshesTmpTable AS m
             ON (a.area_code = m.:meshNameColumn)
@@ -41,11 +45,7 @@ INSERT INTO ref_geo.li_grids
         SELECT 'X'
         FROM ref_geo.li_grids AS g
         WHERE g.id_grid = a.area_code
-    )
-    GROUP BY area_code, id_area ;
+    );
 
--- Clean database: remove temporary table
--- DROP TABLE :moduleSchema.:meshesTmpTable;
-
-
+-- -------------------------------------------------------------------------------------
 COMMIT;

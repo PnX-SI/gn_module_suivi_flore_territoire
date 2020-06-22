@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Encoding : UTF-8
-# SFT install Database script.
+# SFT module install Database script.
 #
 # Documentation : https://github.com/PnX-SI/gn_module_suivi_flore_territoire
 set -euo pipefail
@@ -68,10 +68,10 @@ function main() {
 
     #+----------------------------------------------------------------------------------------------------------+
     # Start script
-    printInfo "SFT install DB script started at: ${fmt_time_start}"
+    printInfo "Install module DB script started at: ${fmt_time_start}"
 
     #+----------------------------------------------------------------------------------------------------------+
-    printMsg "Create SFT schema into GeoNature database"
+    printMsg "Create module schema into GeoNature database"
     export PGPASSWORD="${user_pg_pass}"; \
         psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
             -v moduleSchema="${module_schema}" \
@@ -79,9 +79,10 @@ function main() {
             -f "${data_dir}/sft_schema.sql"
 
     #+----------------------------------------------------------------------------------------------------------+
-    printMsg "Create SFT lists (no values => use import) : meshes, taxons, perturbation"
+    printMsg "Create module lists (no values => use import) : meshes, taxons, perturbation"
     export PGPASSWORD="${user_pg_pass}"; \
         psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
+            -v moduleCode="${module_code}" \
             -v meshesCode="${meshes_code}" \
             -v meshesName="${meshes_name}" \
             -v meshesDesc="${meshes_desc}" \
@@ -95,7 +96,13 @@ function main() {
     #+----------------------------------------------------------------------------------------------------------+
     # Include sample data into database
     if [ "${insert_sample_data}" = true ]; then
-        printMsg "Insert SFT data sample"
+        printMsg "Insert module data sample"
+
+        printMsg "Insert module sample metadata (acquisition framework and dataset)"
+        export PGPASSWORD="${user_pg_pass}"; \
+            psql -h "${db_host}" -U "${user_pg}" -d "${db_name}" \
+                -v moduleCode="${module_code}" \
+                -f "${data_dir}/sft_sample_metadata.sql"
 
         printMsg "Import meshes data sample"
         bash "${script_dir}/import_meshes.sh" -c "${conf_dir}/install_data_sample.ini" -v
@@ -109,7 +116,7 @@ function main() {
         printMsg "Import nomenclatures data sample"
         bash "${script_dir}/import_nomenclatures.sh" -c "${conf_dir}/install_data_sample.ini" -v
     else
-        printPretty "--> SFT data sample was NOT included in database" ${Gra-}
+        printPretty "--> Module data sample was NOT included in database" ${Gra-}
     fi
 
     #+----------------------------------------------------------------------------------------------------------+

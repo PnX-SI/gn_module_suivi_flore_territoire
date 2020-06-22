@@ -45,7 +45,7 @@ class GnModuleSchemaConf(Schema):
     default_zp_columns = fields.List(fields.Dict(), missing=default_zp_columns)
     default_list_visit_columns = fields.List(fields.Dict(), missing=default_list_visit_columns)
     id_dataset = fields.Integer(missing=1)
-    id_type_maille = fields.Integer(missing=32)
+    id_type_maille = fields.Integer(missing=33)
     id_type_commune = fields.Integer(missing=25)
     id_menu_list_user = fields.Integer(missing=1)
     id_list_taxon = fields.Integer(missing=30)

@@ -1,3 +1,8 @@
+-- Script to build SFT schema
+BEGIN;
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Set database variables'
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -5,26 +10,31 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
-BEGIN;
 
+\echo '--------------------------------------------------------------------------------'
+\echo 'Create SFT schema'
 CREATE SCHEMA :moduleSchema;
 
-SET search_path = :moduleSchema, pg_catalog, public;
 
+\echo '--------------------------------------------------------------------------------'
+\echo 'Set new database variables'
+SET search_path = :moduleSchema, pg_catalog, public;
 SET default_with_oids = false;
 
--- -----------------------------------------------------------------------------
--- Tables and sequences
 
+\echo '--------------------------------------------------------------------------------'
+\echo 'TABLES'
+
+\echo 'Table `t_infos_site`'
 CREATE TABLE t_infos_site (
     id_infos_site serial NOT NULL,
     id_base_site integer NOT NULL,
     cd_nom integer NOT NULL
 );
 COMMENT ON TABLE :moduleSchema.t_infos_site IS
-'Extension de t_base_sites de gn_monitoring, permet d\avoir les infos complémentaires d\un site';
+'Extension de t_base_sites de gn_monitoring, permet d''avoir les infos complémentaires d''un site';
 
-
+\echo 'Table `cor_visit_grid`'
 CREATE TABLE cor_visit_grid (
     id_area integer NOT NULL,
     id_base_visit integer NOT NULL,
@@ -32,17 +42,17 @@ CREATE TABLE cor_visit_grid (
     uuid_base_visit UUID DEFAULT public.uuid_generate_v4()
 );
 COMMENT ON TABLE :moduleSchema.cor_visit_grid IS
-'Enregistrer la présence/absence d\une espèce dans une maille définie lors d\une visite';
+'Enregistrer la présence/absence d''une espèce dans une maille définie lors d''une visite';
 
-
+\echo 'Table `cor_visit_perturbation`'
 CREATE TABLE cor_visit_perturbation (
     id_base_visit integer NOT NULL,
     id_nomenclature_perturbation integer NOT NULL
 );
 COMMENT ON TABLE :moduleSchema.cor_visit_perturbation IS
-'Enregistrer les perturbations constatées lors d\une visite';
+'Enregistrer les perturbations constatées lors d''une visite';
 
-
+\echo 'Add primary keys on previous tables'
 ALTER TABLE ONLY t_infos_site
     ADD CONSTRAINT pk_id_t_infos_site
     PRIMARY KEY (id_infos_site);
@@ -56,8 +66,8 @@ ALTER TABLE ONLY cor_visit_perturbation
     PRIMARY KEY (id_base_visit, id_nomenclature_perturbation);
 
 
--- -----------------------------------------------------------------------------
--- Foreign keys
+\echo '--------------------------------------------------------------------------------'
+\echo 'FOREING KEYS'
 
 ALTER TABLE ONLY t_infos_site
     ADD CONSTRAINT fk_t_infos_site_id_base_site
@@ -97,10 +107,10 @@ ALTER TABLE ONLY cor_visit_perturbation
     ON UPDATE CASCADE;
 
 
--- -----------------------------------------------------------------------------
--- View
+\echo '--------------------------------------------------------------------------------'
+\echo 'VIEWS'
 
--- Create view to export visits
+\echo 'Create view to export visits'
 CREATE OR REPLACE VIEW :moduleSchema.export_visits AS WITH
     observers AS (
         SELECT
@@ -130,7 +140,6 @@ CREATE OR REPLACE VIEW :moduleSchema.export_visits AS WITH
         JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
         WHERE a.id_type=ref_geo.get_id_area_type('COM')
     )
-
 -- All the meshes of a site and their visits
 SELECT
     sites.id_base_site,
@@ -170,13 +179,14 @@ FROM gn_monitoring.t_base_sites sites
     JOIN ref_geo.l_areas AS ar
         ON (ar.id_area = cor.id_area)
 WHERE ar.id_type = ref_geo.get_id_area_type(:'meshesCode')
-ORDER BY visits.id_base_visit;
+ORDER BY visits.id_base_visit ;
 
--- -----------------------------------------------------------------------------
+
+-- ----------------------------------------------------------------------------
 -- Triggers
-
 -- Idée:
 -- + Un trigger pour vérifier si id_nomenclature_perturbation dans la table cor_visit_perturbation
 --   correspond bien à celui stocké dans t_nomenclatures.
 
+-- ----------------------------------------------------------------------------
 COMMIT;

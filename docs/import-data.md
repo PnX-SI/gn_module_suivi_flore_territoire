@@ -114,3 +114,28 @@ Ex. pour lancer le script des visites :
  - en suppression des imports précédents : `./import_visits.sh -d`
 
 Une fois l'ensemble des imports réalisés vous pouvez vérifier les données présentent dans la base à l'aide de l'interface du module mais aussi via le script suivant : `./import_checking.sh`
+
+
+## Notes
+
+### Lignes dupliquées dans la liste d'auto-complétion des taxons
+
+Dans les versions antérieures à v2.4.0 de GeoNature, des doublons pouvaient apparaitre dans les listes d'auto-complétion des taxons. La requête ci-dessous permet de nettoyer "*taxonomie.vm_taxref_list_forautocomplete*" qui dans les version inférieures à v2.4.0 est une table et non une vue matérialisée :
+
+```sql
+WITH tax_list AS (
+    SELECT id_liste AS id
+    FROM taxonomie.bib_listes
+    WHERE nom_liste = '<replace-by-taxon-list-name>'
+    ORDER BY id_liste ASC
+    LIMIT 1
+)
+DELETE FROM taxonomie.vm_taxref_list_forautocomplete AS vtlf1
+USING taxonomie.vm_taxref_list_forautocomplete AS vtlf2, tax_list
+WHERE vtlf1.ctid < vtlf2.ctid
+	AND vtlf1.cd_nom = vtlf2.cd_nom
+	AND vtlf1.cd_ref = vtlf2.cd_ref
+	AND vtlf1.id_liste = vtlf2.id_liste
+	AND vtlf1.id_liste = (SELECT id FROM tax_list);
+```
+

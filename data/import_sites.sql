@@ -1,12 +1,16 @@
 -- Script SQL to import sites (use with `import_sites.sh`)
 BEGIN;
 
+\echo '--------------------------------------------------------------------------------'
+\echo 'Force SRID on geometry colum of temporary sites table'
 ALTER TABLE :moduleSchema.:sitesTmpTable
 ALTER COLUMN :siteGeomColumn TYPE geometry(MULTIPOLYGON, :sridLocal)
 USING ST_Force2D(:siteGeomColumn) ;
 
--- Insert data in `t_base_sites` with data in temporary table
--- WARNING: your Shape file must used the same SRID than you database (usually 2154)
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Insert data in `t_base_sites` with data in temporary table'
+\echo 'WARNING: your Shape file must used the same SRID than you database (usually 2154)'
 INSERT INTO gn_monitoring.t_base_sites
     (id_nomenclature_type_site, base_site_name, base_site_description, base_site_code, first_use_date, geom)
     SELECT
@@ -23,7 +27,9 @@ WHERE NOT EXISTS (
     WHERE bs.base_site_code = st.:siteCodeColumn::character varying
 ) ;
 
--- Add extended site infos in 't_infos_sites'
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Add extended site infos in t_infos_sites"'
 INSERT INTO :moduleSchema.t_infos_site (id_base_site, cd_nom)
     SELECT bs.id_base_site, tmp.:siteTaxonColumn
     FROM gn_monitoring.t_base_sites AS bs
@@ -31,7 +37,9 @@ INSERT INTO :moduleSchema.t_infos_site (id_base_site, cd_nom)
             ON (tmp.:siteCodeColumn::character varying = bs.base_site_code)
 ON CONFLICT ON CONSTRAINT pk_id_t_infos_site DO NOTHING ;
 
--- Insérer dans cor_site_application les sites suivis de ce module
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Insert into "cor_site_application" the monitoring sites'
 INSERT INTO gn_monitoring.cor_site_module (id_base_site, id_module)
     WITH
         sites AS (
@@ -48,7 +56,11 @@ INSERT INTO gn_monitoring.cor_site_module (id_base_site, id_module)
     SELECT sites.id, module.id FROM sites, module
 ON CONFLICT ON CONSTRAINT pk_cor_site_module DO NOTHING ;
 
--- Clean database: remove temporary table
+
+\echo '--------------------------------------------------------------------------------'
+\echo 'Clean database: remove temporary table'
 DROP TABLE :moduleSchema.:sitesTmpTable ;
 
+
+-- ----------------------------------------------------------------------------
 COMMIT;
