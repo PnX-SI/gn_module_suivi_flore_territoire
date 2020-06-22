@@ -5,10 +5,11 @@
 Première version stable du module compatible avec GeoNature version 2.3.2 et plus.
 
 **Fonctionnalités**
+* Mise à jour de la documentation et du changelog (issue #22)
+* Simplification des la gestion des fichiers de configuration.
 * Ajout de scripts d'import (et de suppression) pour les taxons, les nomenclatures, les mailles, les sites et les visites
 * Ajout d'un paramètre pour le niveau de zoom par défaut des cartes du module.uninstall.sh (issue #45)
 * Ajout d'un script de désinstallation du module (`uninstall.sh`)
-* Mise à jour de la documentation et du changelog (issue #22)
 * Affichage abrégé de l'ensemble des observateurs sur la liste des visites et complet sur le fiche (issue #41)
 * Prise en compte de l'abscence d'observateur associé à une visite dans la liste et la fiche d'une visite (issue #40)
 * Prise en compte de l'identifiant d'une liste d'utilisateurs dédiée pour le module SFT (issue #35)

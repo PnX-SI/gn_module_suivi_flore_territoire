@@ -18,13 +18,11 @@ Module GeoNature du protocole Suivi flore territoire
 
 ## Installation
 
-* Installez GeoNature (https://github.com/PnX-SI/GeoNature) en version 2.3.0 ou supérieure.
+* Installez GeoNature (https://github.com/PnX-SI/GeoNature) en version 2.4.0 ou supérieure.
 * Téléchargez la dernière version stable du module (``wget https://github.com/PnX-SI/gn_module_suivi_flore_territoire/archive/X.Y.Z.zip``)
 dans ``/home/myuser/``
 * Dézippez la dans ``/home/myuser/`` (``unzip X.Y.Z.zip``)
-* Créez et adaptez le fichier ``config/settings.ini`` à partir de ``config/settings.sample.ini`` :
-  * Commande pour copier le fichier : ``cp config/settings.sample.ini config/settings.ini``
-  * Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](http://docs.geonature.fr/admin-manual.html#integrer-des-donnees)
+* Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](http://docs.geonature.fr/admin-manual.html#integrer-des-donnees)
 * Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes suivantes (le nom du module abrégé en "sft" est utilisé comme code) :
 
 ```
@@ -33,7 +31,9 @@ dans ``/home/myuser/``
     # Exemple : geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft
 ```
 
-* Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :
+* Adaptez les fichiers ``config/settings.ini``, ``config/imports_settings.ini`` et ``config/conf_gn_module.toml`` :
+  * Si vous n'importer pas le jeu de données d'exemple (paramètre *insert_sample_data*), vérifiez principalement les valeurs des paramètres *dataset_id* et *observers_list_id* dans ``settings.ini`` (voir ``config/settings.default.ini`` pour les valeurs par défaut)
+  Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :
   * les mailles (par défaut 25x25m) correspondant à vos sites ou à l'ensemble de la zone d'étude (si elle est de taille réduite) (`import_meshes.sh`)
   * les valeurs pour la nomenclature "Perturbation" (`import_nomenclatures.sh`)
   * les taxons suivis (`import_taxons.sh`)
@@ -52,8 +52,7 @@ dans ``/home/myuser/``
 ## Désinstallation
 
 * Utiliser le script `bin/uninstall_db.sh` en vous plaçant dans le dossier bin puis en éxecutant : `./uninstall_db.sh`
-* Cette action va supprimer toutes les données et structures en lien avec le module SFT dans la base de données.
-* Vous pouvez ensuite supprimer le lien symbolique dans le dossier ``geonature/external_modules/``
+* Cette action va supprimer toutes les données et structures en lien avec le module SFT dans la base de données. Cela supprimera aussi automatiquement le lien symbolique présent dans le dossier ``geonature/external_modules/``
 
 ## Licence
 
