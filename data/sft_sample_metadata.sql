@@ -1,6 +1,5 @@
 BEGIN;
 
-
 \echo '----------------------------------------------------------------------------'
 \echo 'Create a sample acquisition framework for this module'
 INSERT INTO gn_meta.t_acquisition_frameworks (
@@ -19,12 +18,12 @@ INSERT INTO gn_meta.t_acquisition_frameworks (
     acquisition_framework_end_date
 )
 SELECT
-    '28917b9b-2e17-4bbe-8207-1254a9748844',
-    'Suivis Flore Sentinelle',
-    'Ensemble des suivis réalisés dans les Alpes françaises dans le cadre du réseau Flore Sentinelle.',
+    '4c58d0af-18b9-468a-95f5-72b6f26aa841',
+    'Suivis Flore et Habitats',
+    'Ensemble de suivis liés à la conservation de la flore et des habitats.',
     ref_nomenclatures.get_id_nomenclature('NIVEAU_TERRITORIAL', '4'),
     'Alpes françaises.',
-    'Suivi, Alpes, France, Flore, Réseau.',
+    'Suivi, Flore, Alpes, France.',
     ref_nomenclatures.get_id_nomenclature('TYPE_FINANCEMENT', '1'),
     'Identifier et comprendre les dynamiques démographiques des espèces végétales et des habitats, sentinelles pour le suivi des changements globaux dans les Alpes françaises.',
     'Flore',
@@ -35,12 +34,13 @@ SELECT
 WHERE NOT EXISTS(
     SELECT 'X'
     FROM gn_meta.t_acquisition_frameworks AS tafe
-    WHERE tafe.unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+    WHERE tafe.unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
 ) ;
 
 
 \echo '----------------------------------------------------------------------------'
 \echo 'Insert links between acquisition framework and actor'
+-- TODO: check if organism with id 1 already exists
 INSERT INTO gn_meta.cor_acquisition_framework_actor (
     id_acquisition_framework,
     id_role,
@@ -50,7 +50,7 @@ INSERT INTO gn_meta.cor_acquisition_framework_actor (
     (
         SELECT id_acquisition_framework
         FROM gn_meta.t_acquisition_frameworks
-        WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+        WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
     ),
     NULL,
     1,
@@ -68,7 +68,7 @@ INSERT INTO gn_meta.cor_acquisition_framework_objectif (
         (
             SELECT id_acquisition_framework
             FROM gn_meta.t_acquisition_frameworks
-            WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+            WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
         ),
         ref_nomenclatures.get_id_nomenclature('CA_OBJECTIFS', '4')
     ),
@@ -76,7 +76,7 @@ INSERT INTO gn_meta.cor_acquisition_framework_objectif (
         (
             SELECT id_acquisition_framework
             FROM gn_meta.t_acquisition_frameworks
-            WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+            WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
         ),
         ref_nomenclatures.get_id_nomenclature('CA_OBJECTIFS', '5')
     ),
@@ -84,7 +84,7 @@ INSERT INTO gn_meta.cor_acquisition_framework_objectif (
         (
             SELECT id_acquisition_framework
             FROM gn_meta.t_acquisition_frameworks
-            WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+            WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
         ),
         ref_nomenclatures.get_id_nomenclature('CA_OBJECTIFS', '6')
     ) ;
@@ -100,7 +100,7 @@ INSERT INTO gn_meta.cor_acquisition_framework_voletsinp (
         (
             SELECT id_acquisition_framework
             FROM gn_meta.t_acquisition_frameworks
-            WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+            WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
         ),
         ref_nomenclatures.get_id_nomenclature('VOLET_SINP', '1')
     ) ;
@@ -130,11 +130,11 @@ INSERT INTO gn_meta.t_datasets (
     active,
     validable
 ) VALUES (
-    'e4af0284-740d-42d3-8052-fd2912f07d5b',
+    '82e64512-f28d-4549-b6aa-b28e0b5e51f0',
     (
         SELECT id_acquisition_framework
         FROM gn_meta.t_acquisition_frameworks
-        WHERE unique_acquisition_framework_id = '28917b9b-2e17-4bbe-8207-1254a9748844'
+        WHERE unique_acquisition_framework_id = '4c58d0af-18b9-468a-95f5-72b6f26aa841'
     ),
     'Suivis Flore Territoire',
     :'moduleCode',
@@ -169,7 +169,7 @@ INSERT INTO gn_meta.cor_dataset_actor (
         (
             SELECT id_dataset
             FROM gn_meta.t_datasets
-            WHERE unique_dataset_id = 'e4af0284-740d-42d3-8052-fd2912f07d5b'
+            WHERE unique_dataset_id = '82e64512-f28d-4549-b6aa-b28e0b5e51f0'
         ),
         NULL,
         1,
@@ -187,7 +187,7 @@ INSERT INTO gn_commons.cor_module_dataset (
         (
             SELECT id_dataset
             FROM gn_meta.t_datasets
-            WHERE unique_dataset_id = 'e4af0284-740d-42d3-8052-fd2912f07d5b'
+            WHERE unique_dataset_id = '82e64512-f28d-4549-b6aa-b28e0b5e51f0'
         )
     ) ;
 
