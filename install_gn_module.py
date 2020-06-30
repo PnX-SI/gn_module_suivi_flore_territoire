@@ -37,4 +37,3 @@ def create_imports_settings_file_from_sample():
     if not os.path.exists(settingFile):
         sampleSettingFile = str(MODULE_ROOT_DIR) + '/config/imports_settings.sample.ini'
         copy(sampleSettingFile, settingFile)
-
