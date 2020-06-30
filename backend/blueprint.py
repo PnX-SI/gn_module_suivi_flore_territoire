@@ -1,5 +1,6 @@
 import datetime
 import time
+import logging
 
 
 from flask import Blueprint, request, session, current_app, send_from_directory
@@ -26,20 +27,20 @@ from geonature.core.gn_monitoring.models import (
 from geonature.core.ref_geo.models import LAreas
 from geonature.core.users.models import BibOrganismes
 from pypnusershub.db.models import User
+from geonature.core.taxonomie.models import Taxref
 
 from .models import (
     TInfoSite,
     TVisiteSFT,
     corVisitPerturbation,
     CorVisitGrid,
-    Taxonomie,
     ExportVisits,
 )
 from .repositories import check_user_cruved_visit, check_year_visit
 
 
 blueprint = Blueprint("pr_suivi_flore_territoire", __name__)
-
+log = logging.getLogger(__name__)
 
 @blueprint.route("/sites", methods=["GET"])
 @json_resp
@@ -108,7 +109,7 @@ def get_sites_zp():
         DB.session.query(
             TInfoSite,
             func.max(TBaseVisits.visit_date_min),
-            Taxonomie.nom_complet,
+            Taxref.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(BibOrganismes.nom_organisme), ", "),
             func.string_agg(distinct(LAreas.area_name), ", "),
@@ -132,8 +133,8 @@ def get_sites_zp():
                 BibOrganismes.id_organisme == User.id_organisme
             )
             .outerjoin(
-                Taxonomie,
-                TInfoSite.cd_nom == Taxonomie.cd_nom
+                Taxref,
+                TInfoSite.cd_nom == Taxref.cd_nom
             )
             .outerjoin(
                 corSiteArea,
@@ -148,7 +149,7 @@ def get_sites_zp():
             )
         )
         .filter(TInfoSite.id_infos_site.in_(idSiteList))
-        .group_by(TInfoSite, Taxonomie.nom_complet)
+        .group_by(TInfoSite, Taxref.nom_complet)
     )
     data = query.all()
 
