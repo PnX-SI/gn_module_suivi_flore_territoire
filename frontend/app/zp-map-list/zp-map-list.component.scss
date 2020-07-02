@@ -52,15 +52,9 @@
 }
 
 #end-btn {
-  margin-top: 15px;
-  margin-bottom: 30px;
+  padding: 15px;
+  height: 60px;
+  display: flex;
+  align-items: center;
 }
 
-.format-btn {
-  margin-left: 5px;
-}
-
-.export-btn {
-  display: block;
-  margin: auto;
-}

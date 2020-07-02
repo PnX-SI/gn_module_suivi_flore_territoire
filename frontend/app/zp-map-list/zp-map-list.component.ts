@@ -2,6 +2,7 @@ import {
   Component,
   OnInit,
   AfterViewInit,
+  AfterViewChecked,
   Input,
   Output,
   EventEmitter,
@@ -25,16 +26,15 @@ import { ModuleConfig } from "../module.config";
   templateUrl: "./zp-map-list.component.html",
   styleUrls: ["./zp-map-list.component.scss"]
 })
-export class ZpMapListComponent implements OnInit, AfterViewInit {
+export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewChecked {
   public zps;
 
   @Input()
   searchTaxon: string;
   @ViewChild("dataTable") dataTable: DatatableComponent;
 
+  private dataTableLatestWidth: number;
   public loadingIndicator = false;
-  // Height in pixels of all HTML elements in sites list column (GeoNature header included) except datatable body.
-  private sitesListHeight: number = 470;
   // Height in pixel of a datatable row
   public rowHeight: number = 50;
   // Minimal number of rows in datable
@@ -160,18 +160,34 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       });
   }
 
-  /** Calculate the number of row with the client screen height */
-  calculateRowNumber(screenHeight: number): number {
-    let rowNumber: number;
-    rowNumber = Math.trunc((screenHeight - this.sitesListHeight) / this.rowHeight);
-    rowNumber = (rowNumber < this.defaultRowNumber ) ? this.defaultRowNumber : rowNumber;
-    return rowNumber;
+  ngAfterViewChecked() {
+    if (this.dataTable && this.dataTable.element.clientWidth !== this.dataTableLatestWidth) {
+        this.dataTableLatestWidth = this.dataTable.element.clientWidth;
+        this.dataTable.recalculate();
+        this.dataTable.recalculateColumns();
+        window.dispatchEvent(new Event('resize'));
+    }
+  }
+
+  @HostListener("window:resize", ["$event"])
+  onResize(event) {
+    this.updateDataTableRowNumber(event.target.innerHeight);  
   }
 
   /** Update the number of row per page when resize the window */
-  @HostListener("window:resize", ["$event"])
-  onResize(event) {
-    this.rowNumber = this.calculateRowNumber(event.target.innerHeight);
+  updateDataTableRowNumber(height: number) {
+    this.rowNumber = this.calculateRowNumber(height);
+  }
+
+  /** Calculate the number of row with the client screen height */
+  calculateRowNumber(screenHeight: number): number {
+    const dataTableTop = this.dataTable.element.getBoundingClientRect().top;
+    const footerHeight = document.querySelector('#end-btn').getBoundingClientRect().height;
+    const outerheight = dataTableTop + this.dataTable.headerHeight + this.dataTable.footerHeight + footerHeight;
+
+    let rowNumber = Math.trunc((screenHeight - outerheight) / this.rowHeight);
+    rowNumber = (rowNumber < this.defaultRowNumber ) ? this.defaultRowNumber : rowNumber;
+    return rowNumber;
   }
 
   onChargeList(param) {
