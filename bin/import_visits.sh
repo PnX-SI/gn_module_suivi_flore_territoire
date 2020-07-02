@@ -115,7 +115,7 @@ function createTmpTables() {
 
 function importCsvDataByCopy() {
     printMsg "Import visits data into tmp tables"
-    sudo -n -u ${pg_admin_name} -s \
+    sudo -n -u "${pg_admin_name}" -s \
         psql -d "${db_name}" ${psql_verbosity} \
         -v moduleSchema="${module_schema}" \
         -v visitsTmpTable="${visits_table_tmp_visits}" \
