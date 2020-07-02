@@ -4,10 +4,14 @@ import {
   AfterViewInit,
   Input,
   Output,
-  EventEmitter
+  EventEmitter,
+  HostListener,
+  ViewChild
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormGroup, FormBuilder, FormControl } from "@angular/forms";
+
+import { DatatableComponent } from "@swimlane/ngx-datatable/release";
 
 import { MapService } from "@geonature_common/map/map.service";
 import { MapListService } from "@geonature_common/map-list/map-list.service";
@@ -26,7 +30,16 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   @Input()
   searchTaxon: string;
+  @ViewChild("dataTable") dataTable: DatatableComponent;
 
+  public loadingIndicator = false;
+  // Height in pixels of all HTML elements in sites list column (GeoNature header included) except datatable body.
+  private sitesListHeight: number = 470;
+  // Height in pixel of a datatable row
+  public rowHeight: number = 50;
+  // Minimal number of rows in datable
+  public defaultRowNumber: number = 5;
+  public rowNumber: number;
   public filteredData = [];
   public tabOrganism = [];
   public taxonForm = new FormControl();
@@ -52,6 +65,16 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    // Get wiewport height to set the number of rows in datatable
+    const screenHeight = document.documentElement.clientHeight;
+    this.rowNumber = this.calculateRowNumber(screenHeight);
+  
+    // Observable on mapListService.currentIndexRow to find the current page
+    this.mapListService.currentIndexRow$.subscribe(indexRow => {
+      const currentPage = Math.trunc(indexRow / this.rowNumber);
+      this.dataTable.offset = currentPage;
+    });
+
     this.mapListService.idName = "id_infos_site";
     this.storeService.initialize();
     this.filtreForm = this._fb.group({
@@ -137,11 +160,27 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
       });
   }
 
+  /** Calculate the number of row with the client screen height */
+  calculateRowNumber(screenHeight: number): number {
+    let rowNumber: number;
+    rowNumber = Math.trunc((screenHeight - this.sitesListHeight) / this.rowHeight);
+    rowNumber = (rowNumber < this.defaultRowNumber ) ? this.defaultRowNumber : rowNumber;
+    return rowNumber;
+  }
+
+  /** Update the number of row per page when resize the window */
+  @HostListener("window:resize", ["$event"])
+  onResize(event) {
+    this.rowNumber = this.calculateRowNumber(event.target.innerHeight);
+  }
+
   onChargeList(param) {
+    this.loadingIndicator = true;
     this._api.getZp(this.storeService.queryString).subscribe(data => {
       this.zps = data;
       this.mapListService.loadTableData(data);
       this.filteredData = this.mapListService.tableData;
+      this.loadingIndicator = false;
     });
   }
 

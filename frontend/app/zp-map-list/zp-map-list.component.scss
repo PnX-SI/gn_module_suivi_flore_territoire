@@ -1,32 +1,46 @@
-.ngx-datatable.material {
-  max-height: 79vh !important;
+:host /deep/ .ngx-datatable.material {
   box-shadow: none !important;
-  overflow-y: scroll;
-}
 
-// #blocSearch {
-//     display: flex;
-//     justify-content: space-between
-// }
-.inputSearch {
-  margin-top: 2px;
-  width: 120%;
-  height: 27px;
+  .datatable-body {
+    .progress-linear {
+      position: fixed !important;
+    }
+    .datatable-body-row {
+      .actions-cell {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
 
-  // background-color: transparent;
-  border: none;
-
-  // border-bottom: 1px #181818
+  .datatable-footer {
+    .page-count {
+      flex-basis: 30% !important;
+      line-height: 1.5em;
+      height: 1.5em;
+      padding: 0 0.2rem;
+    }
+    .datatable-pager {
+      flex-basis: 70% !important;
+      margin: 0;
+      padding: 0 0.2rem;
+    }
+  }
 }
 
 :host /deep/ .single-selection .datatable-body-row.active .datatable-row-group {
   background-color: rgb(154, 217, 247) !important;
 }
 
+.inputSearch {
+  margin-top: 2px;
+  width: 120%;
+  height: 27px;
+  border: none;
+}
+
 .list-sft {
-  max-height: 94vh;
-  overflow-y: auto;
-  padding-bottom: 5px;
+  max-height: 89vh;
 }
 
 #bottom-search {

@@ -1,8 +1,8 @@
-<div class="row row-0">
+<div class="row row-sm map-list-container">
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
     <pnx-map
-      height="94vh"
+      height="89vh"
       [center]="storeService.sftConfig.zoom_center"
       [zoom]="storeService.sftConfig.zoom_level">
         <pnx-geojson
@@ -66,18 +66,20 @@
     </div>
 
     <ngx-datatable
-      #table class="material"
+      #dataTable
+      class="material"
+      [loadingIndicator]="loadingIndicator"
       [rows]="filteredData"
       [headerHeight]="50"
       [footerHeight]="50"
-      [rowHeight]="'auto'"
+      [rowHeight]="50"
       [columnMode]="'force'"
       [selected]="mapListService.selectedRow"
       [selectionType]="'single'"
       (select)="mapListService.onRowSelect($event)"
       [rowClass]="mapListService.getRowClass"
-      [offset]="mapListService.page.pageNumber"
-      [limit]="mapListService.page.size"
+      [count]="filteredData.length"
+      [limit]="rowNumber"
       [messages]="storeService.sftConfig.zp_message">
 
       <ngx-datatable-column
@@ -91,13 +93,14 @@
       </ngx-datatable-column>
 
       <ngx-datatable-column
+        cellClass="actions-cell"
         maxWidth="90"
         name="Voir"
         title="Accéder aux visites du site">
         <ng-template let-row="row" ngx-datatable-cell-template>
           <button
             type="button"
-            class="btn btn-info fa fa-eye"
+            class="btn btn-info btn-sm fa fa-eye"
             (click)="onInfo(row.id_base_site)"
             title="Visualiser">
           </button>
