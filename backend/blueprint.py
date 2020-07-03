@@ -50,6 +50,7 @@ def get_sites_zp():
     """
     parameters = request.args
     id_type_commune = blueprint.config["id_type_commune"]
+
     # Query to get Sites id
     query = (
         DB.session.query(
@@ -156,10 +157,6 @@ def get_sites_zp():
     features = []
     for d in data:
         feature = d[0].get_geofeature()
-
-        # ID
-        id_site = feature["properties"]["base_site"]["id_base_site"]
-
         # Year
         feature["properties"]["date_max"] = str(d[1])
         if d[1] == None:
