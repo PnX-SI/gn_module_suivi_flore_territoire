@@ -22,6 +22,7 @@ def check_user_cruved_visit(user, visit, cruved_level):
     """
 
     is_allowed = False
+    # cruved level '1' => My data
     if cruved_level == '1':
 
         for role in visit.observers:
@@ -38,7 +39,8 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 .format(user.id_role, visit.id_base_visit),
                 403
             )
-
+    
+    # cruved level '2' => My organism data
     elif cruved_level == '2':
         for role in visit.observers:
             if role.id_role == user.id_role:

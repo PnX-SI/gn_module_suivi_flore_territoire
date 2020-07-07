@@ -60,6 +60,10 @@ Autres paramètres :
 
 ### Sites (Shape)
 
+Le fichier Shape fournissant les contours des sites devrait contenir des géométries qui recoupent uniquement les mailles concernnées pour chaque site. Leur géométrie devrait avoir un contour au moins légérement inférieur aux mailles qui le composent.
+
+En effet, un *trigger* en base de données réalise automatiquement le lien entre la géométrie d'un site et les mailles qui le composent à l'aide de la fonction Postgis *st_intersect*. Il faut donc éviter les géométries de site qui collent au contour des mailles car si 2 sites dans ce cas sont en contact au travers d'une ou plusieurs mailles, celles-ci vont se retrouver liées aux 2 sites.
+
 Description des paramètres de configuration permettant d'indiquer les noms des champs utilisés dans les attributs des objets géographiques du fichier Shape pour les sites :
 
  - **site_code_column** : nom du champ contenant le code du site.
@@ -117,7 +121,7 @@ Ex. pour lancer le script des visites :
 Une fois l'ensemble des imports réalisés vous pouvez vérifier les données présentent dans la base à l'aide de l'interface du module mais aussi via le script suivant : `./import_checking.sh`
 
 
-## Notes
+## Notes et aides diverses
 
 ### Lignes dupliquées dans la liste d'auto-complétion des taxons
 
@@ -140,3 +144,37 @@ WHERE vtlf1.ctid < vtlf2.ctid
 	AND vtlf1.id_liste = (SELECT id FROM tax_list);
 ```
 
+### Lister les sites possédant des mailles communes
+
+```sql
+SELECT DISTINCT tbs0.id_base_site, tbs0.base_site_code 
+FROM gn_monitoring.cor_site_area AS csa0
+	INNER JOIN gn_monitoring.t_base_sites AS tbs0
+			ON (tbs0.id_base_site = csa0.id_base_site)
+WHERE id_area IN (
+	SELECT csa.id_area
+	FROM gn_monitoring.cor_site_area AS csa
+		INNER JOIN ref_geo.l_areas AS la
+			ON (csa.id_area = la.id_area) 
+	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m') 
+	GROUP BY csa.id_area
+	HAVING COUNT(csa.id_area) > 1
+);
+```
+
+### Lister des mailles non comprisent entièrement dans leur site
+
+Au préalable, exécuter le SQL permettant d'ajouer la fonction *st_dilate* dont le code est proposé sur [[https://github.com/iboates/ST_Dilate|le dépôt Github iboates/ST_Dilate]].
+
+Exemple, liste des mailles non comprisent entièrement dans la géométrie de leur site pour les sites 5, 13, 128 et 176 :
+```sql
+SELECT DISTINCT tbs.id_base_site, tbs.base_site_code, tbs.geom, la.geom, la.id_area 
+FROM gn_monitoring.t_base_sites AS tbs
+	INNER JOIN gn_monitoring.cor_site_area AS csa
+		ON (tbs.id_base_site = csa.id_base_site)
+	INNER JOIN ref_geo.l_areas AS la
+		ON (csa.id_area = la.id_area) 
+	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m') 
+	AND tbs.id_base_site IN (5, 13, 128, 176)
+	AND NOT public.ST_ContainsProperly(st_dilate(tbs.geom_local, 1.1), public.st_transform(la.geom, 2154)) ;
+```
