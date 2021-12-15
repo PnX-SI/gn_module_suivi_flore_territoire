@@ -35,8 +35,8 @@ class TInfoSite(DB.Model):
     geom = association_proxy("base_site", "geom")
     cd_nom = DB.Column(DB.Integer)
 
-    def get_geofeature(self, recursif=True):
-        return self.as_geofeature("geom", "id_infos_site", recursif)
+    def get_geofeature(self):
+        return self.as_geofeature("geom", "id_infos_site")
 
 
 class corVisitPerturbation(DB.Model):
