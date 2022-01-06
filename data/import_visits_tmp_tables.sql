@@ -32,7 +32,7 @@ DROP TABLE IF EXISTS :moduleSchema.:visitsObserversTmpTable ;
 \echo 'Temporary table to store meshes taxon presence information for each visit'
 CREATE TABLE :moduleSchema.:visitsTmpTable (
 	id_visit_meshe serial NOT NULL,
-	site_code int4 NULL,
+	site_code varchar(25) NULL,
     site_id int4 NULL,
     module_id int4 NULL,
     dataset_id int4 NULL DEFAULT :datasetId,

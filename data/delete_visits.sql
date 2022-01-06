@@ -7,7 +7,7 @@ BEGIN;
 WITH sites AS (
     SELECT
         id_base_site AS id,
-        base_site_code::int AS site_code
+        base_site_code AS site_code
     FROM gn_monitoring.t_base_sites
 )
 UPDATE :moduleSchema.:visitsTmpTable AS vt
