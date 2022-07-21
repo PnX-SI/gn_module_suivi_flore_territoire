@@ -1,0 +1,2 @@
+MODULE_CODE = "PRIORITY_FLORA"
+MODULE_PICTO = "fa-pagelines"
