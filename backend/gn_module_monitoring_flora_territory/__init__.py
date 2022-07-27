@@ -1,2 +1,2 @@
-MODULE_CODE = "PRIORITY_FLORA"
-MODULE_PICTO = "fa-pagelines"
+MODULE_CODE = "SFT"
+MODULE_PICTO = "fa-leaf"
