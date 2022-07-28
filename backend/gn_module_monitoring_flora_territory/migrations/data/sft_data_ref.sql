@@ -91,7 +91,8 @@ SET
     module_label = 'Suivi Flore Territoire',
     module_picto = 'fa-leaf',
     module_desc = 'Module de Suivi de la Flore d''un Territoire'
-WHERE module_code ILIKE :'moduleCode' ;
+WHERE module_code ILIKE :'moduleCode'
+    AND NOT EXISTS  module_code = 'SFT';
 
 -- ----------------------------------------------------------------------------
 COMMIT;
