@@ -25,7 +25,7 @@ from geonature.core.gn_monitoring.models import (
     corSiteArea,
 )
 from geonature.core.ref_geo.models import LAreas
-from geonature.core.users.models import BibOrganismes
+from pypnusershub.db.models import Organisme
 from pypnusershub.db.models import User
 from geonature.core.taxonomie.models import Taxref
 
@@ -70,8 +70,8 @@ def get_sites_zp():
                 User,
                 User.id_role == corVisitObserver.c.id_role)
             .outerjoin(
-                BibOrganismes,
-                BibOrganismes.id_organisme == User.id_organisme
+                Organisme,
+                Organisme.id_organisme == User.id_organisme
             )
             .outerjoin(
                 corSiteArea,
@@ -94,7 +94,7 @@ def get_sites_zp():
         query = query.filter(TInfoSite.cd_nom == parameters["cd_nom"])
 
     if "organisme" in parameters:
-        query = query.filter(BibOrganismes.nom_organisme == parameters["organisme"])
+        query = query.filter(Organisme.nom_organisme == parameters["organisme"])
 
     if "commune" in parameters:
         query = query.filter(LAreas.area_name == parameters["commune"])
@@ -112,7 +112,7 @@ def get_sites_zp():
             func.max(TBaseVisits.visit_date_min),
             Taxref.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
-            func.string_agg(distinct(BibOrganismes.nom_organisme), ", "),
+            func.string_agg(distinct(Organisme.nom_organisme), ", "),
             func.string_agg(distinct(LAreas.area_name), ", "),
         )
         .select_from(
@@ -130,8 +130,8 @@ def get_sites_zp():
                 User.id_role == corVisitObserver.c.id_role
             )
             .outerjoin(
-                BibOrganismes,
-                BibOrganismes.id_organisme == User.id_organisme
+                Organisme,
+                Organisme.id_organisme == User.id_organisme
             )
             .outerjoin(
                 Taxref,
@@ -423,13 +423,13 @@ def get_organisme():
 
     query = (
         select([
-            BibOrganismes.nom_organisme.distinct(),
+            Organisme.nom_organisme.distinct(),
             User.nom_role,
             User.prenom_role
         ])
         .select_from(
-            User.__table__.outerjoin(BibOrganismes,
-                User.id_organisme == BibOrganismes.id_organisme
+            User.__table__.outerjoin(Organisme,
+                User.id_organisme == Organisme.id_organisme
             )
             .join(corVisitObserver,
                 User.id_role == corVisitObserver.c.id_role
