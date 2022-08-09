@@ -7,7 +7,7 @@
 -- Delete names list : taxonomie.bib_listes, taxonomie.cor_nom_liste, taxonomie.bib_noms
 WITH names_deleted AS (
 	DELETE FROM taxonomie.cor_nom_liste WHERE id_liste IN (
-		SELECT id_liste FROM taxonomie.bib_listes WHERE nom_liste = 'Suivi Habitat Territoire'
+		SELECT id_liste FROM taxonomie.bib_listes WHERE nom_liste = 'Suivi Flore Territoire'
 	)
 	RETURNING id_nom
 )
@@ -15,7 +15,7 @@ DELETE FROM taxonomie.bib_noms WHERE id_nom IN (
 	SELECT id_nom FROM names_deleted
 );
 
-DELETE FROM taxonomie.bib_listes WHERE nom_liste = 'Suivi Habitat Territoire';
+DELETE FROM taxonomie.bib_listes WHERE nom_liste = 'Suivi Flore Territoire';
 
 
 -- -----------------------------------------------------------------------------
@@ -23,11 +23,11 @@ DELETE FROM taxonomie.bib_listes WHERE nom_liste = 'Suivi Habitat Territoire';
 
 DELETE FROM ref_habitats.cor_list_habitat
     WHERE id_list IN (
-        SELECT id_list FROM ref_habitats.bib_list_habitat WHERE list_name = 'Suivi Habitat Territoire'
+        SELECT id_list FROM ref_habitats.bib_list_habitat WHERE list_name = 'Suivi Flore Territoire'
     ) ;
 
 DELETE FROM ref_habitats.bib_list_habitat
-    WHERE list_name = 'Suivi Habitat Territoire';
+    WHERE list_name = 'Suivi Flore Territoire';
 
 -- -----------------------------------------------------------------------------
 -- GN_MONITORING
@@ -37,7 +37,7 @@ DELETE FROM gn_monitoring.cor_site_module
     WHERE id_module = (
         SELECT id_module
         FROM gn_commons.t_modules
-        WHERE module_code ILIKE 'sht'
+        WHERE module_code ILIKE 'SFT'
     ) ;
 
 -- -----------------------------------------------------------------------------
@@ -48,10 +48,10 @@ DELETE FROM gn_commons.cor_module_dataset
     WHERE id_module = (
         SELECT id_module
         FROM gn_commons.t_modules
-        WHERE module_code ILIKE 'sht'
+        WHERE module_code ILIKE 'SFT'
     ) ;
 
 -- Uninstall module (unlink this module of GeoNature)
 DELETE FROM gn_commons.t_modules
-    WHERE module_code ILIKE 'sht' ;
+    WHERE module_code ILIKE 'SFT' ;
 
