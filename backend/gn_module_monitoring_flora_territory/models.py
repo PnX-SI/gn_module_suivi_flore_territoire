@@ -101,6 +101,7 @@ class TVisiteSFT(TBaseVisits):
             corVisitPerturbation.id_base_visit,
             corVisitPerturbation.id_nomenclature_perturbation,
         ],
+        viewonly=True
     )
 
     observers = DB.relationship(
