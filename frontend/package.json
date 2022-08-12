@@ -1,6 +1,6 @@
  
 {
-  "name": "Suivi Flore Territoire",
+  "name": "suivi_flore_territoire",
   "version": "1.0.0",
   "description": "Module Suivi Flore Territoire",
   "main": "index.js",

@@ -28,8 +28,6 @@ def upgrade():
     )
     op.get_bind().execute(operations)
 
-    delete_module("SFT")
-
 
 def downgrade():
     operations = text(
@@ -38,6 +36,8 @@ def downgrade():
         )
     )
     op.get_bind().execute(operations)
+
+    delete_module("SFT")
 
 
 def delete_module(module_code):
