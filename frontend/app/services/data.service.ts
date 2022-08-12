@@ -70,7 +70,7 @@ export class DataService {
     );
   }
 
-  getCommune(id_application: number, params: any) {
+  getCommune(id_application: string, params: any) {
     let wsParams = new HttpParams();
 
     for (let key in params) {

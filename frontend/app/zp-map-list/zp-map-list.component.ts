@@ -45,7 +45,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   public taxonForm = new FormControl();
   public filtreForm: FormGroup;
   public paramApp = {
-    id_application: ModuleConfig.ID_MODULE,
+    id_application: ModuleConfig.MODULE_CODE,
     id_area_type: ModuleConfig.id_type_commune
   };
 
@@ -147,7 +147,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
       });
 
     let params = {id_area_type: this.storeService.sftConfig.id_type_commune};
-    this._api.getCommune(ModuleConfig.ID_MODULE, params)
+    this._api.getCommune(ModuleConfig.MODULE_CODE, params)
       .subscribe(info => {
         info.forEach(com => {
           if (this.tabCom.indexOf(com.nom_commune) === -1) {
@@ -221,7 +221,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   onSearchDate(event) {
     this.onSetParams("year", event);
     this.onChargeList({
-      id_application: ModuleConfig.ID_MODULE,
+      id_application: ModuleConfig.MODULE_CODE,
       year: event
     });
     this.actualDate = event;
@@ -230,7 +230,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   onSearchOrganisme(event) {
     this.onSetParams("organisme", event);
     this.onChargeList({
-      id_application: ModuleConfig.ID_MODULE,
+      id_application: ModuleConfig.MODULE_CODE,
       organisme: event
     });
   }
@@ -239,7 +239,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
     this.onSetParams("cd_nom", event.item.cd_nom);
     this.actualTaxonNameId = event.item.cd_nom;
     this.onChargeList({
-      id_application: ModuleConfig.ID_MODULE,
+      id_application: ModuleConfig.MODULE_CODE,
       cd_nom: event.item.cd_nom
     });
   }
@@ -247,7 +247,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   onSearchCom(event) {
     this.onSetParams("commune", event);
     this.onChargeList({
-      id_application: ModuleConfig.ID_MODULE,
+      id_application: ModuleConfig.MODULE_CODE,
       commune: event
     });
   }

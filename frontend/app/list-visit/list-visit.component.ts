@@ -114,7 +114,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
 
     const parametre = {
       id_base_site: this.idSite,
-      id_application: ModuleConfig.ID_MODULE
+      id_application: ModuleConfig.MODULE_CODE
     };
 
     this._api.getZp(parametre).subscribe(data => {
