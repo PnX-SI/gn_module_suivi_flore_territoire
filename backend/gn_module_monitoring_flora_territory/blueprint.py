@@ -24,6 +24,7 @@ from geonature.core.gn_monitoring.models import (
     corSiteModule,
     corSiteArea,
 )
+from geonature.core.gn_commons.models import TModules
 from geonature.core.ref_geo.models import LAreas
 from pypnusershub.db.models import Organisme
 from pypnusershub.db.models import User
@@ -380,9 +381,9 @@ def export_visit():
         return send_from_directory(dir_path, file_name + ".zip", as_attachment=True)
 
 
-@blueprint.route("/commune/<id_module>", methods=["GET"])
+@blueprint.route("/commune/<module_code>", methods=["GET"])
 @json_resp
-def get_commune(id_module):
+def get_commune(module_code):
     """
     Retourne toutes les communes présents dans le module
     """
@@ -396,9 +397,12 @@ def get_commune(id_module):
             ).outerjoin(
                 corSiteModule,
                 corSiteModule.c.id_base_site == corSiteArea.c.id_base_site,
+            ).outerjoin(
+                TModules,
+                TModules.id_module == corSiteModule.c.id_module,
             )
         )
-        .where(corSiteModule.c.id_module == id_module)
+        .where(TModules.module_code == module_code)
     )
 
     if "id_area_type" in params:
