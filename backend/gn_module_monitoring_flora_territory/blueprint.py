@@ -14,7 +14,7 @@ from pypnusershub.db.tools import InsufficientRightsError
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
-from geonature.utils.utilssqlalchemy import json_resp, to_json_resp, to_csv_resp
+from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
 from geonature.utils.env import DB, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
 from geonature.core.gn_monitoring.models import (
