@@ -1,2 +1,4 @@
 MODULE_CODE = "SFT"
 MODULE_PICTO = "fa-leaf"
+METADATA_NAME = "Bilan Stationnel"
+METADATA_CODE = "SFT"
