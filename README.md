@@ -1,6 +1,6 @@
 # Suivi Flore Territoire
 
-Module GeoNature du protocole Suivi flore territoire
+Module GeoNature du protocole Suivi flore territoire. 
  
 
 ![SFT module](http://geonature.fr/docs/img/2018-09-sft.jpg)
@@ -16,43 +16,11 @@ Module GeoNature du protocole Suivi flore territoire
 * Rapport de stage de Khanh-Chau Nguyen : http://geonature.fr/documents/2018-09-Nguyen-Khanh-Chau-Rapport-stage-M2DCISS.pdf
 * Présentation de soutenance de stage de Khanh-Chau Nguyen : http://geonature.fr/documents/2018-09-Nguyen-Khanh-Chau-Soutenance-stage-M2DCISS.pdf
 
-## Installation
+## Documentation
 
-* Installez GeoNature (https://github.com/PnX-SI/GeoNature) en version 2.4.0 ou supérieure.
-* Téléchargez la dernière version stable du module (``wget https://github.com/PnX-SI/gn_module_suivi_flore_territoire/archive/X.Y.Z.zip``)
-dans ``/home/myuser/``
-* Dézippez la dans ``/home/myuser/`` (``unzip X.Y.Z.zip``)
-* Si vous utilisez les données d'exemple, assurez vous d'avoir [intégrer le MNT (DEM) dans GeoNature](http://docs.geonature.fr/admin-manual.html#integrer-des-donnees)
-* Placez-vous dans le répertoire ``backend`` de GeoNature et lancez les commandes suivantes (le nom du module abrégé en "sft" est utilisé comme code) :
+- [Installation et désinstallation du module](./docs/install.md)
 
-```
-    source venv/bin/activate
-    geonature install_gn_module <mon_chemin_absolu_vers_le_module> <url_relative_du_module>
-    # Exemple : geonature install_gn_module /home/`whoami`/gn_module_suivi_flore_territoire-X.Y.Z /sft
-```
-
-* Adaptez les fichiers ``config/settings.ini``, ``config/imports_settings.ini`` et ``config/conf_gn_module.toml`` :
-  * Si vous n'importer pas le jeu de données d'exemple (paramètre *insert_sample_data*), vérifiez principalement les valeurs des paramètres *dataset_id* et *observers_list_id* dans ``settings.ini`` (voir ``config/settings.default.ini`` pour les valeurs par défaut)
-  Réaliser les imports nécessaires au fonctionnement du module à l'aide des scripts disponibles :
-  * les mailles (par défaut 25x25m) correspondant à vos sites ou à l'ensemble de la zone d'étude (si elle est de taille réduite) (`import_meshes.sh`)
-  * les valeurs pour la nomenclature "Perturbation" (`import_nomenclatures.sh`)
-  * les taxons suivis (`import_taxons.sh`)
-  * les sites (`import_sites.sh`)
-  * les visites (`import_visits.sh`)
-* Vous trouverez plus d'informations sur l'importation de données et ces scripts dans [la documentation qui leur est dédiée](docs/import-data.md).
-* Complétez la configuration du module dans le fichier ``config/conf_gn_module.toml`` en surcouchant les valeurs par défaut présentes dans le fichier ``config/conf_gn_module.sample.toml``:
-  * Commande pour copier le fichier par défaut : ``cp config/conf_gn_module.sample.toml config/conf_gn_module.toml``
-  * Remplacer, si nécessaire, les identifiants des listes en les récupérant dans la base de données pour : `id_type_maille`, `id_type_commune`, `id_menu_list_user`, `id_list_taxon`
-  * Ensuite, relancez la mise à jour de la configuration de GeoNature :
-    * Se rendre dans le répertoire ``geonature/backend``
-    * Activer le venv : ``source venv/bin/activate``
-    * Lancer la commande de mise à jour de configuration du module (abrégé ici en "sft")  : ``geonature update_module_configuration sft``
-* Vous pouvez sortir du venv en lançant la commande ``deactivate``
-
-## Désinstallation
-
-* Utiliser le script `bin/uninstall_db.sh` en vous plaçant dans le dossier bin puis en éxecutant : `./uninstall_db.sh`
-* Cette action va supprimer toutes les données et structures en lien avec le module SFT dans la base de données. Cela supprimera aussi automatiquement le lien symbolique présent dans le dossier ``geonature/external_modules/``
+  Si vous n'importez pas le jeu de données d'exemple (paramètre *insert_sample_data*), vérifiez principalement les valeurs des paramètres *dataset_id* et *observers_list_id* dans ``settings.ini`` (voir ``config/settings.default.ini`` pour les valeurs par défaut)
 
 ## Licence
 
