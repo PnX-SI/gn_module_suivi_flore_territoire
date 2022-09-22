@@ -17,7 +17,6 @@ Version stable du module compatible avec GeoNature version 2.9.2.
 
 * Utilisation de la nouvelle syntaxe utils-flask-sqla.
 * Amélioration de la gestion du code SQL commun aux différents modules Conservation.
-*
 
 ## [1.0.0-beta] - 2020-07-07
 
