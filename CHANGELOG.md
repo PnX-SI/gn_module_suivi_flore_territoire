@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+* Ajout d'un fichier de config par défaut pour tous les scripts Bash : `settings.default.ini`
+* Ajout d'un fichier de config par défaut pour les scripts d'import : `imports_settings.default.ini`
+
+### Changed
+
+* Déplacement des fichiers de configuration `.ini` dans le dossier `config/` du dossier `bin/`.
+
+### Fixed
+
+* Correction du fonctionnement des scripts d'import qui ne fonctionnaient plus suite à la
+suppression du fichier de configuration par défaut.
+
 ## [1.0.0] - 2022-09-22
 
 Version stable du module compatible avec GeoNature version 2.9.2.
