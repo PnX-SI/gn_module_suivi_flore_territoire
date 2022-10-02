@@ -41,8 +41,8 @@ function initScript() {
     # Directories pathes
     readonly bin_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
     readonly root_dir="$(realpath $bin_dir/..)"
-    readonly conf_dir="${root_dir}/config"
-    readonly data_dir="${root_dir}/data"
+    readonly conf_dir="${bin_dir}/config"
+    readonly data_dir="${bin_dir}/data"
     readonly import_dir="${data_dir}/imports"
     readonly sample_dir="${data_dir}/sample"
     readonly var_dir="${root_dir}/var"
@@ -184,6 +184,20 @@ function loadUserScriptConfig() {
     fi
 }
 
+# DESC: Load default imports config file
+# ARGS: None
+# OUTS: All variables and constants from imports config file.
+function loadDefaultImportsScriptConfig() {
+    local default_setting_file_path=$(realpath "${conf_dir}/imports_settings.default.ini")
+    if [[ -f "${default_setting_file_path}" ]] ; then
+        source "${default_setting_file_path}"
+        printVerbose "Loading default imports settings '${default_setting_file_path}': ${Gre-}OK" ${Gra-}
+    else
+        printError "Config file '${default_setting_file_path}' not found."
+        exitScript "Please restore default configuration file '${default_setting_file_path}' from source." 1
+    fi
+}
+
 # DESC: Load imports config file
 # ARGS: $1 (optional): imports config file path (default ${conf_dir}/imports_settings.ini)
 # OUTS: All variables and constants from imports config file.
@@ -218,6 +232,7 @@ function loadGeoNatureConfig() {
 function loadScriptConfig() {
     loadDefaultScriptConfig
     loadUserScriptConfig "${2-}"
+    loadDefaultImportsScriptConfig
     loadImportsScriptConfig "${1-}"
     loadGeoNatureConfig
 }
