@@ -138,6 +138,7 @@ INSERT INTO utilisateurs.bib_organismes (nom_organisme)
     WHERE role_id IS NULL
         AND organism_id IS NULL
         AND organism != ''
+        AND organism != 'INCONNU'
         AND organism IS NOT NULL
         AND upper(organism) NOT IN (
             SELECT DISTINCT ON (upper(nom_organisme)) upper(nom_organisme)
@@ -177,11 +178,12 @@ INSERT INTO utilisateurs.t_roles (
         firstname,
         lastname,
         organism_id,
-        false,
+        true,
         'Added by SFT import_visits.sh script.',
         json_build_object('sft', json_build_object('importDate', :'importDate'))
     FROM :moduleSchema.:visitsObserversTmpTable AS ot
-    WHERE ot.role_id IS NULL AND ot.organism_id IS NOT NULL
+    WHERE ot.role_id IS NULL
+        AND (ot.organism_id IS NOT NULL OR ot.organism = 'INCONNU')
 ON CONFLICT DO NOTHING;
 
 
@@ -202,7 +204,7 @@ FROM users AS u
 WHERE ot.role_id IS NULL
     AND u.firstname ILIKE ot.firstname
     AND u.lastname ILIKE ot.lastname
-    AND u.id_organism = ot.organism_id;
+    AND (u.id_organism = ot.organism_id OR ot.organism = 'INCONNU');
 
 
 \echo '--------------------------------------------------------------------------------'

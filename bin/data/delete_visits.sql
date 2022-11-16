@@ -62,8 +62,9 @@ WITH users AS (
         o.id_organisme AS id_organism,
         o.nom_organisme AS organism
     FROM utilisateurs.t_roles AS r
-        JOIN utilisateurs.bib_organismes AS o
+        LEFT JOIN utilisateurs.bib_organismes AS o
             ON (r.id_organisme = o.id_organisme)
+    WHERE r.groupe = false
 )
 UPDATE :moduleSchema.:visitsObserversTmpTable AS ot
 SET
@@ -73,7 +74,7 @@ FROM users AS u
 WHERE
     u.firstname ILIKE ot.firstname
     AND u.lastname ILIKE ot.lastname
-    AND u.organism ILIKE ot.organism;
+    AND (u.organism ILIKE ot.organism OR u.organism IS NULL);
 
 
 \echo '--------------------------------------------------------------------------------'
