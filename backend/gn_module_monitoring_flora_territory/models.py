@@ -1,23 +1,22 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geometry
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.associationproxy import association_proxy
 
-
-from geonature.utils.env import DB
-from utils_flask_sqla.serializers import serializable
-from utils_flask_sqla_geo.serializers import geoserializable
-from utils_flask_sqla.generic import GenericQuery
-from geonature.utils.utilsgeometry import shapeserializable
-from geonature.core.gn_synthese.models import synthese_export_serialization
+from apptax.taxonomie.models import Taxref
 from geonature.core.gn_monitoring.models import (
     TBaseSites,
     TBaseVisits,
+    corSiteArea,
     corVisitObserver,
 )
 from geonature.core.ref_geo.models import LAreas
+from geonature.utils.env import DB
+from geonature.utils.utilsgeometry import shapeserializable
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
+from utils_flask_sqla.serializers import serializable
+from utils_flask_sqla_geo.serializers import geoserializable
 
 
 @serializable
@@ -31,11 +30,13 @@ class TInfoSite(DB.Model):
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
 
     id_infos_site = DB.Column(DB.Integer, primary_key=True)
-    # fk gn_monitoring.base_site
     id_base_site = DB.Column(DB.Integer, ForeignKey(TBaseSites.id_base_site))
+    cd_nom = DB.Column(DB.Integer, ForeignKey(Taxref.cd_nom))
+
     base_site = DB.relationship(TBaseSites)
+    sciname = DB.relationship(Taxref)
+
     geom = association_proxy("base_site", "geom")
-    cd_nom = DB.Column(DB.Integer)
 
     def get_geofeature(self):
         return self.as_geofeature("geom", "id_infos_site")

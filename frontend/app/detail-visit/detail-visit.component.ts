@@ -16,15 +16,14 @@ import { ObserversService } from '../services/observers.service';
   styleUrls: ["./detail-visit.component.scss"]
 })
 export class DetailVisitComponent implements OnInit, AfterViewInit {
-
   public zps;
-  public nomTaxon;
+  public taxonName;
   public date;
   public idVisit;
   public idSite;
   public tabPertur = [];
   public visitGrid = [];
-  public observers = '';
+  public observers = "";
 
   public rows = [];
 
@@ -33,7 +32,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
 
   @ViewChild("geojson")
   geojson: GeojsonComponent;
-  @ViewChild('observersCellTpl')
+  @ViewChild("observersCellTpl")
   observersCellTpl: TemplateRef<any>;
 
   constructor(
@@ -43,7 +42,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     public storeService: StoreService,
     public router: Router,
     public dataFormService: DataFormService,
-    private observersService: ObserversService,
+    private observersService: ObserversService
   ) {}
 
   ngOnInit() {
@@ -73,12 +72,11 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           });
         }
 
-        let typePer;
         let tabVisitPerturb = element.cor_visit_perturbation;
         this.tabPertur = [];
-
         if (tabVisitPerturb !== undefined) {
           tabVisitPerturb.forEach(per => {
+            let typePer;
             if (per == tabVisitPerturb[tabVisitPerturb.length - 1]) {
               typePer = per.label_fr + ". ";
             } else {
@@ -110,13 +108,11 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           });
 
         this._api.getInfoSite(this.idSite).subscribe(info => {
-          this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
-            this.nomTaxon = taxon.nom_valide;
-          });
+          this.taxonName = info.sciname.label;
         });
 
         this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
-          if (col.prop === 'observers') {
+          if (col.prop === "observers") {
             col.cellTemplate = this.observersCellTpl;
           }
         });

@@ -15,25 +15,20 @@ import { ObserversService } from '../services/observers.service';
 @Component({
   selector: "pnx-list-visit",
   templateUrl: "list-visit.component.html",
-  styleUrls: ["./list-visit.component.scss"]
+  styleUrls: ["./list-visit.component.scss"],
 })
 export class ListVisitComponent implements OnInit, AfterViewInit {
-
   public zps;
-  public nomTaxon;
   public currentZp = {};
   public idSite;
   public visitGrid: FormGroup;
   public idVisit;
-  public rows = [];
-  public show = false;
-  public nomCommune;
-  public nomSite;
-  public codeSite;
-  public descriSite;
+  public visits = [];
+  public showDetails = false;
+  public site;
   @ViewChild("geojson")
   geojson: GeojsonComponent;
-  @ViewChild('observersCellTpl')
+  @ViewChild("observersCellTpl")
   observersCellTpl: TemplateRef<any>;
 
   constructor(
@@ -43,7 +38,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     public storeService: StoreService,
     public router: Router,
     public mapListService: MapListService,
-    private observersService: ObserversService,
+    private observersService: ObserversService
   ) {}
 
   ngOnInit() {
@@ -54,50 +49,45 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       this.idSite
     );
 
-    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
-        if (col.prop === 'observers') {
-          col.cellTemplate = this.observersCellTpl;
-        }
+    this.storeService.sftConfig.default_list_visit_columns.forEach((col) => {
+      if (col.prop === "observers") {
+        col.cellTemplate = this.observersCellTpl;
+      }
     });
 
-    this._api.getZp({ id_base_site: this.idSite }).subscribe(info => {
-      info.features.forEach(el => {
-        this.nomSite = el.properties.base_site.base_site_name;
-        this.codeSite = el.properties.base_site.base_site_code;
-        this.descriSite = el.properties.base_site.base_site_description;
+    this._api.getInfoSite(this.idSite).subscribe((info) => {
+      this.site = info;
 
-        if (this.descriSite !== "" || this.nomSite !== "") {
-          // masquer bloc 'détail' si les champs Nom et Description sont vides
-          this.show = true;
-        }
-        this.nomCommune = el.properties.nom_commune;
-      });
+      // Hide 'détail' tab if name and description are empty.
+      if (this.site.description !== "" || this.site.name !== "") {
+        this.showDetails = true;
+      }
     });
 
     this._api
       .getMaille(this.idSite, {
-        id_area_type: this.storeService.sftConfig.id_type_maille
+        id_area_type: this.storeService.sftConfig.id_type_maille,
       })
-      .subscribe(nbMaille => {
+      .subscribe((nbMaille) => {
         this.storeService.total = nbMaille.features.length;
       });
 
-    this._api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
-      this.computeVisitsInfos(visits)
-      this.rows = visits;
+    this._api.getVisits({ id_base_site: this.idSite }).subscribe((visits) => {
+      this.computeVisitsInfos(visits);
+      this.visits = visits;
     });
   }
 
   private computeVisitsInfos(visits) {
-    visits.forEach(visit => {
-      this.observersService.initialize().addObservers(visit.observers)
+    visits.forEach((visit) => {
+      this.observersService.initialize().addObservers(visit.observers);
       visit.observers = this.observersService.getObserversAbbr();
       visit.observersFull = this.observersService.getObserversFull();
 
       let pres = 0;
       let abs = 0;
       if (visit.cor_visit_grid !== undefined) {
-        visit.cor_visit_grid.forEach(maille => {
+        visit.cor_visit_grid.forEach((maille) => {
           if (maille.presence) {
             pres += 1;
           } else {
@@ -112,14 +102,11 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.mapService.map.doubleClickZoom.disable();
 
-    const parametre = {
+    const parameters = {
       id_base_site: this.idSite,
-      id_application: ModuleConfig.MODULE_CODE
+      id_application: ModuleConfig.MODULE_CODE,
     };
-
-    this._api.getZp(parametre).subscribe(data => {
-      this.nomTaxon = data.features[0].properties.nom_taxon;
-
+    this._api.getZp(parameters).subscribe(data => {
       this.zps = data;
       this.geojson.currentGeoJson$.subscribe(currentLayer => {
         this.mapService.map.fitBounds(currentLayer.getBounds());
@@ -137,7 +124,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       this.idSite,
       "visits",
       id_visit,
-      "edit"
+      "edit",
     ]);
   }
 
@@ -146,7 +133,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
       "visits",
-      id_visit
+      id_visit,
     ]);
   }
 
@@ -155,7 +142,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
       "visits",
-      "add"
+      "add",
     ]);
   }
 }

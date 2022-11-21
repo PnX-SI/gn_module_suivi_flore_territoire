@@ -1,13 +1,10 @@
-from flask import Blueprint, request, session, current_app
 from sqlalchemy.sql.expression import func
 
-from pypnusershub.db.tools import InsufficientRightsError
 
-from geonature.utils.errors import GeonatureApiError
-from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.core.gn_monitoring.models import TBaseVisits
-from geonature.utils.env import DB, ROOT_DIR
-
+from geonature.utils.env import DB
+from geonature.utils.errors import GeonatureApiError
+from pypnusershub.db.tools import InsufficientRightsError
 
 
 class PostYearError (GeonatureApiError):
@@ -39,7 +36,7 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 .format(user.id_role, visit.id_base_visit),
                 403
             )
-    
+
     # cruved level '2' => My organism data
     elif cruved_level == '2':
         for role in visit.observers:

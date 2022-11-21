@@ -1,43 +1,41 @@
 import datetime
-import time
 import logging
 
 
-from flask import Blueprint, request, session, current_app, send_from_directory
-from sqlalchemy.sql.expression import func
-from sqlalchemy import and_, distinct, select
-from geojson import FeatureCollection, Feature
+from flask import Blueprint, request, session, send_from_directory
 from geoalchemy2.shape import to_shape
+from geojson import FeatureCollection
+from sqlalchemy import and_, distinct, select
+from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy.sql.expression import func
 
-from pypnnomenclature.models import TNomenclatures, BibNomenclaturesTypes
-from pypnusershub.db.tools import InsufficientRightsError
 
-from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
-from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
-from geonature.utils.env import DB, ROOT_DIR
-from geonature.utils.utilsgeometry import FionaShapeService
+from apptax.taxonomie.models import Taxref
+from geonature.core.gn_commons.models import TModules
 from geonature.core.gn_monitoring.models import (
     corVisitObserver,
     TBaseVisits,
-    TBaseSites,
     corSiteModule,
     corSiteArea,
 )
-from geonature.core.gn_commons.models import TModules
-from geonature.core.ref_geo.models import LAreas
-from pypnusershub.db.models import Organisme
-from pypnusershub.db.models import User
-from geonature.core.taxonomie.models import Taxref
+from geonature.core.gn_permissions import decorators as permissions
+from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
+from geonature.core.ref_geo.models import LAreas, BibAreasTypes
+from geonature.utils.env import DB, ROOT_DIR
+from geonature.utils.utilsgeometry import FionaShapeService
+from pypnnomenclature.models import TNomenclatures
+from pypnusershub.db.models import Organisme, User
+from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
+
 
 from .models import (
     TInfoSite,
     TVisiteSFT,
-    corVisitPerturbation,
     CorVisitGrid,
     ExportVisits,
 )
 from .repositories import check_user_cruved_visit, check_year_visit
+from .utils import prepare_output, prepare_input, fprint
 
 
 blueprint = Blueprint("pr_suivi_flore_territoire", __name__)
@@ -45,7 +43,7 @@ log = logging.getLogger(__name__)
 
 @blueprint.route("/sites", methods=["GET"])
 @json_resp
-def get_sites_zp():
+def get_sites():
     """
     Retourne la liste des ZP
     """
@@ -181,33 +179,40 @@ def get_sites_zp():
     return FeatureCollection(features)
 
 
-@blueprint.route("/site", methods=["GET"])
+@blueprint.route("/sites/<int:id_info_site>", methods=["GET"])
 @json_resp
-def get_one_zp():
+def get_one_site(id_info_site):
     """
-    Retourne une ZP à partir de l'id_base_site
-    param:
-        id_base_site: integer
+    Retourne les infos d'un site à partir de l'id_info_site
     """
-    parameters = request.args
-    q = DB.session.query(TInfoSite)
-    if "id_base_site" in parameters:
-        q = q.filter(TInfoSite.id_base_site == parameters["id_base_site"])
-    data = q.first()
+    (base_site_infos, municipalities) = (
+        DB.session
+        .query(
+            TInfoSite,
+            func.string_agg(
+                distinct(func.concat(LAreas.area_name, " (", LAreas.area_code, ")")), ", "
+            ).filter(LAreas.area_name != None)
+        )
+        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
+        .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
+        .join(
+            BibAreasTypes,
+            and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM")
+        )
+        .filter(TInfoSite.id_base_site == id_info_site)
+        .group_by(TInfoSite.id_infos_site)
+        .first()
+    )
 
-    if data:
-        return data.as_dict()
-    return None
-
-
-@blueprint.route("/site/<id_infos_site>", methods=["GET"])
-@json_resp
-def get_one_zp_id(id_infos_site):
-    """
-    Retourne une ZP à partir de l'id_info_site
-    """
-    data = DB.session.query(TInfoSite).get(id_infos_site)
-    return data.as_dict()
+    infos_site = base_site_infos.as_dict(fields=["base_site", "sciname"])
+    fprint(infos_site)
+    output = infos_site["base_site"]
+    output["sciname"] = {
+        "code": infos_site["cd_nom"],
+        "label": infos_site["sciname"]["nom_complet_html"],
+    }
+    output["municipalities"] = municipalities
+    return prepare_output(output, remove_in_key="base_site")
 
 
 @blueprint.route("/visits", methods=["GET"])
@@ -224,9 +229,9 @@ def get_visits():
     return [d.as_dict(True) for d in data]
 
 
-@blueprint.route("/visit/<id_visit>", methods=["GET"])
+@blueprint.route("/visits/<id_visit>", methods=["GET"])
 @json_resp
-def get_visit(id_visit):
+def get_one_visit(id_visit):
     """
     Retourne une visite
     """
@@ -234,10 +239,10 @@ def get_visit(id_visit):
     return data.as_dict(recursif=True)
 
 
-@blueprint.route("/visit", methods=["POST"])
+@blueprint.route("/visits", methods=["POST"])
 @permissions.check_cruved_scope("R", True)
 @json_resp
-def post_visit(info_role):
+def add_visit(info_role):
     """
     Poste une nouvelle visite ou édite une ancienne
     """
@@ -246,6 +251,14 @@ def post_visit(info_role):
     # if its not an update we check if there is not aleady a visit this year
     if not data["id_base_visit"]:
         check_year_visit(data["id_base_site"], data["visit_date_min"][0:4])
+
+    # Set generic infos got from config
+    data["id_dataset"] = blueprint.config["id_dataset"];
+    data["id_module"] = (
+        DB.session.query(TModules.id_module)
+        .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
+        .scalar()
+    )
 
     try:
         tab_perturbation = data.pop("cor_visit_perturbation")
@@ -299,7 +312,7 @@ def post_visit(info_role):
 
 
 @blueprint.route("/export_visit", methods=["GET"])
-def export_visit():
+def export_visits():
     """
     Télécharge les données d'une visite (ou des visites )
     """
@@ -389,7 +402,7 @@ def get_commune(module_code):
     """
     params = request.args
 
-    q = (
+    query = (
         select([LAreas.area_name.distinct()])
         .select_from(
             LAreas.__table__.outerjoin(
@@ -406,25 +419,25 @@ def get_commune(module_code):
     )
 
     if "id_area_type" in params:
-        q = q.where(LAreas.id_type == params["id_area_type"])
+        query = query.where(LAreas.id_type == params["id_area_type"])
 
-    data = DB.engine.execute(q)
+    data = DB.engine.execute(query)
 
-    tab_commune = []
+    municipalities = []
     for d in data:
-        nom_com = dict()
-        nom_com["nom_commune"] = str(d[0])
-        tab_commune.append(nom_com)
-    return tab_commune
+        municipality = {
+            "nom_commune": str(d[0]),
+        }
+        municipalities.append(municipality)
+    return municipalities
 
 
-@blueprint.route("/organisme", methods=["GET"])
+@blueprint.route("/organisms", methods=["GET"])
 @json_resp
 def get_organisme():
     """
     Retourne la liste de tous les organismes présents
     """
-
     query = (
         select([
             Organisme.nom_organisme.distinct(),
@@ -445,10 +458,11 @@ def get_organisme():
     )
     data = DB.engine.execute(query)
 
-    tab_orga = []
+    organisms = []
     for d in data:
-        info_orga = dict()
-        info_orga["nom_organisme"] = str(d[0])
-        info_orga["observer"] = str(d[1]) + " " + str(d[2])
-        tab_orga.append(info_orga)
-    return tab_orga
+        organism = {
+            "nom_organisme": str(d[0]),
+            "observer": f"{d[1]} {d[2]}",
+        }
+        organisms.append(organism)
+    return organisms

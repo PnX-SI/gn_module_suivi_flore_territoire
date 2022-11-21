@@ -5,14 +5,15 @@ import { ModuleConfig } from "../module.config";
 
 @Injectable()
 export class DataService {
+  apiGn: string = AppConfig.API_ENDPOINT;
+  apiModule: string = `${AppConfig.API_ENDPOINT}${ModuleConfig.MODULE_URL}`;
+
   constructor(private _http: HttpClient) {}
 
   getZp(wsParams) {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/sites`,
-      {
-        params: wsParams
-      }
+      `${this.apiModule}/sites`,
+      { params: wsParams }
     );
   }
 
@@ -23,22 +24,20 @@ export class DataService {
       wsParams = wsParams.set(key, params[key]);
     }
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/gn_monitoring/siteareas/${id_base_site}`,
+      `${this.apiGn}/gn_monitoring/siteareas/${id_base_site}`,
       { params: wsParams }
     );
   }
 
   getInfoSite(id_base_site) {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${
-        ModuleConfig.MODULE_URL
-      }/site?id_base_site=${id_base_site}`
+      `${this.apiModule}/sites/${id_base_site}`
     );
   }
 
   postVisit(data: any) {
     return this._http.post<any>(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit`,
+      `${this.apiModule}/visits`,
       data
     );
   }
@@ -51,22 +50,20 @@ export class DataService {
     }
 
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits`,
-      {
-        params: wsParams
-      }
+      `${this.apiModule}/visits`,
+      { params: wsParams }
     );
   }
 
   getOneVisit(id_visit) {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visit/${id_visit}`
+      `${this.apiModule}/visits/${id_visit}`
     );
   }
 
   getOrganisme() {
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/organisme`
+      `${this.apiModule}/organisms`
     );
   }
 
@@ -78,9 +75,7 @@ export class DataService {
     }
 
     return this._http.get<any>(
-      `${AppConfig.API_ENDPOINT}/${
-        ModuleConfig.MODULE_URL
-      }/commune/${id_application}`,
+      `${this.apiModule}/commune/${id_application}`,
       { params: wsParams }
     );
   }

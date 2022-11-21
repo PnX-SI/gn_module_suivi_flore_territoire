@@ -196,8 +196,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   onModif() {
     const formModif = Object.assign({}, this.modifGrid.value);
     formModif["id_base_site"] = this.idSite;
-    formModif["id_dataset"] = ModuleConfig.id_dataset;
-    formModif["module_code"] = ModuleConfig.MODULE_CODE;
 
     formModif["visit_date_min"] = this.dateParser.format(
       this.modifGrid.controls.visit_date_min.value

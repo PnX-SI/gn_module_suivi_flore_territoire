@@ -29,7 +29,7 @@
                Informations générales
             </a>
          </li>
-         <li class="nav-item" *ngIf="show">
+         <li class="nav-item" *ngIf="showDetails">
             <a
                class="nav-link"
                data-toggle="tab"
@@ -46,22 +46,25 @@
             <p>
                <i class="fa fa-map-marker" aria-hidden="true"></i>
                <span> Nom du site : </span>
-               <span class="strong"> {{nomSite}} </span>
+               <span class="strong"> {{site.name}} </span>
             </p>
             <p>
                <i class="fa fa-tag" aria-hidden="true"></i>
                <span> Code du site : </span>
-               <span class="strong"> {{codeSite}} </span>
+               <span class="strong"> {{site.code}} </span>
             </p>
             <p>
                <i class="fa fa-leaf" aria-hidden="true"></i>
                <span> Espèce suivie : </span>
-               <span class="strong"> {{nomTaxon}} </span>
+               <span
+                  class="strong"
+                  [matTooltip]="site.sciname.code"
+                  [innerHTML]="site.sciname.label"></span>
             </p>
             <p>
                <i class="fa fa-map" aria-hidden="true"></i>
                <span> Commune : </span>
-               <span class="strong"> {{nomCommune}} </span>
+               <span class="strong"> {{site.municipalities}} </span>
             </p>
             <p>
                <i class="fa fa-th" aria-hidden="true"></i>
@@ -74,12 +77,17 @@
             <p>
                <i class="fa fa-key" aria-hidden="true"></i>
                <span> Identifiant du site : </span>
-               <span class="strong"> {{idSite}} </span>
+               <span class="strong"> {{site.id}} </span>
+            </p>
+            <p>
+               <i class="fa fa-barcode" aria-hidden="true"></i>
+               <span> Identifiant unique du site : </span>
+               <span class="strong"> {{site.uuid}} </span>
             </p>
             <p>
                <i class="fa fa-align-justify" aria-hidden="true"></i>
                <span> Description du site : </span>
-               <span class="strong"> {{descriSite}} </span>
+               <span class="strong"> {{site.description}} </span>
             </p>
          </div>
       </div>
@@ -90,7 +98,7 @@
          <ngx-datatable
             class="material"
             [columnMode]="'force'"
-            [rows]="rows"
+            [rows]="visits"
             [headerHeight]="50"
             [footerHeight]="50"
             [rowHeight]="'auto'"
