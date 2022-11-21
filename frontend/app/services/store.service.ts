@@ -16,21 +16,16 @@ export class StoreService {
   public total;
   public rest;
   public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
-  public queryString;
+  public queryString = new HttpParams();
 
   constructor(private _modalService: NgbModal) {
     this.initialize();
   }
 
   initialize() {
-    this.initializeQueryString();
     this.defineMeshesStyle();
     this.initialzeMeshesCounters();
     this.initializeModuleConfig();
-  }
-
-  private initializeQueryString() {
-    this.queryString = new HttpParams();
   }
 
   private defineMeshesStyle() {
@@ -66,5 +61,22 @@ export class StoreService {
 
   openModal(content) {
     this._modalService.open(content);
+  }
+
+  loadQueryString() {
+    this.queryString = new HttpParams({
+      fromString: localStorage.getItem('sft-filters-querystring'),
+    });
+  }
+
+  saveQueryString() {
+    localStorage.setItem('sft-filters-querystring', this.queryString.toString());
+  }
+
+  clearQueryString() {
+    let filterkey = this.queryString.keys();
+    filterkey.forEach(key => {
+      this.queryString = this.queryString.delete(key);
+    });
   }
 }

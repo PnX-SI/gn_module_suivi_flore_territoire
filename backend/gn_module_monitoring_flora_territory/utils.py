@@ -2,11 +2,11 @@ import json
 from uuid import UUID
 
 
-def prepare_output(d, remove_in_key=None):
+def prepare_output(d, remove_in_key=None, replace_keys=None):
     if isinstance(d, list):
         new = [] if len(d) > 0 else None
         for item in d:
-            output = prepare_output(item, remove_in_key)
+            output = prepare_output(item, remove_in_key, replace_keys)
             if output:
                 new.append(output)
         return new
@@ -15,13 +15,16 @@ def prepare_output(d, remove_in_key=None):
         for k, v in d.items():
             # Remove None and empty values
             if v != None and v != "":
+                # Replace keys
+                if replace_keys and k in replace_keys:
+                    k = replace_keys[k]
                 # Remove substring in key
                 if remove_in_key:
                     new_key = k.replace(remove_in_key, "").strip("_")
                     if new_key != "":
                         k = new_key
                 # Value processing recursively
-                output = prepare_output(v, remove_in_key)
+                output = prepare_output(v, remove_in_key, replace_keys)
                 if output != None and output != "":
                     new[format_to_camel_case(k)] = output
         return new

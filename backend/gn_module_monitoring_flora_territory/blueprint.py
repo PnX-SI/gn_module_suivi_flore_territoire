@@ -5,8 +5,7 @@ import logging
 from flask import Blueprint, request, session, send_from_directory
 from geoalchemy2.shape import to_shape
 from geojson import FeatureCollection
-from sqlalchemy import and_, distinct, select
-from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy import and_, distinct, desc
 from sqlalchemy.sql.expression import func
 
 
@@ -78,11 +77,11 @@ def get_sites():
     if "cd_nom" in parameters:
         query = query.filter(TInfoSite.cd_nom == parameters["cd_nom"])
 
-    if "organisme" in parameters:
-        query = query.filter(Organisme.nom_organisme == parameters["organisme"])
+    if "organism" in parameters:
+        query = query.filter(Organisme.id_organisme == parameters["organism"])
 
-    if "commune" in parameters:
-        query = query.filter(LAreas.area_name == parameters["commune"])
+    if "municipality" in parameters:
+        query = query.filter(LAreas.id_area == parameters["municipality"])
 
     if "year" in parameters:
         query = query.filter(
@@ -269,7 +268,7 @@ def add_visit(info_role):
 
     if visit.id_base_visit:
         user_cruved = get_or_fetch_user_cruved(
-            session=session, id_role=info_role.id_role, module_code="SFT"
+            session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
         )
         update_cruved = user_cruved["U"]
         check_user_cruved_visit(info_role, visit, update_cruved)
@@ -357,64 +356,79 @@ def export_visits():
         return send_from_directory(dir_path, file_name + ".zip", as_attachment=True)
 
 
-@blueprint.route("/commune/<module_code>", methods=["GET"])
+@blueprint.route("/visits/years", methods=["GET"])
 @json_resp
-def get_commune(module_code):
+def get_visits_years():
+    """
+    Retourne toutes les années de visites du module
+    """
+    query = (
+        DB.session.query(func.to_char(TVisiteSFT.visit_date_min, "YYYY"))
+        .join(TInfoSite, TInfoSite.id_base_site == TVisiteSFT.id_base_site)
+        .order_by(desc(func.to_char(TVisiteSFT.visit_date_min, "YYYY")))
+        .group_by(func.to_char(TVisiteSFT.visit_date_min, "YYYY"))
+    )
+    results = query.all()
+
+    years = []
+    for row in results:
+        years.append(row[0])
+    return years
+
+
+@blueprint.route("/municipalities", methods=["GET"])
+@json_resp
+def get_municipalities():
     """
     Retourne toutes les communes présents dans le module
     """
-    params = request.args
-
     query = (
-        select([LAreas.area_name.distinct()])
-        .select_from(
-            LAreas.__table__.outerjoin(corSiteArea, LAreas.id_area == corSiteArea.c.id_area)
-            .outerjoin(
-                corSiteModule,
-                corSiteModule.c.id_base_site == corSiteArea.c.id_base_site,
-            )
-            .outerjoin(
-                TModules,
-                TModules.id_module == corSiteModule.c.id_module,
-            )
-        )
-        .where(TModules.module_code == module_code)
+        DB.session.query(LAreas)
+        .join(BibAreasTypes, BibAreasTypes.id_type == LAreas.id_type)
+        .join(corSiteArea, LAreas.id_area == corSiteArea.c.id_area)
+        .join(corSiteModule, corSiteModule.c.id_base_site == corSiteArea.c.id_base_site)
+        .join(TModules, TModules.id_module == corSiteModule.c.id_module)
+        .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
+        .filter(BibAreasTypes.type_code == "COM")
     )
+    results = query.all()
 
-    if "id_area_type" in params:
-        query = query.where(LAreas.id_type == params["id_area_type"])
+    output = []
+    for area in results:
+        output.append(area.as_dict())
 
-    data = DB.engine.execute(query)
-
-    municipalities = []
-    for d in data:
-        municipality = {
-            "nom_commune": str(d[0]),
-        }
-        municipalities.append(municipality)
-    return municipalities
+    return prepare_output(output, remove_in_key="area")
 
 
 @blueprint.route("/organisms", methods=["GET"])
 @json_resp
-def get_organisme():
+def get_organisms():
     """
     Retourne la liste de tous les organismes présents
     """
-    query = select(
-        [Organisme.nom_organisme.distinct(), User.nom_role, User.prenom_role]
-    ).select_from(
-        User.__table__.outerjoin(Organisme, User.id_organisme == Organisme.id_organisme)
-        .join(corVisitObserver, User.id_role == corVisitObserver.c.id_role)
-        .outerjoin(TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
+    query = (
+        DB.session.query(Organisme)
+        .join(User, User.id_organisme == Organisme.id_organisme)
+        .join(corVisitObserver, corVisitObserver.c.id_role == User.id_role)
+        .join(TVisiteSFT, TVisiteSFT.id_base_visit == corVisitObserver.c.id_base_visit)
     )
-    data = DB.engine.execute(query)
+    results = query.all()
 
-    organisms = []
-    for d in data:
-        organism = {
-            "nom_organisme": str(d[0]),
-            "observer": f"{d[1]} {d[2]}",
-        }
-        organisms.append(organism)
-    return organisms
+    output = []
+    for organism in results:
+        output.append(organism.as_dict())
+
+    replace_keys = {
+        "id_organisme": "id",
+        "uuid_organisme": "uuid",
+        "nom_organisme": "name",
+        "adresse_organisme": "address",
+        "cp_organisme": "postal_code",
+        "ville_organisme": "city",
+        "tel_organisme": "phone",
+        "fax_organisme": "fax",
+        "email_organisme": "email",
+        "fax_organisme": "fax",
+        "url_organisme": "url",
+    }
+    return prepare_output(output, replace_keys=replace_keys)

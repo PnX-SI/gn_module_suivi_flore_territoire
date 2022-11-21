@@ -19,24 +19,27 @@
         <pnx-taxonomy
           #taxon
           label="{{ 'Taxon.Taxon' | translate }}"
-          [parentFormControl]="taxonForm"
+          [parentFormControl]="filterForm.controls.taxonFilter"
           [idList]="storeService.sftConfig.id_list_taxon"
           [charNumber]="3"
           [listLength]="20"
           (onChange)="onTaxonChanged($event)"
-          (onDelete)="onDeleteParams('cd_nom', actualTaxonNameId); onDelete()"
+          (onDelete)="onTaxonDeleted($event)"
         >
         </pnx-taxonomy>
       </div>
 
       <div class="col padding-sm">
         <small> Année de visite </small>
-        <input
-          type="number"
-          [formControl]="filtreForm.controls.filtreYear"
+        <select
           class="form-control form-control-sm"
-          (onDeleteFiltre)="onDelete()"
-        />
+          name="year-filter"
+          [formControl]="filterForm.controls.yearFilter"
+        >
+          <option [ngValue]="null"> Toutes </option>
+          <option *ngFor="let year of yearsList" [value]="year" [innerHTML]="year">
+          </option>
+        </select>
       </div>
     </div>
 
@@ -45,11 +48,14 @@
         <small> Organisme </small>
         <select
           class="form-control form-control-sm"
-          name="monSelect"
-          [formControl]="filtreForm.controls.filtreOrga"
+          name="organism-filter"
+          [formControl]="filterForm.controls.organismFilter"
         >
           <option [ngValue]="null"> Tous </option>
-          <option *ngFor="let label of tabOrganism"> {{ label }} </option>
+          <option
+            *ngFor="let organism of organismsList"
+            [value]="organism.id"
+          > {{ organism.name }} </option>
         </select>
       </div>
 
@@ -57,11 +63,14 @@
         <small> Commune </small>
         <select
           class="form-control form-control-sm"
-          name="monSelect"
-          [formControl]="filtreForm.controls.filtreCom"
+          name="municipality-filter"
+          [formControl]="filterForm.controls.municipalityFilter"
         >
           <option [ngValue]="null"> Toutes </option>
-          <option *ngFor="let label of tabCom"> {{ label }} </option>
+          <option
+            *ngFor="let municipality of municipalitiesList"
+            [value]="municipality.id"
+          > {{ municipality.name }} </option>
         </select>
       </div>
     </div>
@@ -73,7 +82,7 @@
       [rows]="filteredData"
       [headerHeight]="50"
       [footerHeight]="50"
-      [rowHeight]="50"
+      [rowHeight]="rowHeight"
       [columnMode]="'force'"
       [selected]="mapListService.selectedRow"
       [selectionType]="'single'"

@@ -47,17 +47,15 @@ export class DataService {
     return this._http.get<any>(`${this.apiModule}/visits/${id_visit}`);
   }
 
-  getOrganisme() {
+  getVisitsYears() {
+    return this._http.get<any>(`${this.apiModule}/visits/years`);
+  }
+
+  getOrganisms() {
     return this._http.get<any>(`${this.apiModule}/organisms`);
   }
 
-  getCommune(id_application: string, params: any) {
-    let wsParams = new HttpParams();
-
-    for (let key in params) {
-      wsParams = wsParams.set(key, params[key]);
-    }
-
-    return this._http.get<any>(`${this.apiModule}/commune/${id_application}`, { params: wsParams });
+  getMunicipalities() {
+    return this._http.get<any>(`${this.apiModule}/municipalities`);
   }
 }

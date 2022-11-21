@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   AfterViewInit,
-  AfterViewChecked,
   Input,
   Output,
   EventEmitter,
@@ -26,13 +25,14 @@ import { ModuleConfig } from '../module.config';
   templateUrl: './zp-map-list.component.html',
   styleUrls: ['./zp-map-list.component.scss'],
 })
-export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewChecked {
-  public zps;
-
+export class ZpMapListComponent implements OnInit, AfterViewInit {
   @Input()
   searchTaxon: string;
-  @ViewChild('dataTable') dataTable: DatatableComponent;
-
+  @Output()
+  onDeleteFilter = new EventEmitter<any>();
+  @ViewChild('dataTable')
+  dataTable: DatatableComponent;
+  public zps;
   private dataTableLatestWidth: number;
   public loadingIndicator = false;
   // Height in pixel of a datatable row
@@ -41,33 +41,102 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   public defaultRowNumber: number = 5;
   public rowNumber: number;
   public filteredData = [];
-  public tabOrganism = [];
-  public taxonForm = new FormControl();
-  public filtreForm: FormGroup;
-  public paramApp = {
-    id_application: ModuleConfig.MODULE_CODE,
-    id_area_type: ModuleConfig.id_type_commune,
-  };
-
-  public actualDate;
-  public actualTaxonNameId;
-  public tabCom = [];
-  @Output()
-  onDeleteFiltre = new EventEmitter<any>();
+  public filterForm: FormGroup;
+  public yearsList = [];
+  public organismsList = [];
+  public municipalitiesList = [];
 
   constructor(
     public mapService: MapService,
-    private _api: DataService,
+    private api: DataService,
     public router: Router,
     public storeService: StoreService,
     public mapListService: MapListService,
-    private _fb: FormBuilder
+    private formBuilder: FormBuilder,
   ) {}
 
   ngOnInit() {
+    this.loadInitialData();
+    this.initializeRowNumber();
+    this.initializeFilterForm();
+    this.initializeFilterControls();
+    this.initializeMapList();
+  }
+
+  private initializeRowNumber() {
     // Get wiewport height to set the number of rows in datatable
     const screenHeight = document.documentElement.clientHeight;
     this.rowNumber = this.calculateRowNumber(screenHeight);
+  }
+
+  private loadInitialData() {
+    this.storeService.loadQueryString();
+    this.onChargeList();
+  }
+
+  private initializeFilterForm() {
+    this.filterForm = this.formBuilder.group({
+      taxonFilter: JSON.parse(localStorage.getItem('sft-filters-taxon')),
+      yearFilter: this.getInitialFilterValue('year'),
+      organismFilter: this.getInitialFilterValue('organism'),
+      municipalityFilter: this.getInitialFilterValue('municipality'),
+    });
+  }
+
+  private getInitialFilterValue(filterName) {
+    let value = null;
+    if (this.storeService.queryString.has(filterName)) {
+      value = this.storeService.queryString.get(filterName);
+    }
+    return value;
+  }
+
+  private initializeFilterControls() {
+    // Year
+    this.filterForm.controls.yearFilter.valueChanges
+      .filter(select => !select || select !== null)
+      .subscribe(item => {
+        this.onSearchYear(item);
+      });
+
+    this.filterForm.controls.yearFilter.valueChanges
+      .filter(input => !input || input === null)
+      .subscribe(item => {
+        this.deleteQueryString('year');
+        this.onDeleteFilter.emit(item);
+      });
+
+    // Organism
+    this.filterForm.controls.organismFilter.valueChanges
+      .filter(select => !select || select !== null)
+      .subscribe(item => {
+        this.onSearchOrganism(item);
+      });
+
+    this.filterForm.controls.organismFilter.valueChanges
+      .filter(input => !input || input === null)
+      .subscribe(item => {
+        this.deleteQueryString('organism');
+        this.onDeleteFilter.emit(item);
+      });
+
+    // Municipality
+    this.filterForm.controls.municipalityFilter.valueChanges
+      .filter(select => !select || select !== null)
+      .subscribe(item => {
+        this.onSearchMunicipality(item);
+      });
+
+    this.filterForm.controls.municipalityFilter.valueChanges
+      .filter(input => !input || input === null)
+      .subscribe(item => {
+        this.deleteQueryString('municipality');
+        this.onDeleteFilter.emit(item);
+      });
+  }
+
+  private initializeMapList() {
+    this.mapListService.idName = 'id_infos_site';
 
     // Observable on mapListService.currentIndexRow to find the current page
     this.mapListService.currentIndexRow$.subscribe(indexRow => {
@@ -75,90 +144,48 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
       this.dataTable.offset = currentPage;
     });
 
-    this.mapListService.idName = 'id_infos_site';
     this.storeService.initialize();
-    this.filtreForm = this._fb.group({
-      filtreYear: null,
-      filtreOrga: null,
-      filtreCom: null,
-    });
-
-    this.onChargeList(this.paramApp);
-
-    // Year
-    this.filtreForm.controls.filtreYear.valueChanges
-      .filter(input => input !== null && input.toString().length === 4)
-      .subscribe(year => {
-        this.onSearchDate(year);
-      });
-
-    this.filtreForm.controls.filtreYear.valueChanges
-      .filter(input => !input || input === null || input === '')
-      .subscribe(year => {
-        this.onDeleteParams('year', this.actualDate);
-        this.onDeleteFiltre.emit();
-        this.onDelete();
-      });
-
-    // Organism
-    this.filtreForm.controls.filtreOrga.valueChanges
-      .filter(select => !select || select !== null)
-      .subscribe(org => {
-        this.onSearchOrganisme(org);
-      });
-
-    this.filtreForm.controls.filtreOrga.valueChanges
-      .filter(input => !input || input === null)
-      .subscribe(org => {
-        this.onDeleteParams('organisme', org);
-        this.onDeleteFiltre.emit();
-        this.onDelete();
-      });
-
-    // Municipality
-    this.filtreForm.controls.filtreCom.valueChanges
-      .filter(select => !select || select !== null)
-      .subscribe(com => {
-        this.onSearchCom(com);
-      });
-
-    this.filtreForm.controls.filtreCom.valueChanges
-      .filter(input => !input || input === null)
-      .subscribe(com => {
-        this.onDeleteParams('commune', com);
-        this.onDeleteFiltre.emit();
-        this.onDelete();
-      });
   }
 
   ngAfterViewInit() {
     this.mapListService.enableMapListConnexion(this.mapService.getMap());
 
-    this._api.getOrganisme().subscribe(elem => {
-      elem.forEach(orga => {
-        if (this.tabOrganism.indexOf(orga.nom_organisme) === -1) {
-          this.tabOrganism.push(orga.nom_organisme);
-        }
-        this.tabOrganism.sort((a, b) => {
-          return a.localeCompare(b);
-        });
-      });
-    });
+    this.loadYears();
+    this.loadOrganisms();
+    this.loadMunicipalities();
 
-    let params = { id_area_type: this.storeService.sftConfig.id_type_commune };
-    this._api.getCommune(ModuleConfig.MODULE_CODE, params).subscribe(info => {
-      info.forEach(com => {
-        if (this.tabCom.indexOf(com.nom_commune) === -1) {
-          this.tabCom.push(com.nom_commune);
-        }
-        this.tabCom.sort((a, b) => {
-          return a.localeCompare(b);
-        });
+    // WARNING: use Promise to avoid ExpressionChangedAfterItHasBeenCheckedError
+    // See: https://angular.io/errors/NG0100
+    Promise.resolve(null).then(() => this.recalculateDataTableSize());
+  }
+
+  private loadYears() {
+    this.api.getVisitsYears().subscribe(data => {
+      this.yearsList = data;
+      this.yearsList.sort().reverse();
+    });
+  }
+
+  private loadMunicipalities() {
+    this.api.getMunicipalities().subscribe(data => {
+      this.municipalitiesList = data;
+      this.municipalitiesList.sort((a, b) => {
+        return a.name.localeCompare(b.name);
       });
     });
   }
 
-  ngAfterViewChecked() {
+  private loadOrganisms() {
+    this.api.getOrganisms().subscribe(data => {
+      this.organismsList = data;
+      this.organismsList.sort();
+      this.organismsList.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+    });
+  }
+
+  private recalculateDataTableSize() {
     if (this.dataTable && this.dataTable.element.clientWidth !== this.dataTableLatestWidth) {
       this.dataTableLatestWidth = this.dataTable.element.clientWidth;
       this.dataTable.recalculate();
@@ -173,12 +200,12 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
   }
 
   /** Update the number of row per page when resize the window */
-  updateDataTableRowNumber(height: number) {
+  private updateDataTableRowNumber(height: number) {
     this.rowNumber = this.calculateRowNumber(height);
   }
 
   /** Calculate the number of row with the client screen height */
-  calculateRowNumber(screenHeight: number): number {
+  private calculateRowNumber(screenHeight: number): number {
     const dataTableTop = this.dataTable.element.getBoundingClientRect().top;
     const footerHeight = document.querySelector('#end-btn').getBoundingClientRect().height;
     const outerheight =
@@ -187,16 +214,6 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
     let rowNumber = Math.trunc((screenHeight - outerheight) / this.rowHeight);
     rowNumber = rowNumber < this.defaultRowNumber ? this.defaultRowNumber : rowNumber;
     return rowNumber;
-  }
-
-  onChargeList(param) {
-    this.loadingIndicator = true;
-    this._api.getZp(this.storeService.queryString).subscribe(data => {
-      this.zps = data;
-      this.mapListService.loadTableData(data);
-      this.filteredData = this.mapListService.tableData;
-      this.loadingIndicator = false;
-    });
   }
 
   onEachFeature(feature, layer) {
@@ -214,51 +231,48 @@ export class ZpMapListComponent implements OnInit, AfterViewInit, AfterViewCheck
     this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, id_base_site]);
   }
 
-  onSearchDate(event) {
-    this.onSetParams('year', event);
-    this.onChargeList({
-      id_application: ModuleConfig.MODULE_CODE,
-      year: event,
-    });
-    this.actualDate = event;
-  }
-
-  onSearchOrganisme(event) {
-    this.onSetParams('organisme', event);
-    this.onChargeList({
-      id_application: ModuleConfig.MODULE_CODE,
-      organisme: event,
-    });
-  }
-
   onTaxonChanged(event) {
-    this.onSetParams('cd_nom', event.item.cd_nom);
-    this.actualTaxonNameId = event.item.cd_nom;
-    this.onChargeList({
-      id_application: ModuleConfig.MODULE_CODE,
-      cd_nom: event.item.cd_nom,
-    });
+    this.setQueryString('cd_nom', event.item.cd_nom);
+    localStorage.setItem('sft-filters-taxon', JSON.stringify(event.item));
   }
 
-  onSearchCom(event) {
-    this.onSetParams('commune', event);
-    this.onChargeList({
-      id_application: ModuleConfig.MODULE_CODE,
-      commune: event,
-    });
+  onTaxonDeleted(event) {
+    this.deleteQueryString('cd_nom');
+    this.onDeleteFilter.emit(event);
+    localStorage.removeItem('sft-filters-taxon');
   }
 
-  onDelete() {
-    this.onChargeList(this.paramApp);
+  private onSearchYear(event) {
+    this.setQueryString('year', event);
   }
 
-  onSetParams(param: string, value) {
-    // Add filter query string to download data
+  private onSearchOrganism(event) {
+    this.setQueryString('organism', event);
+  }
+
+  private onSearchMunicipality(event) {
+    this.setQueryString('municipality', event);
+  }
+
+  private setQueryString(param: string, value) {
     this.storeService.queryString = this.storeService.queryString.set(param, value);
+    this.storeService.saveQueryString();
+    this.onChargeList();
   }
 
-  onDeleteParams(param: string, value) {
-    // Remove filter query string to download data
-    this.storeService.queryString = this.storeService.queryString.delete(param, value);
+  private deleteQueryString(param: string) {
+    this.storeService.queryString = this.storeService.queryString.delete(param);
+    this.storeService.saveQueryString();
+    this.onChargeList();
+  }
+
+  private onChargeList() {
+    this.loadingIndicator = true;
+    this.api.getZp(this.storeService.queryString).subscribe(data => {
+      this.zps = data;
+      this.mapListService.loadTableData(data);
+      this.filteredData = this.mapListService.tableData;
+      this.loadingIndicator = false;
+    });
   }
 }
