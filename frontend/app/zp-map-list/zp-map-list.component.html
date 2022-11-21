@@ -1,5 +1,5 @@
-<div class="row row-sm map-list-container">
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+<div class="row mx-0">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 px-0">
     <pnx-map
       height="91vh"
       [center]="storeService.sftConfig.zoom_center"
@@ -9,125 +9,166 @@
     </pnx-map>
   </div>
 
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
-    <sft-breadcrumbs></sft-breadcrumbs>
+  <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-6 px-0">
+    <div class="card-header pt-0 px-0 pb-1">
+      <sft-breadcrumbs></sft-breadcrumbs>
+      <h3 class="pl-3">Liste des sites</h3>
+    </div>
 
-    <h3>Liste des sites</h3>
+    <div class="card-body overflow-auto pb-0 px-2">
+      <form>
+        <fieldset>
+          <legend class="px-2">
+            <mat-icon>tune</mat-icon>
+            Filtres
+          </legend>
 
-    <div class="row row-0">
-      <div class="col padding-sm">
-        <pnx-taxonomy
-          #taxon
-          label="{{ 'Taxon.Taxon' | translate }}"
-          [parentFormControl]="filterForm.controls.taxonFilter"
-          [idList]="storeService.sftConfig.id_list_taxon"
-          [charNumber]="3"
-          [listLength]="20"
-          (onChange)="onTaxonChanged($event)"
-          (onDelete)="onTaxonDeleted($event)"
+          <div class="row">
+            <div class="col">
+              <label for="taxonFilter" class="mt-2 mb-0">
+                <small>
+                  <mat-icon inline>local_florist</mat-icon>
+                  {{ 'Taxon.Taxon' | translate }}
+                </small>
+              </label>
+              <pnx-taxonomy
+                #taxon
+                [parentFormControl]="filterForm.controls.taxonFilter"
+                [idList]="storeService.sftConfig.id_list_taxon"
+                [charNumber]="3"
+                [listLength]="20"
+                (onChange)="onTaxonChanged($event)"
+                (onDelete)="onTaxonDeleted($event)"
+                matTooltip="Commencez à saisir les 3 premiers caractères
+                  d'un nom de taxon présent dans la liste pré-définie du module."
+                matTooltipPosition="above"
+              >
+              </pnx-taxonomy>
+            </div>
+
+            <div class="col">
+              <label for="yearFilter" class="mt-2 mb-0">
+                <small>
+                  <mat-icon inline>calendar_month</mat-icon>
+                  Année de visite
+                </small>
+              </label>
+              <select
+                class="form-control form-control-sm"
+                name="year-filter"
+                [formControl]="filterForm.controls.yearFilter"
+              >
+                <option [ngValue]="null"> -- Toutes les années --</option>
+                <option *ngFor="let year of yearsList" [value]="year" [innerHTML]="year">
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label for="organismFilter" class="mt-2 mb-0">
+                <small>
+                  <mat-icon inline>domain</mat-icon>
+                  Organisme
+                </small>
+              </label>
+              <select
+                class="form-control form-control-sm"
+                name="organism-filter"
+                [formControl]="filterForm.controls.organismFilter"
+              >
+                <option [ngValue]="null"> -- Tous les organismes -- </option>
+                <option
+                  *ngFor="let organism of organismsList"
+                  [value]="organism.id"
+                > {{ organism.name }} </option>
+              </select>
+            </div>
+
+            <div class="col">
+              <label for="municipalityFilter" class="mt-2 mb-0">
+                <small>
+                  <mat-icon inline>map</mat-icon>
+                  Commune
+                </small>
+              </label>
+              <select
+                class="form-control form-control-sm"
+                name="municipality-filter"
+                [formControl]="filterForm.controls.municipalityFilter"
+              >
+                <option [ngValue]="null"> -- Toutes les communes -- </option>
+                <option
+                  *ngFor="let municipality of municipalitiesList"
+                  [value]="municipality.id"
+                > {{ municipality.name }} </option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="mx-0 mb-0 mt-3">
+        <ngx-datatable
+          #dataTable
+          class="material striped margin-top-xs table-size expandable"
+          [loadingIndicator]="loadingIndicator"
+          [rows]="filteredData"
+          [headerHeight]="35"
+          [footerHeight]="40"
+          [rowHeight]="rowHeight"
+          [columnMode]="'force'"
+          [selected]="mapListService.selectedRow"
+          [selectionType]="'single'"
+          (select)="mapListService.onRowSelect($event)"
+          [rowClass]="mapListService.getRowClass"
+          [count]="filteredData.length"
+          [limit]="rowNumber"
+          [messages]="storeService.sftConfig.zp_message"
         >
-        </pnx-taxonomy>
-      </div>
+          <ngx-datatable-column
+            *ngFor="let col of storeService.sftConfig.default_zp_columns"
+            [name]="col.name"
+            [prop]="col.prop"
+            [maxWidth]="col.width"
+          >
+            <ng-template let-column="col" ngx-datatable-header-template>
+              <span [title]="col.title">{{ col.name }}</span>
+            </ng-template>
+          </ngx-datatable-column>
 
-      <div class="col padding-sm">
-        <small> Année de visite </small>
-        <select
-          class="form-control form-control-sm"
-          name="year-filter"
-          [formControl]="filterForm.controls.yearFilter"
-        >
-          <option [ngValue]="null"> Toutes </option>
-          <option *ngFor="let year of yearsList" [value]="year" [innerHTML]="year">
-          </option>
-        </select>
+          <ngx-datatable-column
+            cellClass="actions-cell"
+            maxWidth="90"
+            name="Voir"
+            title="Accéder aux visites du site"
+          >
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <button
+                type="button"
+                class="btn btn-info btn-sm fa fa-eye"
+                (click)="onInfo(row.id_base_site)"
+                title="Visualiser"
+              ></button>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
       </div>
     </div>
 
-    <div id="bottom-search" class="row row-0 ">
-      <div class="col padding-sm">
-        <small> Organisme </small>
-        <select
-          class="form-control form-control-sm"
-          name="organism-filter"
-          [formControl]="filterForm.controls.organismFilter"
-        >
-          <option [ngValue]="null"> Tous </option>
-          <option
-            *ngFor="let organism of organismsList"
-            [value]="organism.id"
-          > {{ organism.name }} </option>
-        </select>
+    <div id="after-datatable" class="card-footer">
+      <div class="row">
+        <div class="col">
+          <pnx-modal-download
+            [pathDownload]="storeService.urlLoad"
+            [exportFormat]="storeService.sftConfig.export_available_format"
+            [queryString]="storeService.queryString"
+            labelButton="Télécharger les visites"
+          >
+          </pnx-modal-download>
+        </div>
       </div>
-
-      <div class="col padding-sm">
-        <small> Commune </small>
-        <select
-          class="form-control form-control-sm"
-          name="municipality-filter"
-          [formControl]="filterForm.controls.municipalityFilter"
-        >
-          <option [ngValue]="null"> Toutes </option>
-          <option
-            *ngFor="let municipality of municipalitiesList"
-            [value]="municipality.id"
-          > {{ municipality.name }} </option>
-        </select>
-      </div>
-    </div>
-
-    <ngx-datatable
-      #dataTable
-      class="material"
-      [loadingIndicator]="loadingIndicator"
-      [rows]="filteredData"
-      [headerHeight]="50"
-      [footerHeight]="50"
-      [rowHeight]="rowHeight"
-      [columnMode]="'force'"
-      [selected]="mapListService.selectedRow"
-      [selectionType]="'single'"
-      (select)="mapListService.onRowSelect($event)"
-      [rowClass]="mapListService.getRowClass"
-      [count]="filteredData.length"
-      [limit]="rowNumber"
-      [messages]="storeService.sftConfig.zp_message"
-    >
-      <ngx-datatable-column
-        *ngFor="let col of storeService.sftConfig.default_zp_columns"
-        [name]="col.name"
-        [prop]="col.prop"
-        [maxWidth]="col.width"
-      >
-        <ng-template let-column="col" ngx-datatable-header-template>
-          <span [title]="col.title">{{ col.name }}</span>
-        </ng-template>
-      </ngx-datatable-column>
-
-      <ngx-datatable-column
-        cellClass="actions-cell"
-        maxWidth="90"
-        name="Voir"
-        title="Accéder aux visites du site"
-      >
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <button
-            type="button"
-            class="btn btn-info btn-sm fa fa-eye"
-            (click)="onInfo(row.id_base_site)"
-            title="Visualiser"
-          ></button>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
-
-    <div id="end-btn">
-      <pnx-modal-download
-        [pathDownload]="storeService.urlLoad"
-        [exportFormat]="storeService.sftConfig.export_available_format"
-        [queryString]="storeService.queryString"
-        labelButton="Télécharger les visites"
-      >
-      </pnx-modal-download>
     </div>
   </div>
 </div>

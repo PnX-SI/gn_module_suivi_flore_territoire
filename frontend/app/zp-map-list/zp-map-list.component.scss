@@ -1,10 +1,13 @@
 :host /deep/ .ngx-datatable.material {
+  //max-height: 79vh !important;
   box-shadow: none !important;
+  //overflow-y: auto;
 
   .datatable-body {
     .progress-linear {
       position: fixed !important;
     }
+
     .datatable-body-row {
       .actions-cell {
         display: flex;
@@ -20,6 +23,7 @@
       height: 1.5em;
       padding: 0 0.2rem;
     }
+
     .datatable-pager {
       flex-basis: 70% !important;
       margin: 0;
@@ -32,28 +36,15 @@
   background-color: rgb(154, 217, 247) !important;
 }
 
-.inputSearch {
-  margin-top: 2px;
-  width: 120%;
-  height: 27px;
-  border: none;
+fieldset {
+  padding: 0.35em 0.625em 0.75em !important;
+  border: 1px solid silver !important;
+  margin: 0 2px !important;
+  border-radius: 3px;
+  // background-color: #f3f3f3;
 }
 
-.list-sft {
-  max-height: 89vh;
-}
-
-#bottom-search {
-  margin-bottom: 15px;
-}
-
-.box-shadow {
-  box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-#end-btn {
-  padding: 15px;
-  height: 60px;
-  display: flex;
-  align-items: center;
+legend {
+  width: auto;
+  font-size: inherit;
 }

@@ -207,7 +207,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   /** Calculate the number of row with the client screen height */
   private calculateRowNumber(screenHeight: number): number {
     const dataTableTop = this.dataTable.element.getBoundingClientRect().top;
-    const footerHeight = document.querySelector('#end-btn').getBoundingClientRect().height;
+    const footerHeight = document.querySelector('#after-datatable').getBoundingClientRect().height;
     const outerheight =
       dataTableTop + this.dataTable.headerHeight + this.dataTable.footerHeight + footerHeight;
 
