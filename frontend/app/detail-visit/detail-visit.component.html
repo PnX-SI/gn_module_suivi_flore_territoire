@@ -1,146 +1,142 @@
 <div class="row row-0">
-   <!-- MAP  -->
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-      <pnx-map height="94vh">
-         <pnx-geojson #geojson
-            [onEachFeature]="onEachFeature.bind(this)"
-            [geojson]="zps">
-         </pnx-geojson>
-      </pnx-map>
-   </div>
+  <!-- MAP  -->
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+    <pnx-map height="94vh">
+      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+      </pnx-geojson>
+    </pnx-map>
+  </div>
 
-   <!-- INFO VISIT -->
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container detail-sft">
+  <!-- INFO VISIT -->
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container detail-sft">
+    <sft-breadcrumbs></sft-breadcrumbs>
 
-      <sft-breadcrumbs></sft-breadcrumbs>
+    <h3>
+      <i class="fa fa-binoculars"></i>
+      Informations de la visite
+    </h3>
 
-      <h3>
-         <i class="fa fa-binoculars"></i>
-         Informations de la visite
-      </h3>
+    <div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <i class="fa fa-map-marker" aria-hidden="true"></i>
+          Identifiant du site :
+          <span class="info"> {{ idSite }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-leaf" aria-hidden="true"></i>
+          Espèce prospectée :
+          <span class="info" [innerHTML]="taxonName"></span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-group" aria-hidden="true"></i>
+          Observateur(s) :
+          <span class="info"> {{ observers }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-calendar" aria-hidden="true"></i>
+          Date de la visite :
+          <span class="info"> {{ date }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-warning" aria-hidden="true"></i>
+          Perturbation(s) :
+          <span class="info" *ngFor="let per of tabPertur"> {{ per }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-check-circle-o" aria-hidden="true"></i>
+          Maille(s) de présence :
+          <span class="info"> {{ storeService.presence }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-ban" aria-hidden="true"></i>
+          Maille(s) d'absence :
+          <span class="info"> {{ storeService.absence }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+          Maille(s) non visitées :
+          <span class="info"> {{ storeService.rest }} </span>
+        </li>
+        <li class="list-group-item">
+          <i class="fa fa-comments" aria-hidden="true"></i>
+          Commentaires :
+          <span class="info"> {{ comments }} </span>
+        </li>
+      </ul>
+    </div>
 
-      <div>
-         <ul class="list-group">
-            <li class="list-group-item">
-               <i class="fa fa-map-marker" aria-hidden="true"></i>
-               Identifiant du site :
-               <span class="info"> {{ idSite }} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-leaf" aria-hidden="true"></i>
-               Espèce prospectée :
-               <span class="info" [innerHTML]="taxonName"></span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-group" aria-hidden="true"></i>
-               Observateur(s) :
-               <span class="info"> {{observers}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-calendar" aria-hidden="true"></i>
-               Date de la visite :
-               <span class="info"> {{date}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-warning" aria-hidden="true"></i>
-               Perturbation(s) :
-               <span class="info" *ngFor="let per of tabPertur"> {{per}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-check-circle-o" aria-hidden="true"></i>
-               Maille(s) de présence :
-               <span class="info"> {{storeService.presence}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-ban" aria-hidden="true"></i>
-               Maille(s) d'absence :
-               <span class="info"> {{storeService.absence}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-question-circle-o" aria-hidden="true"></i>
-               Maille(s) non visitées :
-               <span class="info"> {{storeService.rest}} </span>
-            </li>
-            <li class="list-group-item">
-               <i class="fa fa-comments" aria-hidden="true"></i>
-               Commentaires :
-               <span class="info"> {{comments}} </span>
-            </li>
-         </ul>
-      </div>
+    <div id="end-btn">
+      <pnx-modal-download
+        [pathDownload]="storeService.urlLoad"
+        [exportFormat]="storeService.sftConfig.export_available_format"
+        [queryString]="storeService.queryString"
+        labelButton="Télécharger cette visite"
+      >
+      </pnx-modal-download>
 
-      <div id="end-btn">
-         <pnx-modal-download
-            [pathDownload]="storeService.urlLoad"
-            [exportFormat]="storeService.sftConfig.export_available_format"
-            [queryString]="storeService.queryString"
-            labelButton="Télécharger cette visite">
-         </pnx-modal-download>
+      <button
+        type="button"
+        class="btn btn-success box-shadow btn-sm"
+        id="add-btn"
+        (click)="onEditHere()"
+      >
+        <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
+        Éditer cette visite
+      </button>
+    </div>
 
-         <button
-            type="button"
-            class="btn btn-success box-shadow btn-sm"
-            id="add-btn"
-            (click)="onEditHere()">
-            <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
-            Éditer cette visite
-         </button>
-      </div>
+    <!-- OTHER VISITS  -->
+    <h4>
+      <i class="fa fa-search-plus"></i>
+      Autres visites
+    </h4>
+    <div>
+      <ngx-datatable
+        class="material"
+        [rows]="rows"
+        [columnMode]="'force'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [limit]="6"
+        [messages]="storeService.sftConfig.detail_list_visit_message"
+      >
+        <ngx-datatable-column name="Voir" maxWidth="100">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <button
+              type="button"
+              class="btn btn-info fa fa-eye"
+              (click)="onInfo(row.id_base_visit)"
+              title="Visualiser"
+            ></button>
+          </ng-template>
+        </ngx-datatable-column>
 
-      <!-- OTHER VISITS  -->
-      <h4>
-         <i class="fa fa-search-plus"></i>
-         Autres visites
-      </h4>
-      <div>
-         <ngx-datatable
-            class="material"
-            [rows]="rows"
-            [columnMode]="'force'"
-            [headerHeight]="50"
-            [footerHeight]="50"
-            [rowHeight]="'auto'"
-            [limit]="6"
-            [messages]="storeService.sftConfig.detail_list_visit_message">
+        <ngx-datatable-column name="Éditer" maxWidth="100">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <button
+              type="button"
+              class="btn btn-success fa fa-edit"
+              (click)="onEditOther(row.id_base_visit)"
+              title="Éditer"
+            ></button>
+          </ng-template>
+        </ngx-datatable-column>
 
-            <ngx-datatable-column
-               name="Voir"
-               maxWidth="100">
-               <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button
-                     type="button"
-                     class="btn btn-info fa fa-eye"
-                     (click)="onInfo(row.id_base_visit)"
-                     title="Visualiser">
-                  </button>
-               </ng-template>
-            </ngx-datatable-column>
+        <ngx-datatable-column
+          *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
+          [name]="col.name"
+          [prop]="col.prop"
+          [cellTemplate]="col.cellTemplate"
+          maxWidth="220"
+        >
+        </ngx-datatable-column>
 
-            <ngx-datatable-column
-               name="Éditer"
-               maxWidth="100">
-               <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button
-                     type="button"
-                     class="btn btn-success fa fa-edit"
-                     (click)="onEditOther(row.id_base_visit)"
-                     title="Éditer">
-                  </button>
-               </ng-template>
-            </ngx-datatable-column>
-
-            <ngx-datatable-column
-               *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
-               [name]="col.name"
-               [prop]="col.prop"
-               [cellTemplate]="col.cellTemplate"
-               maxWidth="220">
-            </ngx-datatable-column>
-
-            <ng-template #observersCellTpl let-row="row" ngx-datatable-cell-template>
-               <span title="{{ row.observersFull }}">{{ row.observers }}</span>
-            </ng-template>
-         </ngx-datatable>
-      </div>
-   </div>
+        <ng-template #observersCellTpl let-row="row" ngx-datatable-cell-template>
+          <span title="{{ row.observersFull }}">{{ row.observers }}</span>
+        </ng-template>
+      </ngx-datatable>
+    </div>
+  </div>
 </div>

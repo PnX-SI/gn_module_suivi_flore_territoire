@@ -2,23 +2,20 @@
   <!-- MAP  -->
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
     <pnx-map height="94vh">
-      <pnx-geojson
-        #geojson
-        [onEachFeature]="onEachFeature.bind(this)"
-        [geojson]="zps">
+      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
       </pnx-geojson>
 
       <pnx-leaflet-filelayer
         [editMode]="false"
         (onLoad)="displayFileLayerInfoMessage()"
-        [style]="{'color': storeService.sftConfig.map_gpx_color}">
+        [style]="{ color: storeService.sftConfig.map_gpx_color }"
+      >
       </pnx-leaflet-filelayer>
     </pnx-map>
   </div>
 
   <!-- FORMULAIRE  -->
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container form-sft">
-
     <sft-breadcrumbs></sft-breadcrumbs>
 
     <h5 class="debLigne">
@@ -35,7 +32,7 @@
     <div class="list-group-item">
       <i class="fa fa-leaf fa-lg"></i>
       Espèce prospectée :
-      <span class="info"> {{nomTaxon}} </span>
+      <span class="info"> {{ nomTaxon }} </span>
     </div>
 
     <div class=" list-group-item modif">
@@ -57,7 +54,8 @@
         <pnx-observers
           [parentFormControl]="modifGrid.controls.cor_visit_observer"
           [bindAllItem]="true"
-          [idMenu]="storeService.sftConfig.id_menu_list_user">
+          [idMenu]="storeService.sftConfig.id_menu_list_user"
+        >
         </pnx-observers>
       </div>
     </div>
@@ -74,7 +72,8 @@
           [bindAllItem]="true"
           keyValue="id_nomenclature"
           keyLabel="label_default"
-          codeNomenclatureType="TYPE_PERTURBATION">
+          codeNomenclatureType="TYPE_PERTURBATION"
+        >
         </pnx-nomenclature>
       </div>
     </div>
@@ -89,7 +88,8 @@
           class="form-control"
           rows="2"
           id="commentaire"
-          [formControl]="modifGrid.controls.comments"></textarea>
+          [formControl]="modifGrid.controls.comments"
+        ></textarea>
       </div>
     </div>
 
@@ -97,7 +97,7 @@
       <i class="fa fa-check-circle-o fa-lg"></i>
       Maille(s) de présence :
       <span class="info nbGrid" id="nbPres">
-        {{storeService.presence}}
+        {{ storeService.presence }}
       </span>
     </div>
 
@@ -105,7 +105,7 @@
       <i class="fa fa-ban fa-lg"></i>
       Maille(s) d'absence :
       <span class="info nbGrid" id="nbAbs">
-        {{storeService.absence}}
+        {{ storeService.absence }}
       </span>
     </div>
 
@@ -113,52 +113,47 @@
       <i class="fa fa-question-circle-o fa-lg"></i>
       Maille(s) non visitées :
       <span class="info nbGrid" id="nbRest">
-        {{storeService.rest}}
+        {{ storeService.rest }}
       </span>
     </div>
-    <br/>
+    <br />
 
     <!-- FOOTER -->
     <div>
       <button
         class="btn btn-info btn-sm clickable"
         matTooltip="Comment modifier ?"
-        (click)="storeService.openModal(content)">
+        (click)="storeService.openModal(content)"
+      >
         <i class="fa fa-question-circle"></i>
         Aide
       </button>
 
       <ng-template #content let-c="close" let-d="dismiss">
         <div class="modal-header">
-          <h4 class="modal-title"> Pour saisir les mailles : </h4>
-          <button
-            type="button"
-            class="close"
-            aria-label="Close"
-            (click)="d('Cross click')">
+          <h4 class="modal-title">Pour saisir les mailles :</h4>
+          <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
         <div class="modal-body">
           <p class="col-list">
-            <span id="left" class="strong"> Clic gauche </span> :
-            L'espèce suivie est présente sur cette maille.
+            <span id="left" class="strong"> Clic gauche </span> : L'espèce suivie est présente sur
+            cette maille.
           </p>
           <p class="col-list">
-            <span id="right" class="strong"> Clic droit </span> :
-            L'espèce suivie est absente sur cette maille. </p>
+            <span id="right" class="strong"> Clic droit </span> : L'espèce suivie est absente sur
+            cette maille.
+          </p>
           <p class="col-list">
-            <span id="dbcl" class="strong"> Double clic </span> :
-            Cette maille n'est pas encore visitée.
+            <span id="dbcl" class="strong"> Double clic </span> : Cette maille n'est pas encore
+            visitée.
           </p>
         </div>
 
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-outline-dark"
-            (click)="c('Close click')">
+          <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">
             Fermer
           </button>
         </div>
@@ -167,14 +162,13 @@
       <button
         class="btn btn-success btn-sm p-1 mx-2 mr-2 float-right"
         (click)="onModif()"
-        [disabled]="modifGrid.invalid">
-          <i class="fa fa-floppy-o"></i>
-          Enregistrer
+        [disabled]="modifGrid.invalid"
+      >
+        <i class="fa fa-floppy-o"></i>
+        Enregistrer
       </button>
 
-      <button
-        class="btn btn-primary btn-sm p-1 mx-2 mr-2 float-right"
-        (click)="onVisual()">
+      <button class="btn btn-primary btn-sm p-1 mx-2 mr-2 float-right" (click)="onVisual()">
         <i class="fa fa-ban"></i>
         Annuler
       </button>

@@ -1,21 +1,21 @@
-import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef} from "@angular/core";
-import { FormGroup } from "@angular/forms";
-import { Router, ActivatedRoute } from "@angular/router";
+import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 
-import { MapListService } from "@geonature_common/map-list/map-list.service";
-import { MapService } from "@geonature_common/map/map.service";
-import { GeojsonComponent } from "@geonature_common/map/geojson/geojson.component";
+import { MapListService } from '@geonature_common/map-list/map-list.service';
+import { MapService } from '@geonature_common/map/map.service';
+import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { DataService } from "../services/data.service";
+import { DataService } from '../services/data.service';
 
-import { StoreService } from "../services/store.service";
-import { ModuleConfig } from "../module.config";
+import { StoreService } from '../services/store.service';
+import { ModuleConfig } from '../module.config';
 import { ObserversService } from '../services/observers.service';
 
 @Component({
-  selector: "pnx-list-visit",
-  templateUrl: "list-visit.component.html",
-  styleUrls: ["./list-visit.component.scss"],
+  selector: 'pnx-list-visit',
+  templateUrl: 'list-visit.component.html',
+  styleUrls: ['./list-visit.component.scss'],
 })
 export class ListVisitComponent implements OnInit, AfterViewInit {
   public zps;
@@ -26,9 +26,9 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   public visits = [];
   public showDetails = false;
   public site;
-  @ViewChild("geojson")
+  @ViewChild('geojson')
   geojson: GeojsonComponent;
-  @ViewChild("observersCellTpl")
+  @ViewChild('observersCellTpl')
   observersCellTpl: TemplateRef<any>;
 
   constructor(
@@ -42,24 +42,21 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.idSite = this.activatedRoute.snapshot.params["idSite"];
+    this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.storeService.initialize();
-    this.storeService.queryString = this.storeService.queryString.set(
-      "id_base_site",
-      this.idSite
-    );
+    this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
-    this.storeService.sftConfig.default_list_visit_columns.forEach((col) => {
-      if (col.prop === "observers") {
+    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+      if (col.prop === 'observers') {
         col.cellTemplate = this.observersCellTpl;
       }
     });
 
-    this._api.getInfoSite(this.idSite).subscribe((info) => {
+    this._api.getInfoSite(this.idSite).subscribe(info => {
       this.site = info;
 
       // Hide 'détail' tab if name and description are empty.
-      if (this.site.description !== "" || this.site.name !== "") {
+      if (this.site.description !== '' || this.site.name !== '') {
         this.showDetails = true;
       }
     });
@@ -68,18 +65,18 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       .getMaille(this.idSite, {
         id_area_type: this.storeService.sftConfig.id_type_maille,
       })
-      .subscribe((nbMaille) => {
+      .subscribe(nbMaille => {
         this.storeService.total = nbMaille.features.length;
       });
 
-    this._api.getVisits({ id_base_site: this.idSite }).subscribe((visits) => {
+    this._api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
       this.computeVisitsInfos(visits);
       this.visits = visits;
     });
   }
 
   private computeVisitsInfos(visits) {
-    visits.forEach((visit) => {
+    visits.forEach(visit => {
       this.observersService.initialize().addObservers(visit.observers);
       visit.observers = this.observersService.getObserversAbbr();
       visit.observersFull = this.observersService.getObserversFull();
@@ -87,7 +84,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       let pres = 0;
       let abs = 0;
       if (visit.cor_visit_grid !== undefined) {
-        visit.cor_visit_grid.forEach((maille) => {
+        visit.cor_visit_grid.forEach(maille => {
           if (maille.presence) {
             pres += 1;
           } else {
@@ -95,7 +92,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
           }
         });
       }
-      visit.state = pres + "P / " + abs + "A ";
+      visit.state = pres + 'P / ' + abs + 'A ';
     });
   }
 
@@ -122,27 +119,17 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this.router.navigate([
       `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
-      "visits",
+      'visits',
       id_visit,
-      "edit",
+      'edit',
     ]);
   }
 
   onInfo(id_visit) {
-    this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/sites`,
-      this.idSite,
-      "visits",
-      id_visit,
-    ]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', id_visit]);
   }
 
   onAdd() {
-    this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/sites`,
-      this.idSite,
-      "visits",
-      "add",
-    ]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', 'add']);
   }
 }

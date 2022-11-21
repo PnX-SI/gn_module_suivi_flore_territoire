@@ -1,23 +1,24 @@
 <nav aria-label="breadcrumb" *ngIf="breadcrumbs">
-    <ol class="breadcrumb">
-        <li
-            class="breadcrumb-item"
-            aria-current="page"
-            *ngFor="let breadcrumb of breadcrumbs; last as isLast;"
-            [attr.routerLinkActive]="isLast ? 'active' : null"
-            [attr.title]="breadcrumb.title || null">
-            <ng-template [ngIf]="!isLast" [ngIfElse]="activeBreadcrumb">
-                <a routerLink="{{ breadcrumb.url }}">
-                    <i *ngIf="breadcrumb.iconClass" class="{{ breadcrumb.iconClass }}"></i>
-                    {{ breadcrumb.label }}
-                </a>
-            </ng-template>
-            <ng-template #activeBreadcrumb>
-                <a>
-                    <i *ngIf="breadcrumb.iconClass" class="{{ breadcrumb.iconClass }}"></i>
-                    {{ breadcrumb.label }}
-                </a>
-            </ng-template>
-         </li>
-    </ol>
+  <ol class="breadcrumb">
+    <li
+      class="breadcrumb-item"
+      aria-current="page"
+      *ngFor="let breadcrumb of breadcrumbs; last as isLast"
+      [attr.routerLinkActive]="isLast ? 'active' : null"
+      [attr.title]="breadcrumb.title || null"
+    >
+      <ng-template [ngIf]="!isLast" [ngIfElse]="activeBreadcrumb">
+        <a routerLink="{{ breadcrumb.url }}">
+          <i *ngIf="breadcrumb.iconClass" class="{{ breadcrumb.iconClass }}"></i>
+          {{ breadcrumb.label }}
+        </a>
+      </ng-template>
+      <ng-template #activeBreadcrumb>
+        <a>
+          <i *ngIf="breadcrumb.iconClass" class="{{ breadcrumb.iconClass }}"></i>
+          {{ breadcrumb.label }}
+        </a>
+      </ng-template>
+    </li>
+  </ol>
 </nav>

@@ -1,9 +1,9 @@
-import { HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Layer } from "leaflet";
-import { AppConfig } from "@geonature_config/app.config";
-import { ModuleConfig } from "../module.config";
+import { HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Layer } from 'leaflet';
+import { AppConfig } from '@geonature_config/app.config';
+import { ModuleConfig } from '../module.config';
 
 @Injectable()
 export class StoreService {
@@ -35,17 +35,17 @@ export class StoreService {
 
   private defineMeshesStyle() {
     this.myStylePresent = {
-      color: "#008000",
+      color: '#008000',
       fill: true,
       fillOpacity: 0.2,
-      weight: 3
+      weight: 3,
     };
 
     this.myStyleAbsent = {
-      color: "#8B0000",
+      color: '#8B0000',
       fill: true,
       fillOpacity: 0.2,
-      weight: 3
+      weight: 3,
     };
   }
 

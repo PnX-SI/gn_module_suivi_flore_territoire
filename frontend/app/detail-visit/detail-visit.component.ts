@@ -1,19 +1,19 @@
-import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from "@angular/core";
-import { Router, ActivatedRoute } from "@angular/router";
+import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
-import { MapService } from "@geonature_common/map/map.service";
-import { DataFormService } from "@geonature_common/form/data-form.service";
-import { GeojsonComponent } from "@geonature_common/map/geojson/geojson.component";
+import { MapService } from '@geonature_common/map/map.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
+import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { StoreService } from "../services/store.service";
-import { ModuleConfig } from "../module.config";
-import { DataService } from "../services/data.service";
+import { StoreService } from '../services/store.service';
+import { ModuleConfig } from '../module.config';
+import { DataService } from '../services/data.service';
 import { ObserversService } from '../services/observers.service';
 
 @Component({
-  selector: "pnx-detail-visit",
-  templateUrl: "detail-visit.component.html",
-  styleUrls: ["./detail-visit.component.scss"]
+  selector: 'pnx-detail-visit',
+  templateUrl: 'detail-visit.component.html',
+  styleUrls: ['./detail-visit.component.scss'],
 })
 export class DetailVisitComponent implements OnInit, AfterViewInit {
   public zps;
@@ -23,16 +23,16 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   public idSite;
   public tabPertur = [];
   public visitGrid = [];
-  public observers = "";
+  public observers = '';
 
   public rows = [];
 
   public dataListVisit = [];
   public comments;
 
-  @ViewChild("geojson")
+  @ViewChild('geojson')
   geojson: GeojsonComponent;
-  @ViewChild("observersCellTpl")
+  @ViewChild('observersCellTpl')
   observersCellTpl: TemplateRef<any>;
 
   constructor(
@@ -46,7 +46,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.idVisit = this.activatedRoute.snapshot.params["idVisit"];
+    this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
   }
 
   ngAfterViewInit() {
@@ -54,7 +54,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
 
     this.activatedRoute.params.subscribe(params => {
       this.storeService.queryString = this.storeService.queryString.set(
-        "id_base_visit",
+        'id_base_visit',
         params.idVisit
       );
       this._api.getOneVisit(params.idVisit).subscribe(element => {
@@ -78,9 +78,9 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
           tabVisitPerturb.forEach(per => {
             let typePer;
             if (per == tabVisitPerturb[tabVisitPerturb.length - 1]) {
-              typePer = per.label_fr + ". ";
+              typePer = per.label_fr + '. ';
             } else {
-              typePer = per.label_fr + ", ";
+              typePer = per.label_fr + ', ';
             }
             this.tabPertur.push(typePer);
           });
@@ -96,7 +96,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
 
         this._api
           .getMaille(this.idSite, {
-            id_area_type: this.storeService.sftConfig.id_type_maille
+            id_area_type: this.storeService.sftConfig.id_type_maille,
           })
           .subscribe(data => {
             this.zps = data;
@@ -112,7 +112,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
         });
 
         this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
-          if (col.prop === "observers") {
+          if (col.prop === 'observers') {
             col.cellTemplate = this.observersCellTpl;
           }
         });
@@ -136,7 +136,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
                 }
               });
             }
-            visit.state = pres + "P / " + abs + "A ";
+            visit.state = pres + 'P / ' + abs + 'A ';
           });
 
           this.dataListVisit = donnee;
@@ -168,9 +168,9 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       this.router.navigate([
         `${ModuleConfig.MODULE_URL}/sites`,
         this.idSite,
-        "visits",
+        'visits',
         params.idVisit,
-        "edit"
+        'edit',
       ]);
     });
   }
@@ -179,18 +179,13 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     this.router.navigate([
       `${ModuleConfig.MODULE_URL}/sites`,
       this.idSite,
-      "visits",
+      'visits',
       id_visit,
-      "edit"
+      'edit',
     ]);
   }
 
   onInfo(id_visit) {
-    this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/sites`,
-      this.idSite,
-      "visits",
-      id_visit
-    ]);
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', id_visit]);
   }
 }

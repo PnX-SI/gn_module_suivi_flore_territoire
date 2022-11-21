@@ -1,167 +1,150 @@
 <div class="row row-0">
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
-      <pnx-map height="94vh">
-         <pnx-geojson
-            #geojson
-            [onEachFeature]="onEachFeature.bind(this)"
-            [geojson]="zps">
-         </pnx-geojson>
-      </pnx-map>
-   </div>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
+    <pnx-map height="94vh">
+      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+      </pnx-geojson>
+    </pnx-map>
+  </div>
 
-   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
+    <sft-breadcrumbs></sft-breadcrumbs>
 
-      <sft-breadcrumbs></sft-breadcrumbs>
+    <h3>
+      <i class="fa fa-map-marker" aria-hidden="true"></i>
+      Informations du site
+    </h3>
 
-      <h3>
-         <i class="fa fa-map-marker" aria-hidden="true"></i>
-         Informations du site
-      </h3>
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
+          <i class="fa fa-info-circle"> </i>
+          Informations générales
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="showDetails">
+        <a class="nav-link" data-toggle="tab" href="#details" role="tab">
+          <i class="fa fa-search-plus police"> </i>
+          Détails
+        </a>
+      </li>
+    </ul>
 
-      <ul class="nav nav-tabs" role="tablist">
-         <li class="nav-item">
-            <a
-               class="nav-link active"
-               data-toggle="tab"
-               href="#infoGen"
-               role="tab">
-               <i class="fa fa-info-circle"> </i>
-               Informations générales
-            </a>
-         </li>
-         <li class="nav-item" *ngIf="showDetails">
-            <a
-               class="nav-link"
-               data-toggle="tab"
-               href="#details"
-               role="tab">
-               <i class="fa fa-search-plus police"> </i>
-               Détails
-            </a>
-         </li>
-      </ul>
-
-      <div class="tab-content">
-         <div class="tab-pane active modal-header list-group-item" id="infoGen" role="tabpanel">
-            <p>
-               <i class="fa fa-map-marker" aria-hidden="true"></i>
-               <span> Nom du site : </span>
-               <span class="strong"> {{site.name}} </span>
-            </p>
-            <p>
-               <i class="fa fa-tag" aria-hidden="true"></i>
-               <span> Code du site : </span>
-               <span class="strong"> {{site.code}} </span>
-            </p>
-            <p>
-               <i class="fa fa-leaf" aria-hidden="true"></i>
-               <span> Espèce suivie : </span>
-               <span
-                  class="strong"
-                  [matTooltip]="site.sciname.code"
-                  [innerHTML]="site.sciname.label"></span>
-            </p>
-            <p>
-               <i class="fa fa-map" aria-hidden="true"></i>
-               <span> Commune : </span>
-               <span class="strong"> {{site.municipalities}} </span>
-            </p>
-            <p>
-               <i class="fa fa-th" aria-hidden="true"></i>
-               <span> Nombre de mailles : </span>
-               <span class="strong"> {{storeService.total}} </span>
-            </p>
-         </div>
-
-         <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
-            <p>
-               <i class="fa fa-key" aria-hidden="true"></i>
-               <span> Identifiant du site : </span>
-               <span class="strong"> {{site.id}} </span>
-            </p>
-            <p>
-               <i class="fa fa-barcode" aria-hidden="true"></i>
-               <span> Identifiant unique du site : </span>
-               <span class="strong"> {{site.uuid}} </span>
-            </p>
-            <p>
-               <i class="fa fa-align-justify" aria-hidden="true"></i>
-               <span> Description du site : </span>
-               <span class="strong"> {{site.description}} </span>
-            </p>
-         </div>
+    <div class="tab-content">
+      <div class="tab-pane active modal-header list-group-item" id="infoGen" role="tabpanel">
+        <p>
+          <i class="fa fa-map-marker" aria-hidden="true"></i>
+          <span> Nom du site : </span>
+          <span class="strong"> {{ site.name }} </span>
+        </p>
+        <p>
+          <i class="fa fa-tag" aria-hidden="true"></i>
+          <span> Code du site : </span>
+          <span class="strong"> {{ site.code }} </span>
+        </p>
+        <p>
+          <i class="fa fa-leaf" aria-hidden="true"></i>
+          <span> Espèce suivie : </span>
+          <span
+            class="strong"
+            [matTooltip]="site.sciname.code"
+            [innerHTML]="site.sciname.label"
+          ></span>
+        </p>
+        <p>
+          <i class="fa fa-map" aria-hidden="true"></i>
+          <span> Commune : </span>
+          <span class="strong"> {{ site.municipalities }} </span>
+        </p>
+        <p>
+          <i class="fa fa-th" aria-hidden="true"></i>
+          <span> Nombre de mailles : </span>
+          <span class="strong"> {{ storeService.total }} </span>
+        </p>
       </div>
 
-      <hr/>
-
-      <div>
-         <ngx-datatable
-            class="material"
-            [columnMode]="'force'"
-            [rows]="visits"
-            [headerHeight]="50"
-            [footerHeight]="50"
-            [rowHeight]="'auto'"
-            [messages]="storeService.sftConfig.list_visit_message"
-            [offset]="mapListService.page.pageNumber"
-            [limit]="mapListService.page.size">
-
-            <ngx-datatable-column
-               name="Voir"
-               maxWidth="90">
-               <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button
-                     type="button"
-                     class="btn btn-info fa fa-eye"
-                     (click)="onInfo(row.id_base_visit)"
-                     title="Visualiser">
-                  </button>
-               </ng-template>
-            </ngx-datatable-column>
-
-            <ngx-datatable-column
-               name="Éditer"
-               maxWidth="90">
-               <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button
-                     type="button"
-                     class="btn btn-success fa fa-edit"
-                     (click)="onEdit(row.id_base_visit)"
-                     title="Éditer">
-                  </button>
-               </ng-template>
-            </ngx-datatable-column>
-
-            <ngx-datatable-column
-               *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
-               [name]="col.name"
-               [prop]="col.prop"
-               [cellTemplate]="col.cellTemplate"
-               maxWidth="220">
-            </ngx-datatable-column>
-
-            <ng-template #observersCellTpl let-row="row" ngx-datatable-cell-template>
-               <span title="{{ row.observersFull }}">{{ row.observers }}</span>
-            </ng-template>
-         </ngx-datatable>
+      <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
+        <p>
+          <i class="fa fa-key" aria-hidden="true"></i>
+          <span> Identifiant du site : </span>
+          <span class="strong"> {{ site.id }} </span>
+        </p>
+        <p>
+          <i class="fa fa-barcode" aria-hidden="true"></i>
+          <span> Identifiant unique du site : </span>
+          <span class="strong"> {{ site.uuid }} </span>
+        </p>
+        <p>
+          <i class="fa fa-align-justify" aria-hidden="true"></i>
+          <span> Description du site : </span>
+          <span class="strong"> {{ site.description }} </span>
+        </p>
       </div>
+    </div>
 
-      <div id="end-btn">
-         <pnx-modal-download
-            [pathDownload]="storeService.urlLoad"
-            [exportFormat]="storeService.sftConfig.export_available_format"
-            [queryString]="storeService.queryString"
-            labelButton="Télécharger ces visites">
-         </pnx-modal-download>
+    <hr />
 
-         <button
-            type="button"
-            id="add-btn"
-            class="btn btn-success btn-sm"
-            (click)="onAdd()">
-            <i class="fa fa-plus-circle" aria-hidden="true"> </i>
-            Ajouter une nouvelle visite
-         </button>
-      </div>
-   </div>
+    <div>
+      <ngx-datatable
+        class="material"
+        [columnMode]="'force'"
+        [rows]="visits"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="'auto'"
+        [messages]="storeService.sftConfig.list_visit_message"
+        [offset]="mapListService.page.pageNumber"
+        [limit]="mapListService.page.size"
+      >
+        <ngx-datatable-column name="Voir" maxWidth="90">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <button
+              type="button"
+              class="btn btn-info fa fa-eye"
+              (click)="onInfo(row.id_base_visit)"
+              title="Visualiser"
+            ></button>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="Éditer" maxWidth="90">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <button
+              type="button"
+              class="btn btn-success fa fa-edit"
+              (click)="onEdit(row.id_base_visit)"
+              title="Éditer"
+            ></button>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column
+          *ngFor="let col of storeService.sftConfig.default_list_visit_columns"
+          [name]="col.name"
+          [prop]="col.prop"
+          [cellTemplate]="col.cellTemplate"
+          maxWidth="220"
+        >
+        </ngx-datatable-column>
+
+        <ng-template #observersCellTpl let-row="row" ngx-datatable-cell-template>
+          <span title="{{ row.observersFull }}">{{ row.observers }}</span>
+        </ng-template>
+      </ngx-datatable>
+    </div>
+
+    <div id="end-btn">
+      <pnx-modal-download
+        [pathDownload]="storeService.urlLoad"
+        [exportFormat]="storeService.sftConfig.export_available_format"
+        [queryString]="storeService.queryString"
+        labelButton="Télécharger ces visites"
+      >
+      </pnx-modal-download>
+
+      <button type="button" id="add-btn" class="btn btn-success btn-sm" (click)="onAdd()">
+        <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+        Ajouter une nouvelle visite
+      </button>
+    </div>
+  </div>
 </div>

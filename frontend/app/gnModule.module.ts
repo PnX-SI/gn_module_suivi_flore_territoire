@@ -29,7 +29,7 @@ const routes: Routes = [
         label: 'Accueil SFT',
         title: 'Liste des sites du module Suivi Flore Territoire.',
         iconClass: 'fa fa-home',
-      }
+      },
     },
     children: [
       {
@@ -41,9 +41,9 @@ const routes: Routes = [
         data: {
           breadcrumb: {
             label: 'Site: :idSite',
-            title: 'Détail d\'un site du module Suivi Flore Territoire.',
+            title: "Détail d'un site du module Suivi Flore Territoire.",
             iconClass: 'fa fa-map-marker',
-          }
+          },
         },
         children: [
           {
@@ -56,41 +56,41 @@ const routes: Routes = [
             data: {
               breadcrumb: {
                 label: 'Ajout visite',
-                title: 'Ajout d\'une visite du module Suivi Flore Territoire.',
+                title: "Ajout d'une visite du module Suivi Flore Territoire.",
                 iconClass: 'fa fa-plus-circle',
-              }
-            }
+              },
+            },
           },
           {
             path: 'visits/:idVisit',
             data: {
               breadcrumb: {
                 label: 'Visite : :idVisit',
-                title: 'Détail d\'une visite du module Suivi Flore Territoire.',
+                title: "Détail d'une visite du module Suivi Flore Territoire.",
                 iconClass: 'fa fa-binoculars',
-              }
+              },
             },
             children: [
               {
                 path: '',
                 component: DetailVisitComponent,
               },
-               {
-                  path: 'edit',
-                  component: FormVisitComponent,
-                  data: {
-                    breadcrumb: {
-                      label: 'Édition',
-                      title: 'Édition d\'une visite du module Suivi Flore Territoire.',
-                      iconClass: 'fa fa-pencil-square-o',
-                    }
-                  }
+              {
+                path: 'edit',
+                component: FormVisitComponent,
+                data: {
+                  breadcrumb: {
+                    label: 'Édition',
+                    title: "Édition d'une visite du module Suivi Flore Territoire.",
+                    iconClass: 'fa fa-pencil-square-o',
+                  },
                 },
-            ]
+              },
+            ],
           },
-        ]
+        ],
       },
-    ]
+    ],
   },
 ];
 
@@ -106,12 +106,12 @@ const routes: Routes = [
     GN2CommonModule,
     HttpClientXsrfModule.withOptions({
       cookieName: 'token',
-      headerName: 'token'
+      headerName: 'token',
     }),
     RouterModule.forChild(routes),
-    CommonModule
+    CommonModule,
   ],
   providers: [HttpClient, DataService, StoreService, FormService],
-  bootstrap: []
+  bootstrap: [],
 })
 export class GeonatureModule {}

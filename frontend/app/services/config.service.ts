@@ -11,12 +11,12 @@ import { ModuleConfig } from '../module.config';
 export class ConfigService {
   private config;
 
-  constructor(private _http: HttpClient) { }
+  constructor(private _http: HttpClient) {}
 
   initialize() {
     this.config = {};
     this.config['frontendParams'] = {
-        'bChainInput': false
+      bChainInput: false,
     };
     return of(true);
   }
@@ -26,13 +26,12 @@ export class ConfigService {
   }
 
   getApplicationUrl() {
-    return `${AppConfig.URL_APPLICATION}`
+    return `${AppConfig.URL_APPLICATION}`;
   }
 
   getBackendUrl() {
     return `${AppConfig.API_ENDPOINT}`;
   }
-
 
   getBackendModuleUrl() {
     return `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}`;
@@ -41,7 +40,6 @@ export class ConfigService {
   getFrontendModuleUrl() {
     return ModuleConfig.MODULE_URL;
   }
-
 
   geFrontendParams() {
     return this.config.frontendParams;

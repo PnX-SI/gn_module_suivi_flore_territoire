@@ -1,19 +1,15 @@
 <div class="row row-sm map-list-container">
-
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
     <pnx-map
       height="91vh"
       [center]="storeService.sftConfig.zoom_center"
-      [zoom]="storeService.sftConfig.zoom_level">
-        <pnx-geojson
-          [onEachFeature]="onEachFeature.bind(this)"
-          [geojson]="zps">
-      </pnx-geojson>
+      [zoom]="storeService.sftConfig.zoom_level"
+    >
+      <pnx-geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps"> </pnx-geojson>
     </pnx-map>
   </div>
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container list-sft">
-
     <sft-breadcrumbs></sft-breadcrumbs>
 
     <h3>Liste des sites</h3>
@@ -21,13 +17,15 @@
     <div class="row row-0">
       <div class="col padding-sm">
         <pnx-taxonomy
-          #taxon label="{{ 'Taxon.Taxon' | translate }}"
+          #taxon
+          label="{{ 'Taxon.Taxon' | translate }}"
           [parentFormControl]="taxonForm"
           [idList]="storeService.sftConfig.id_list_taxon"
           [charNumber]="3"
           [listLength]="20"
-          (onChange)="onTaxonChanged($event);"
-          (onDelete)="onDeleteParams('cd_nom', actualTaxonNameId); onDelete();">
+          (onChange)="onTaxonChanged($event)"
+          (onDelete)="onDeleteParams('cd_nom', actualTaxonNameId); onDelete()"
+        >
         </pnx-taxonomy>
       </div>
 
@@ -37,7 +35,8 @@
           type="number"
           [formControl]="filtreForm.controls.filtreYear"
           class="form-control form-control-sm"
-          (onDeleteFiltre)="onDelete()" />
+          (onDeleteFiltre)="onDelete()"
+        />
       </div>
     </div>
 
@@ -47,9 +46,10 @@
         <select
           class="form-control form-control-sm"
           name="monSelect"
-          [formControl]="filtreForm.controls.filtreOrga">
-            <option [ngValue]=null> Tous </option>
-            <option *ngFor="let label of tabOrganism"> {{label}} </option>
+          [formControl]="filtreForm.controls.filtreOrga"
+        >
+          <option [ngValue]="null"> Tous </option>
+          <option *ngFor="let label of tabOrganism"> {{ label }} </option>
         </select>
       </div>
 
@@ -58,9 +58,10 @@
         <select
           class="form-control form-control-sm"
           name="monSelect"
-          [formControl]="filtreForm.controls.filtreCom">
-            <option [ngValue]=null> Toutes </option>
-            <option *ngFor="let label of tabCom"> {{label}} </option>
+          [formControl]="filtreForm.controls.filtreCom"
+        >
+          <option [ngValue]="null"> Toutes </option>
+          <option *ngFor="let label of tabCom"> {{ label }} </option>
         </select>
       </div>
     </div>
@@ -80,15 +81,16 @@
       [rowClass]="mapListService.getRowClass"
       [count]="filteredData.length"
       [limit]="rowNumber"
-      [messages]="storeService.sftConfig.zp_message">
-
+      [messages]="storeService.sftConfig.zp_message"
+    >
       <ngx-datatable-column
         *ngFor="let col of storeService.sftConfig.default_zp_columns"
         [name]="col.name"
         [prop]="col.prop"
-        [maxWidth]="col.width">
+        [maxWidth]="col.width"
+      >
         <ng-template let-column="col" ngx-datatable-header-template>
-          <span [title]="col.title">{{col.name}}</span>
+          <span [title]="col.title">{{ col.name }}</span>
         </ng-template>
       </ngx-datatable-column>
 
@@ -96,17 +98,17 @@
         cellClass="actions-cell"
         maxWidth="90"
         name="Voir"
-        title="Accéder aux visites du site">
+        title="Accéder aux visites du site"
+      >
         <ng-template let-row="row" ngx-datatable-cell-template>
           <button
             type="button"
             class="btn btn-info btn-sm fa fa-eye"
             (click)="onInfo(row.id_base_site)"
-            title="Visualiser">
-          </button>
+            title="Visualiser"
+          ></button>
         </ng-template>
       </ngx-datatable-column>
-
     </ngx-datatable>
 
     <div id="end-btn">
@@ -114,7 +116,8 @@
         [pathDownload]="storeService.urlLoad"
         [exportFormat]="storeService.sftConfig.export_available_format"
         [queryString]="storeService.queryString"
-        labelButton="Télécharger les visites">
+        labelButton="Télécharger les visites"
+      >
       </pnx-modal-download>
     </div>
   </div>
