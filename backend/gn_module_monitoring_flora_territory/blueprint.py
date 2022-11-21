@@ -324,7 +324,7 @@ def export_visits():
             features.append(feature)
         result = FeatureCollection(features)
 
-        return to_json_resp(result, as_file=True, filename=file_name, indent=4)
+        return to_json_resp(result, as_file=True, filename=file_name, indent=4, extension="geojson")
 
     elif export_format == "csv":
         tab_visit = []
