@@ -69,9 +69,7 @@ class CorVisitGrid(DB.Model):
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
 
     id_area = DB.Column(DB.Integer, ForeignKey(LAreas.id_area), primary_key=True)
-    id_base_visit = DB.Column(
-        DB.Integer, ForeignKey(TBaseVisits.id_base_visit), primary_key=True
-    )
+    id_base_visit = DB.Column(DB.Integer, ForeignKey(TBaseVisits.id_base_visit), primary_key=True)
     presence = DB.Column(DB.Boolean)
     uuid_base_visit = DB.Column(UUID(as_uuid=True))
 
@@ -97,14 +95,13 @@ class TVisiteSFT(TBaseVisits):
         secondary=corVisitPerturbation.__table__,
         primaryjoin=(corVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit),
         secondaryjoin=(
-            corVisitPerturbation.id_nomenclature_perturbation
-            == TNomenclatures.id_nomenclature
+            corVisitPerturbation.id_nomenclature_perturbation == TNomenclatures.id_nomenclature
         ),
         foreign_keys=[
             corVisitPerturbation.id_base_visit,
             corVisitPerturbation.id_nomenclature_perturbation,
         ],
-        viewonly=True
+        viewonly=True,
     )
 
     observers = DB.relationship(

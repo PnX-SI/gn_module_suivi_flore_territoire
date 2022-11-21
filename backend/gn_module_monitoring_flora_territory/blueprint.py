@@ -41,6 +41,7 @@ from .utils import prepare_output, prepare_input, fprint
 blueprint = Blueprint("pr_suivi_flore_territoire", __name__)
 log = logging.getLogger(__name__)
 
+
 @blueprint.route("/sites", methods=["GET"])
 @json_resp
 def get_sites():
@@ -51,38 +52,23 @@ def get_sites():
     id_type_commune = blueprint.config["id_type_commune"]
 
     # Query to get Sites id
-    query = (
-        DB.session.query(
-            distinct(TInfoSite.id_infos_site)
+    query = DB.session.query(distinct(TInfoSite.id_infos_site)).select_from(
+        TInfoSite.__table__.outerjoin(
+            TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
         )
-        .select_from(
-            TInfoSite.__table__
-            .outerjoin(
-                TBaseVisits,
-                TBaseVisits.id_base_site == TInfoSite.id_base_site
-            )
-            .outerjoin(
-                corVisitObserver,
-                corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit,
-            )
-            .outerjoin(
-                User,
-                User.id_role == corVisitObserver.c.id_role)
-            .outerjoin(
-                Organisme,
-                Organisme.id_organisme == User.id_organisme
-            )
-            .outerjoin(
-                corSiteArea,
-                corSiteArea.c.id_base_site == TInfoSite.id_base_site
-            )
-            .outerjoin(
-                LAreas,
-                and_(
-                    LAreas.id_area == corSiteArea.c.id_area,
-                    LAreas.id_type == id_type_commune,
-                ),
-            )
+        .outerjoin(
+            corVisitObserver,
+            corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit,
+        )
+        .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
+        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
+        .outerjoin(
+            LAreas,
+            and_(
+                LAreas.id_area == corSiteArea.c.id_area,
+                LAreas.id_type == id_type_commune,
+            ),
         )
     )
 
@@ -115,31 +101,17 @@ def get_sites():
             func.string_agg(distinct(LAreas.area_name), ", "),
         )
         .select_from(
-            TInfoSite.__table__
-            .outerjoin(
-                TBaseVisits,
-                TBaseVisits.id_base_site == TInfoSite.id_base_site
+            TInfoSite.__table__.outerjoin(
+                TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
             )
             .outerjoin(
                 corVisitObserver,
                 corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit,
             )
-            .outerjoin(
-                User,
-                User.id_role == corVisitObserver.c.id_role
-            )
-            .outerjoin(
-                Organisme,
-                Organisme.id_organisme == User.id_organisme
-            )
-            .outerjoin(
-                Taxref,
-                TInfoSite.cd_nom == Taxref.cd_nom
-            )
-            .outerjoin(
-                corSiteArea,
-                corSiteArea.c.id_base_site == TInfoSite.id_base_site
-            )
+            .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
+            .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
+            .outerjoin(Taxref, TInfoSite.cd_nom == Taxref.cd_nom)
+            .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
             .outerjoin(
                 LAreas,
                 and_(
@@ -186,18 +158,17 @@ def get_one_site(id_info_site):
     Retourne les infos d'un site à partir de l'id_info_site
     """
     (base_site_infos, municipalities) = (
-        DB.session
-        .query(
+        DB.session.query(
             TInfoSite,
             func.string_agg(
                 distinct(func.concat(LAreas.area_name, " (", LAreas.area_code, ")")), ", "
-            ).filter(LAreas.area_name != None)
+            ).filter(LAreas.area_name != None),
         )
         .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
         .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
         .join(
             BibAreasTypes,
-            and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM")
+            and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM"),
         )
         .filter(TInfoSite.id_base_site == id_info_site)
         .group_by(TInfoSite.id_infos_site)
@@ -253,7 +224,7 @@ def add_visit(info_role):
         check_year_visit(data["id_base_site"], data["visit_date_min"][0:4])
 
     # Set generic infos got from config
-    data["id_dataset"] = blueprint.config["id_dataset"];
+    data["id_dataset"] = blueprint.config["id_dataset"]
     data["id_module"] = (
         DB.session.query(TModules.id_module)
         .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
@@ -320,9 +291,7 @@ def export_visits():
     parameters = request.args
     # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
 
-    export_format = (
-        parameters["export_format"] if "export_format" in request.args else "shapefile"
-    )
+    export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
     file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
     q = DB.session.query(ExportVisits)
@@ -336,21 +305,15 @@ def export_visits():
             ExportVisits.id_base_site == parameters["id_base_site"]
         )
     elif "organisme" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            ExportVisits.organisme == parameters["organisme"]
-        )
+        q = DB.session.query(ExportVisits).filter(ExportVisits.organisme == parameters["organisme"])
     elif "commune" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            ExportVisits.area_name == parameters["commune"]
-        )
+        q = DB.session.query(ExportVisits).filter(ExportVisits.area_name == parameters["commune"])
     elif "year" in parameters:
         q = DB.session.query(ExportVisits).filter(
             func.date_part("year", ExportVisits.visit_date) == parameters["year"]
         )
     elif "cd_nom" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            ExportVisits.cd_nom == parameters["cd_nom"]
-        )
+        q = DB.session.query(ExportVisits).filter(ExportVisits.cd_nom == parameters["cd_nom"])
 
     data = q.all()
     features = []
@@ -405,12 +368,12 @@ def get_commune(module_code):
     query = (
         select([LAreas.area_name.distinct()])
         .select_from(
-            LAreas.__table__.outerjoin(
-                corSiteArea, LAreas.id_area == corSiteArea.c.id_area
-            ).outerjoin(
+            LAreas.__table__.outerjoin(corSiteArea, LAreas.id_area == corSiteArea.c.id_area)
+            .outerjoin(
                 corSiteModule,
                 corSiteModule.c.id_base_site == corSiteArea.c.id_base_site,
-            ).outerjoin(
+            )
+            .outerjoin(
                 TModules,
                 TModules.id_module == corSiteModule.c.id_module,
             )
@@ -438,23 +401,12 @@ def get_organisme():
     """
     Retourne la liste de tous les organismes présents
     """
-    query = (
-        select([
-            Organisme.nom_organisme.distinct(),
-            User.nom_role,
-            User.prenom_role
-        ])
-        .select_from(
-            User.__table__.outerjoin(Organisme,
-                User.id_organisme == Organisme.id_organisme
-            )
-            .join(corVisitObserver,
-                User.id_role == corVisitObserver.c.id_role
-            )
-            .outerjoin(TVisiteSFT,
-                corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit
-            )
-        )
+    query = select(
+        [Organisme.nom_organisme.distinct(), User.nom_role, User.prenom_role]
+    ).select_from(
+        User.__table__.outerjoin(Organisme, User.id_organisme == Organisme.id_organisme)
+        .join(corVisitObserver, User.id_role == corVisitObserver.c.id_role)
+        .outerjoin(TVisiteSFT, corVisitObserver.c.id_base_visit == TVisiteSFT.id_base_visit)
     )
     data = DB.engine.execute(query)
 

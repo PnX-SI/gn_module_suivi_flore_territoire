@@ -1,32 +1,42 @@
-'''
+"""
    Spécification du schéma toml des paramètres de configurations
    Fichier spécifiant les types des paramètres et leurs valeurs par défaut
    Fichier à ne pas modifier. Paramètres surcouchables dans config/config_gn_module.tml
-'''
+"""
 
 from marshmallow import Schema, fields
 
-export_available_format = ['geojson', 'csv', 'shapefile']
+export_available_format = ["geojson", "csv", "shapefile"]
 
 zp_message = {
     "emptyMessage": "Aucune zone à afficher ",
-    "totalMessage": "zone(s) de prospection au total"
+    "totalMessage": "zone(s) de prospection au total",
 }
 list_visit_message = {
     "emptyMessage": "Aucune visite sur ce site ",
-    "totalMessage": "visites au total"
+    "totalMessage": "visites au total",
 }
 detail_list_visit_message = {
     "emptyMessage": "Aucune autre visite sur ce site ",
-    "totalMessage": "visites au total"
+    "totalMessage": "visites au total",
 }
 
 default_zp_columns = [
     {"name": "Id", "title": "Identifiant du site", "prop": "id_base_site", "width": 90},
     {"name": "Taxon", "title": "Nom du taxon", "prop": "nom_taxon", "width": 350},
     {"name": "Nombre visites", "title": "Nombre de visites", "prop": "nb_visit", "width": 120},
-    {"name": "Dernière visite", "title": "Date de la dernière visite", "prop": "date_max", "width": 160},
-    {"name": "Organismes", "title": "Organismes des observateurs des visites", "prop": "organisme", "width": 200},
+    {
+        "name": "Dernière visite",
+        "title": "Date de la dernière visite",
+        "prop": "date_max",
+        "width": 160,
+    },
+    {
+        "name": "Organismes",
+        "title": "Organismes des observateurs des visites",
+        "prop": "organisme",
+        "width": 200,
+    },
 ]
 
 default_list_visit_columns = [
@@ -36,6 +46,7 @@ default_list_visit_columns = [
 ]
 
 zoom_center = [44.982667966765845, 6.062455200884894]
+
 
 class GnModuleSchemaConf(Schema):
     zp_message = fields.Dict(load_default=zp_message)
