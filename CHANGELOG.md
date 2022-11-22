@@ -4,12 +4,12 @@ Toutes les modifications notables apportées à ce projet seront documentées da
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [NonPublié]
 
 
 ## [1.1.0] - 2022-11-22
 
-### Added
+### Fonctionnalités
 
 * Ajout d'un fichier de config par défaut pour tous les scripts Bash : `settings.default.ini`
 * Ajout d'un fichier de config par défaut pour les scripts d'import : `imports_settings.default.ini`
@@ -17,7 +17,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * Ajout d'un fichier `.prettierrc` contenant les règles de formatage du frontend.
 * Les filtres de la liste des sites sont désormais sauvegardé entre deux utilisations.
 
-### Changed
+### Changements
 
 * Déplacement des fichiers de configuration `.ini` dans le dossier `config/` du dossier `bin/`.
 * L'import des visites gère désormais les observateurs sans organisme. Utiliser le mot clé "`INCONNU`" pour indiquer l'organisme de l'observateur.
@@ -27,7 +27,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * L'export au format GeoJson produit un fichier avec l'extension `.geojson` à la place de `.json`.
 * Le rendu de l'interface de la liste des sites a été amélioré (ajout d'icônes) et unifié vis à vis du module *Priority Flora*.
 
-### Fixed
+### Corrections
 
 * Correction du fonctionnement des scripts d'import qui ne fonctionnaient plus suite à la
 suppression du fichier de configuration par défaut.
@@ -41,14 +41,14 @@ suppression du fichier de configuration par défaut.
 
 Version stable du module compatible avec GeoNature version 2.9.2.
 
-### Added
+### Fonctionnalités
 
 * Ajout du support d'Alembic.
 * Module au nouveau format "packagé" de GeoNature (restructuration des dossiers et fichiers).
 * Utilisation des codes à la place des ID dans les paramètres.
 * Mise à jour de la documentation d'installation.
 
-### Fixed
+### Corrections
 
 * Utilisation de la nouvelle syntaxe utils-flask-sqla.
 * Amélioration de la gestion du code SQL commun aux différents modules Conservation.
@@ -57,7 +57,7 @@ Version stable du module compatible avec GeoNature version 2.9.2.
 
 Première version stable du module compatible avec GeoNature version 2.3.2 et plus.
 
-### Added
+### Fonctionnalités
 
 * Mise à jour de la documentation et du changelog (issue #22)
 * Simplification des la gestion des fichiers de configuration.
@@ -68,7 +68,7 @@ Première version stable du module compatible avec GeoNature version 2.3.2 et pl
 * Prise en compte de l'abscence d'observateur associé à une visite dans la liste et la fiche d'une visite (issue #40)
 * Prise en compte de l'identifiant d'une liste d'utilisateurs dédiée pour le module SFT (issue #35)
 
-### Fixed
+### Corrections
 
 * Amélioraton du script d'installation (issue #33)
 * Prise en compte d'un jeu de données auquel associer les visites (issue #51)
@@ -92,7 +92,7 @@ Démonstration : http://geonature.fr/docs/img/2018-10-geonature-sft-demo.gif
 
 Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m, et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
 
-### Added
+### Fonctionnalités
 
 * MCD stabilisé et basé sur le schéma générique ``gn_monitoring`` (#1)
 * Liste des ZP filtrable par taxon, année de visite, commune et organisme
