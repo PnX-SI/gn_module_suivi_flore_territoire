@@ -1,20 +1,41 @@
-# CHANGELOG
+# Changelog
+Toutes les modifications notables apportées à ce projet seront documentées dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [1.1.0] - 2022-11-22
 
 ### Added
 
 * Ajout d'un fichier de config par défaut pour tous les scripts Bash : `settings.default.ini`
 * Ajout d'un fichier de config par défaut pour les scripts d'import : `imports_settings.default.ini`
+* Sauvegarde des valeurs des filtres de la liste des sites.
+* Ajout d'un fichier `.prettierrc` contenant les règles de formatage du frontend.
+* Les filtres de la liste des sites sont désormais sauvegardé entre deux utilisations.
 
 ### Changed
 
 * Déplacement des fichiers de configuration `.ini` dans le dossier `config/` du dossier `bin/`.
+* L'import des visites gère désormais les observateurs sans organisme. Utiliser le mot clé "`INCONNU`" pour indiquer l'organisme de l'observateur.
+* Le filtre des années permet de sélectionner une année existant sour forme de liste déroulante.
+* Formatage du code source du Backend à l'aide de Black.
+* Formatage du code source du Frontend à l'aide de Prettier.
+* L'export au format GeoJson produit un fichier avec l'extension `.geojson` à la place de `.json`.
+* Le rendu de l'interface de la liste des sites a été amélioré (ajout d'icônes) et unifié vis à vis du module *Priority Flora*.
 
 ### Fixed
 
 * Correction du fonctionnement des scripts d'import qui ne fonctionnaient plus suite à la
 suppression du fichier de configuration par défaut.
+* Les observateurs ajoutés via le script d'import des visites sont désormais activés afin de pouvoir être sélectionné dans les formulaires.
+* Le code du module et l'identifiant du jeu de données du module sont directement récupéré dans web service et ne bloque plus l'enregistrement d'une visite.
+* Toutes les informations d'un site sont correctement renvoyées et affichées sur la fiche d'un site.
+* Les filtres *Commune* et *Organisme* utilise un identifiant et non plus un nom pour filtrer les résultats.
+
 
 ## [1.0.0] - 2022-09-22
 
