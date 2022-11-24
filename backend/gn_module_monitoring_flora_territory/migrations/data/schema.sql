@@ -104,34 +104,40 @@ ALTER TABLE ONLY cor_visit_perturbation
 
 -- Create view to export visits
 CREATE OR REPLACE VIEW pr_monitoring_flora_territory.export_visits AS WITH
-    observers AS (
-        SELECT
-            v.id_base_visit,
-            string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
-            org.nom_organisme AS organisme
-        FROM gn_monitoring.t_base_visits v
-        JOIN gn_monitoring.cor_visit_observer observer ON observer.id_base_visit = v.id_base_visit
-        JOIN utilisateurs.t_roles roles ON roles.id_role = observer.id_role
-        JOIN utilisateurs.bib_organismes org ON roles.id_organisme = org.id_organisme
-        GROUP BY v.id_base_visit, org.nom_organisme
-    ),
-    perturbations AS (
-        SELECT
-            v.id_base_visit,
-            string_agg(n.label_default, ',') AS label_perturbation
-        FROM gn_monitoring.t_base_visits v
-        JOIN pr_monitoring_flora_territory.cor_visit_perturbation p ON v.id_base_visit = p.id_base_visit
-        JOIN ref_nomenclatures.t_nomenclatures n ON p.id_nomenclature_perturbation = n.id_nomenclature
-        GROUP BY v.id_base_visit
-    ),
-    area AS (
-        SELECT bs.id_base_site,
-            a.id_area,
-            a.area_name
-        FROM ref_geo.l_areas a
-        JOIN gn_monitoring.t_base_sites bs ON ST_intersects(ST_TRANSFORM(a.geom, 4326), bs.geom)
-        WHERE a.id_type=ref_geo.get_id_area_type('COM')
-    )
+observers AS (
+    SELECT
+        v.id_base_visit,
+        string_agg(roles.nom_role::text || ' ' ||  roles.prenom_role::text, ',') AS observateurs,
+        org.nom_organisme AS organisme
+    FROM gn_monitoring.t_base_visits AS v
+        JOIN gn_monitoring.cor_visit_observer AS observer
+            ON observer.id_base_visit = v.id_base_visit
+        JOIN utilisateurs.t_roles AS roles
+            ON roles.id_role = observer.id_role
+        JOIN utilisateurs.bib_organismes AS org
+            ON roles.id_organisme = org.id_organisme
+    GROUP BY v.id_base_visit, org.nom_organisme
+),
+perturbations AS (
+    SELECT
+        v.id_base_visit,
+        string_agg(n.label_default, ',') AS label_perturbation
+    FROM gn_monitoring.t_base_visits AS v
+        JOIN pr_monitoring_flora_territory.cor_visit_perturbation AS p
+            ON v.id_base_visit = p.id_base_visit
+        JOIN ref_nomenclatures.t_nomenclatures AS n
+            ON p.id_nomenclature_perturbation = n.id_nomenclature
+    GROUP BY v.id_base_visit
+),
+area AS (
+    SELECT bs.id_base_site,
+        a.id_area,
+        a.area_name
+    FROM ref_geo.l_areas AS a
+        JOIN gn_monitoring.t_base_sites AS bs
+            ON ST_intersects(ST_Transform(a.geom, 4326), bs.geom)
+    WHERE a.id_type = ref_geo.get_id_area_type('COM')
+)
 -- All the meshes of a site and their visits
 SELECT
     sites.id_base_site,
@@ -151,7 +157,7 @@ SELECT
     taxon.cd_nom,
     area.area_name,
     ar.id_type
-FROM gn_monitoring.t_base_sites sites
+FROM gn_monitoring.t_base_sites AS sites
     JOIN gn_monitoring.cor_site_area AS cor
         ON (cor.id_base_site = sites.id_base_site)
     JOIN gn_monitoring.t_base_visits AS visits
@@ -162,7 +168,7 @@ FROM gn_monitoring.t_base_sites sites
         ON (obs.id_base_visit = visits.id_base_visit)
     LEFT JOIN perturbations AS per
         ON (per.id_base_visit = visits.id_base_visit)
-    JOIN area
+    LEFT JOIN area
         ON (area.id_base_site = sites.id_base_site)
     JOIN pr_monitoring_flora_territory.t_infos_site AS info
         ON (info.id_base_site = sites.id_base_site)

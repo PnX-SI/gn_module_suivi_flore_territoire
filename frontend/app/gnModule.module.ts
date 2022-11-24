@@ -8,7 +8,6 @@ import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 
 import { DataService } from './services/data.service';
 import { StoreService } from './services/store.service';
-import { FormService } from './services/form.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { ZpMapListComponent } from './zp-map-list/zp-map-list.component';
 import { ListVisitComponent } from './list-visit/list-visit.component';
@@ -111,7 +110,7 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     CommonModule,
   ],
-  providers: [HttpClient, DataService, StoreService, FormService],
+  providers: [HttpClient, DataService, StoreService],
   bootstrap: [],
 })
 export class GeonatureModule {}

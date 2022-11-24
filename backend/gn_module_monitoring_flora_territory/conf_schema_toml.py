@@ -57,7 +57,6 @@ class GnModuleSchemaConf(Schema):
     default_list_visit_columns = fields.List(fields.Dict(), load_default=default_list_visit_columns)
     id_dataset = fields.Integer(load_default=1)
     id_type_maille = fields.Integer(load_default=33)
-    id_type_commune = fields.Integer(load_default=25)
     id_menu_list_user = fields.Integer(load_default=1)
     id_list_taxon = fields.Integer(load_default=30)
     export_srid = fields.Integer(load_default=2154)

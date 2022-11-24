@@ -2,7 +2,7 @@
   <!-- MAP  -->
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm">
     <pnx-map height="94vh">
-      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="zps">
+      <pnx-geojson #geojson [onEachFeature]="onEachFeature.bind(this)" [geojson]="meshes">
       </pnx-geojson>
     </pnx-map>
   </div>
@@ -26,12 +26,12 @@
         <li class="list-group-item">
           <i class="fa fa-leaf" aria-hidden="true"></i>
           Espèce prospectée :
-          <span class="info" [innerHTML]="taxonName"></span>
+          <span class="info" [innerHTML]="sciname"></span>
         </li>
         <li class="list-group-item">
           <i class="fa fa-group" aria-hidden="true"></i>
           Observateur(s) :
-          <span class="info"> {{ observers }} </span>
+          <span class="info"> {{ observersDisplay }} </span>
         </li>
         <li class="list-group-item">
           <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -41,7 +41,7 @@
         <li class="list-group-item">
           <i class="fa fa-warning" aria-hidden="true"></i>
           Perturbation(s) :
-          <span class="info" *ngFor="let per of tabPertur"> {{ per }} </span>
+          <span class="info"> {{ perturbationsDisplay }} </span>
         </li>
         <li class="list-group-item">
           <i class="fa fa-check-circle-o" aria-hidden="true"></i>

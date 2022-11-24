@@ -7,11 +7,10 @@ from apptax.taxonomie.models import Taxref
 from geonature.core.gn_monitoring.models import (
     TBaseSites,
     TBaseVisits,
-    corSiteArea,
     corVisitObserver,
 )
 from geonature.core.ref_geo.models import LAreas
-from geonature.utils.env import DB
+from geonature.utils.env import db
 from geonature.utils.utilsgeometry import shapeserializable
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
@@ -19,92 +18,94 @@ from utils_flask_sqla.serializers import serializable
 from utils_flask_sqla_geo.serializers import geoserializable
 
 
+class MonitoringFloraTerritory(db.Model):
+    """
+    Module db master parent abstract class.
+    Debug is more easy.
+    """
+
+    __abstract__ = True
+
+    def __repr__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+
+
 @serializable
 @geoserializable
-class TInfoSite(DB.Model):
-    """
-    Modèle d'une ZP
-    """
-
+class SiteInfos(MonitoringFloraTerritory):
     __tablename__ = "t_infos_site"
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
+    id_infos_site = db.Column(db.Integer, primary_key=True)
+    id_base_site = db.Column(db.Integer, ForeignKey(TBaseSites.id_base_site))
+    cd_nom = db.Column(db.Integer, ForeignKey(Taxref.cd_nom))
 
-    id_infos_site = DB.Column(DB.Integer, primary_key=True)
-    id_base_site = DB.Column(DB.Integer, ForeignKey(TBaseSites.id_base_site))
-    cd_nom = DB.Column(DB.Integer, ForeignKey(Taxref.cd_nom))
-
-    base_site = DB.relationship(TBaseSites)
-    sciname = DB.relationship(Taxref)
+    base_site = db.relationship(TBaseSites)
+    sciname = db.relationship(Taxref)
 
     geom = association_proxy("base_site", "geom")
 
     def get_geofeature(self):
         return self.as_geofeature("geom", "id_infos_site")
 
-
-class corVisitPerturbation(DB.Model):
+@serializable
+class VisitPerturbation(MonitoringFloraTerritory):
     __tablename__ = "cor_visit_perturbation"
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
-    id_base_visit = DB.Column(
+    id_base_visit = db.Column(
         "id_base_visit",
-        DB.Integer,
-        ForeignKey("gn_monitoring.t_base_visits.id_base_visit"),
+        db.Integer,
+        ForeignKey(TBaseVisits.id_base_visit),
         primary_key=True,
     )
-    id_nomenclature_perturbation = DB.Column(
+    id_nomenclature_perturbation = db.Column(
         "id_nomenclature_perturbation",
-        DB.Integer,
+        db.Integer,
         ForeignKey(TNomenclatures.id_nomenclature),
         primary_key=True,
     )
 
+    nomenclature = db.relationship(
+        TNomenclatures,
+        primaryjoin=(id_nomenclature_perturbation == TNomenclatures.id_nomenclature),
+        foreign_keys=[id_nomenclature_perturbation],
+        lazy="joined",
+    )
+
 
 @serializable
-class CorVisitGrid(DB.Model):
-    """
-    Corespondance entre une maille et une visite
-    """
-
+class VisitGrid(MonitoringFloraTerritory):
     __tablename__ = "cor_visit_grid"
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
-
-    id_area = DB.Column(DB.Integer, ForeignKey(LAreas.id_area), primary_key=True)
-    id_base_visit = DB.Column(DB.Integer, ForeignKey(TBaseVisits.id_base_visit), primary_key=True)
-    presence = DB.Column(DB.Boolean)
-    uuid_base_visit = DB.Column(UUID(as_uuid=True))
+    id_area = db.Column(db.Integer, ForeignKey(LAreas.id_area), primary_key=True)
+    id_base_visit = db.Column(db.Integer, ForeignKey(TBaseVisits.id_base_visit), primary_key=True)
+    presence = db.Column(db.Boolean)
+    uuid_base_visit = db.Column(UUID(as_uuid=True))
 
 
 @serializable
 @shapeserializable
-class TVisiteSFT(TBaseVisits):
-    """
-    Visite sur une ZP
-    et corespondance avec ses mailles
-    """
-
+class Visit(TBaseVisits):
     __tablename__ = "t_base_visits"
     __table_args__ = {"schema": "gn_monitoring", "extend_existing": True}
 
-    cor_visit_grid = DB.relationship(
-        "CorVisitGrid",
-        primaryjoin=(CorVisitGrid.id_base_visit == TBaseVisits.id_base_visit),
-        foreign_keys=[CorVisitGrid.id_base_visit],
-    )
-    cor_visit_perturbation = DB.relationship(
-        TNomenclatures,
-        secondary=corVisitPerturbation.__table__,
-        primaryjoin=(corVisitPerturbation.id_base_visit == TBaseVisits.id_base_visit),
-        secondaryjoin=(
-            corVisitPerturbation.id_nomenclature_perturbation == TNomenclatures.id_nomenclature
-        ),
-        foreign_keys=[
-            corVisitPerturbation.id_base_visit,
-            corVisitPerturbation.id_nomenclature_perturbation,
-        ],
-        viewonly=True,
-    )
+    def __repr__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
 
-    observers = DB.relationship(
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    #id_base_visit = db.Column(db.Integer, primary_key=True)
+    cor_visit_grid = db.relationship(
+        VisitGrid,
+        primaryjoin=(VisitGrid.id_base_visit == TBaseVisits.id_base_visit),
+        foreign_keys=[VisitGrid.id_base_visit],
+    )
+    cor_visit_perturbation = db.relationship(VisitPerturbation, lazy="joined")
+    observers = db.relationship(
         "User",
         secondary=corVisitObserver,
         primaryjoin=(corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit),
@@ -116,22 +117,22 @@ class TVisiteSFT(TBaseVisits):
 @serializable
 @geoserializable
 @shapeserializable
-class ExportVisits(DB.Model):
+class VisitsExport(MonitoringFloraTerritory):
     __tablename__ = "export_visits"
     __table_args__ = {"schema": "pr_monitoring_flora_territory"}
-    id_area = DB.Column(DB.Integer, primary_key=True)
-    id_base_visit = DB.Column(DB.Integer, primary_key=True)
-    id_base_site = DB.Column(DB.Integer)
-    uuid_base_visit = DB.Column(UUID(as_uuid=True))
-    visit_date_min = DB.Column(DB.DateTime)
-    comments = DB.Column(DB.Unicode)
-    geom = DB.Column(Geometry("GEOMETRY", 2154))
-    presence = DB.Column(DB.Boolean)
-    label_perturbation = DB.Column(DB.Unicode)
-    observateurs = DB.Column(DB.Unicode)
-    organisme = DB.Column(DB.Unicode)
-    base_site_name = DB.Column(DB.Unicode)
-    nom_valide = DB.Column(DB.Unicode)
-    cd_nom = DB.Column(DB.Integer)
-    area_name = DB.Column(DB.Unicode)
-    id_type = DB.Column(DB.Integer)
+    id_area = db.Column(db.Integer, primary_key=True)
+    id_base_visit = db.Column(db.Integer, primary_key=True)
+    id_base_site = db.Column(db.Integer)
+    uuid_base_visit = db.Column(UUID(as_uuid=True))
+    visit_date_min = db.Column(db.DateTime)
+    comments = db.Column(db.Unicode)
+    geom = db.Column(Geometry("GEOMETRY", 2154))
+    presence = db.Column(db.Boolean)
+    label_perturbation = db.Column(db.Unicode)
+    observateurs = db.Column(db.Unicode)
+    organisme = db.Column(db.Unicode)
+    base_site_name = db.Column(db.Unicode)
+    nom_valide = db.Column(db.Unicode)
+    cd_nom = db.Column(db.Integer)
+    area_name = db.Column(db.Unicode)
+    id_type = db.Column(db.Integer)

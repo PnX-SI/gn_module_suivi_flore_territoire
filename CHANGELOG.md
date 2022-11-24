@@ -6,6 +6,21 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [NonPublié]
 
+## [1.1.1] - 2022-11-22
+
+### Changements
+
+* Changement du chemin du web service `/export_visit` pour `/visits/export` afin de mieux respecter les principes REST.
+* Les paramètres du web service `/visits/export` peuvent maintenant être utilisé de manière combinés.
+* ⚠️ La vue `pr_monitoring_flora_territory.export_visits` a été corrigé afin de supporter les sites sans commune. Nous n'avons pas utilisé de révision Alembic pour la mise à jour. Il est nécessaire de mettre à jour cette vue manuellement à l'aide de Psql par exemple. Voir le code SQL de la vue dans le fichier [schema.sql](backend/gn_module_monitoring_flora_territory/migrations/data/schema.sql).
+
+
+### Corrections
+
+* Autorisé les sites a ne pas avoir de commune associé dans le cas des sites hors France. Corrige l'export des visites et l'affichage des informations du site.
+* Suppression des avertissements liés à l'utilisation du mode récursif avec la bibliothèque `utils_flask_sqla`.
+* Correction de la gestion des perturbations dans le formulaire d'édition d'une visite.
+
 
 ## [1.1.0] - 2022-11-22
 

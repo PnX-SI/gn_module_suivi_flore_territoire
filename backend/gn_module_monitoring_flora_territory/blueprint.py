@@ -6,38 +6,39 @@ from flask import Blueprint, request, session, send_from_directory
 from geoalchemy2.shape import to_shape
 from geojson import FeatureCollection
 from sqlalchemy import and_, distinct, desc
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func
 
 
 from apptax.taxonomie.models import Taxref
 from geonature.core.gn_commons.models import TModules
 from geonature.core.gn_monitoring.models import (
-    corVisitObserver,
-    TBaseVisits,
     corSiteModule,
     corSiteArea,
+    corVisitObserver,
+    TBaseVisits,
 )
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
 from geonature.core.ref_geo.models import LAreas, BibAreasTypes
-from geonature.utils.env import DB, ROOT_DIR
+from geonature.utils.env import db, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
-from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
 
 
 from .models import (
-    TInfoSite,
-    TVisiteSFT,
-    CorVisitGrid,
-    ExportVisits,
+    VisitGrid,
+    VisitPerturbation,
+    VisitsExport,
+    SiteInfos,
+    Visit,
 )
 from .repositories import check_user_cruved_visit, check_year_visit
 from .utils import prepare_output, prepare_input, fprint
 
 
-blueprint = Blueprint("pr_suivi_flore_territoire", __name__)
+blueprint = Blueprint("pr_monitoring_flora_territory", __name__)
 log = logging.getLogger(__name__)
 
 
@@ -45,15 +46,14 @@ log = logging.getLogger(__name__)
 @json_resp
 def get_sites():
     """
-    Retourne la liste des ZP
+    Retourne la liste des sites.
     """
     parameters = request.args
-    id_type_commune = blueprint.config["id_type_commune"]
 
-    # Query to get Sites id
-    query = DB.session.query(distinct(TInfoSite.id_infos_site)).select_from(
-        TInfoSite.__table__.outerjoin(
-            TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
+    # "From" shared between two queries
+    from_clause = (
+        SiteInfos.__table__.outerjoin(
+            TBaseVisits, TBaseVisits.id_base_site == SiteInfos.id_base_site
         )
         .outerjoin(
             corVisitObserver,
@@ -61,66 +61,49 @@ def get_sites():
         )
         .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
         .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
-        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
+        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == SiteInfos.id_base_site)
+        .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
         .outerjoin(
-            LAreas,
-            and_(
-                LAreas.id_area == corSiteArea.c.id_area,
-                LAreas.id_type == id_type_commune,
-            ),
+            BibAreasTypes,
+            and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM"),
         )
     )
 
+    # Query to get Sites id
+    query = db.session.query(distinct(SiteInfos.id_infos_site)).select_from(from_clause)
+
     if "id_base_site" in parameters:
-        query = query.filter(TInfoSite.id_base_site == parameters["id_base_site"])
+        query = query.filter(SiteInfos.id_base_site == parameters["id_base_site"])
 
     if "cd_nom" in parameters:
-        query = query.filter(TInfoSite.cd_nom == parameters["cd_nom"])
+        query = query.filter(SiteInfos.cd_nom == parameters["cd_nom"])
 
-    if "organism" in parameters:
+    if "organism" in parameters and parameters["organism"] != "null":
         query = query.filter(Organisme.id_organisme == parameters["organism"])
 
-    if "municipality" in parameters:
+    if "municipality" in parameters and parameters["municipality"] != "null":
         query = query.filter(LAreas.id_area == parameters["municipality"])
 
-    if "year" in parameters:
+    if "year" in parameters and parameters["year"] != "null":
         query = query.filter(
             func.date_part("year", TBaseVisits.visit_date_min) == parameters["year"]
         )
-    idSiteList = query.all()
+
+    id_site_list = query.all()
 
     # Query to get Sites data with previous id
     query = (
-        DB.session.query(
-            TInfoSite,
+        db.session.query(
+            SiteInfos,
             func.max(TBaseVisits.visit_date_min),
             Taxref.nom_complet,
             func.count(distinct(TBaseVisits.id_base_visit)),
             func.string_agg(distinct(Organisme.nom_organisme), ", "),
             func.string_agg(distinct(LAreas.area_name), ", "),
         )
-        .select_from(
-            TInfoSite.__table__.outerjoin(
-                TBaseVisits, TBaseVisits.id_base_site == TInfoSite.id_base_site
-            )
-            .outerjoin(
-                corVisitObserver,
-                corVisitObserver.c.id_base_visit == TBaseVisits.id_base_visit,
-            )
-            .outerjoin(User, User.id_role == corVisitObserver.c.id_role)
-            .outerjoin(Organisme, Organisme.id_organisme == User.id_organisme)
-            .outerjoin(Taxref, TInfoSite.cd_nom == Taxref.cd_nom)
-            .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
-            .outerjoin(
-                LAreas,
-                and_(
-                    LAreas.id_area == corSiteArea.c.id_area,
-                    LAreas.id_type == id_type_commune,
-                ),
-            )
-        )
-        .filter(TInfoSite.id_infos_site.in_(idSiteList))
-        .group_by(TInfoSite, Taxref.nom_complet)
+        .select_from(from_clause.outerjoin(Taxref, SiteInfos.cd_nom == Taxref.cd_nom))
+        .filter(SiteInfos.id_infos_site.in_(id_site_list))
+        .group_by(SiteInfos, Taxref.nom_complet)
     )
     data = query.all()
 
@@ -150,32 +133,37 @@ def get_sites():
     return FeatureCollection(features)
 
 
-@blueprint.route("/sites/<int:id_info_site>", methods=["GET"])
+@blueprint.route("/sites/<int:id_base_site>", methods=["GET"])
 @json_resp
-def get_one_site(id_info_site):
+def get_one_site(id_base_site):
     """
-    Retourne les infos d'un site à partir de l'id_info_site
+    Retourne les infos d'un site à partir de l'id_base_site
     """
-    (base_site_infos, municipalities) = (
-        DB.session.query(
-            TInfoSite,
+    base_site_infos = (
+        db.session.query(SiteInfos)
+        .filter(SiteInfos.id_base_site == id_base_site)
+        .first()
+    )
+    municipalities = (
+        db.session.query(
             func.string_agg(
                 distinct(func.concat(LAreas.area_name, " (", LAreas.area_code, ")")), ", "
             ).filter(LAreas.area_name != None),
         )
-        .outerjoin(corSiteArea, corSiteArea.c.id_base_site == TInfoSite.id_base_site)
-        .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
-        .join(
-            BibAreasTypes,
-            and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM"),
+        .select_from(
+            SiteInfos.__table__
+            .outerjoin(corSiteArea, corSiteArea.c.id_base_site == SiteInfos.id_base_site)
+            .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
+            .join(
+                BibAreasTypes,
+                and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM"),
+            )
         )
-        .filter(TInfoSite.id_base_site == id_info_site)
-        .group_by(TInfoSite.id_infos_site)
-        .first()
+        .filter(SiteInfos.id_base_site == id_base_site)
+        .scalar()
     )
 
     infos_site = base_site_infos.as_dict(fields=["base_site", "sciname"])
-    fprint(infos_site)
     output = infos_site["base_site"]
     output["sciname"] = {
         "code": infos_site["cd_nom"],
@@ -192,27 +180,51 @@ def get_visits():
     Retourne toutes les visites du module
     """
     parameters = request.args
-    q = DB.session.query(TVisiteSFT)
+    query = db.session.query(Visit)
     if "id_base_site" in parameters:
-        q = q.filter(TVisiteSFT.id_base_site == parameters["id_base_site"])
-    data = q.all()
-    return [d.as_dict(True) for d in data]
+        query = query.filter(Visit.id_base_site == parameters["id_base_site"])
+    data = query.all()
+    fields = get_visit_fields()
+    return [d.as_dict(fields=fields) for d in data]
 
 
-@blueprint.route("/visits/<id_visit>", methods=["GET"])
+@blueprint.route("/visits/<int:id_visit>", methods=["GET"])
 @json_resp
 def get_one_visit(id_visit):
     """
     Retourne une visite
     """
-    data = DB.session.query(TVisiteSFT).get(id_visit)
-    return data.as_dict(recursif=True)
+    return get_visit_details(id_visit)
 
 
-@blueprint.route("/visits", methods=["POST"])
+def get_visit_details(id_visit):
+    data = (
+        db.session.query(Visit)
+        .options(joinedload(Visit.cor_visit_perturbation))
+        .filter(Visit.id_base_visit == id_visit)
+        .first()
+    )
+    fields = get_visit_fields()
+    return data.as_dict(fields=fields)
+
+
+def get_visit_fields():
+    return [
+        "id_base_visit",
+        "id_base_site",
+        "visit_date_min",
+        "comments",
+        "cor_visit_grid",
+        "cor_visit_perturbation.nomenclature",
+        "observers",
+    ]
+
+
+# TODO: split this web into one for POST and one other for PATCH. See SHT module.
+@blueprint.route("/visits", methods=["POST", "PATCH"])
 @permissions.check_cruved_scope("R", True)
 @json_resp
-def add_visit(info_role):
+def edit_visit(info_role):
     """
     Poste une nouvelle visite ou édite une ancienne
     """
@@ -225,134 +237,130 @@ def add_visit(info_role):
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
     data["id_module"] = (
-        DB.session.query(TModules.id_module)
+        db.session.query(TModules.id_module)
         .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
         .scalar()
     )
 
-    try:
-        tab_perturbation = data.pop("cor_visit_perturbation")
-    except:
-        pass
-
+    # Extract data
+    perturbations_ids = []
+    if "cor_visit_perturbation" in data:
+        perturbations_ids = data.pop("cor_visit_perturbation")
+    visit_grids = []
     if "cor_visit_grid" in data:
-        tab_visit_grid = data.pop("cor_visit_grid")
-    else:
-        tab_visit_grid = None
+        visit_grids = data.pop("cor_visit_grid")
+    observers_ids = []
+    if "cor_visit_observer" in data:
+        observers_ids = data.pop("cor_visit_observer")
 
-    tab_observer = data.pop("cor_visit_observer")
+    # Create visit object
+    visit = Visit(**data)
 
-    visit = TVisiteSFT(**data)
-    visit.as_dict(True)
-    # pour que visit prenne en compte des relations
-    # sinon elle prend pas en compte le fait qu'on efface toutes les perturbations quand on édite par ex.
-    try:
-        perturs = (
-            DB.session.query(TNomenclatures)
-            .filter(TNomenclatures.id_nomenclature.in_(tab_perturbation))
-            .all()
-        )
-        for per in perturs:
-            visit.cor_visit_perturbation.append(per)
-    except:
-        pass
-
-    if tab_visit_grid is not None:
-        for v in tab_visit_grid:
-            visit_grid = CorVisitGrid(**v)
-            visit.cor_visit_grid.append(visit_grid)
-
-    observers = DB.session.query(User).filter(User.id_role.in_(tab_observer)).all()
-    for o in observers:
-        visit.observers.append(o)
-
+    # Manage mode (update/insert)
+    idv = None
     if visit.id_base_visit:
+        idv = visit.id_base_visit
+
+    # Add/Update perturbations
+    if idv:
+        db.session.query(VisitPerturbation).filter_by(id_base_visit=idv).delete()
+    for perturbation_id in perturbations_ids:
+        perturbation = { "id_nomenclature_perturbation": perturbation_id }
+        if idv:
+            perturbation["id_base_visit"] = idv
+        fprint(perturbation)
+        visit_perturbation = VisitPerturbation(**perturbation)
+        visit.cor_visit_perturbation.append(visit_perturbation)
+
+    # Add/Update grids
+    if idv:
+        db.session.query(VisitGrid).filter_by(id_base_visit=idv).delete()
+    for grid in visit_grids:
+        visit_grid = VisitGrid(**grid)
+        visit.cor_visit_grid.append(visit_grid)
+
+    # Add/Update observers
+    observers = db.session.query(User).filter(User.id_role.in_(observers_ids)).all()
+    for observer in observers:
+        visit.observers.append(observer)
+
+    # Add/Update database
+    if idv:
         user_cruved = get_or_fetch_user_cruved(
             session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
         )
         update_cruved = user_cruved["U"]
         check_user_cruved_visit(info_role, visit, update_cruved)
-        DB.session.merge(visit)
+        print(visit)
+        visit = db.session.merge(visit)
     else:
-        DB.session.add(visit)
+        db.session.add(visit)
 
-    DB.session.commit()
+    db.session.commit()
+    if not idv:
+        db.session.refresh(visit)
 
-    return visit.as_dict(recursif=True)
+    return get_visit_details(visit.id_base_visit)
 
 
-@blueprint.route("/export_visit", methods=["GET"])
+@blueprint.route("/visits/export", methods=["GET"])
 def export_visits():
     """
     Télécharge les données d'une visite (ou des visites )
     """
-
     parameters = request.args
-    # q = q.filter(TInfoSite.id_base_site == parameters['id_base_site'])
-
     export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
-    file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
-    q = DB.session.query(ExportVisits)
-
+    query = db.session.query(VisitsExport)
     if "id_base_visit" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            ExportVisits.id_base_visit == parameters["id_base_visit"]
-        )
-    elif "id_base_site" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            ExportVisits.id_base_site == parameters["id_base_site"]
-        )
-    elif "organisme" in parameters:
-        q = DB.session.query(ExportVisits).filter(ExportVisits.organisme == parameters["organisme"])
-    elif "commune" in parameters:
-        q = DB.session.query(ExportVisits).filter(ExportVisits.area_name == parameters["commune"])
-    elif "year" in parameters:
-        q = DB.session.query(ExportVisits).filter(
-            func.date_part("year", ExportVisits.visit_date) == parameters["year"]
-        )
-    elif "cd_nom" in parameters:
-        q = DB.session.query(ExportVisits).filter(ExportVisits.cd_nom == parameters["cd_nom"])
+        query = query.filter(VisitsExport.id_base_visit == parameters["id_base_visit"])
 
-    data = q.all()
-    features = []
+    if "id_base_site" in parameters:
+        query = query.filter(VisitsExport.id_base_site == parameters["id_base_site"])
 
+    if "organisme" in parameters:
+        query = query.filter(VisitsExport.organisme == parameters["organisme"])
+
+    if "commune" in parameters:
+        query = query.filter(VisitsExport.area_name == parameters["commune"])
+
+    if "year" in parameters:
+        query = query.filter(func.date_part("year", VisitsExport.visit_date) == parameters["year"])
+
+    if "cd_nom" in parameters:
+        query = query.filter(VisitsExport.cd_nom == parameters["cd_nom"])
+
+    results = query.all()
+
+    file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
     if export_format == "geojson":
-        for d in data:
-            feature = d.as_geofeature("geom", "id_area", False)
+        features = []
+        for data in results:
+            feature = data.as_geofeature("geom", "id_area", False)
             features.append(feature)
-        result = FeatureCollection(features)
-
-        return to_json_resp(result, as_file=True, filename=file_name, indent=4, extension="geojson")
-
+        geojson = FeatureCollection(features)
+        return to_json_resp(geojson, as_file=True, filename=file_name, indent=4, extension="geojson")
     elif export_format == "csv":
-        tab_visit = []
-
-        for d in data:
-            visit = d.as_dict()
-            geom_wkt = to_shape(d.geom)
+        visits = []
+        for data in results:
+            visit = data.as_dict()
+            geom_wkt = to_shape(data.geom)
             visit["geom"] = geom_wkt
 
-            tab_visit.append(visit)
-
-        return to_csv_resp(file_name, tab_visit, tab_visit[0].keys(), ";")
-
+            visits.append(visit)
+        headers = visits[0].keys()
+        return to_csv_resp(file_name, visits, headers, ";")
     else:
-
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
-
         FionaShapeService.create_shapes_struct(
-            db_cols=ExportVisits.__mapper__.c,
+            db_cols=VisitsExport.__mapper__.c,
             srid=2154,
             dir_path=dir_path,
             file_name=file_name,
         )
-
-        for row in data:
-            FionaShapeService.create_feature(row.as_dict(), row.geom)
-
+        for data in results:
+            FionaShapeService.create_feature(data.as_dict(), data.geom)
         FionaShapeService.save_and_zip_shapefiles()
-
         return send_from_directory(dir_path, file_name + ".zip", as_attachment=True)
 
 
@@ -360,13 +368,13 @@ def export_visits():
 @json_resp
 def get_visits_years():
     """
-    Retourne toutes les années de visites du module
+    Retourne toutes les années de visites du module.
     """
     query = (
-        DB.session.query(func.to_char(TVisiteSFT.visit_date_min, "YYYY"))
-        .join(TInfoSite, TInfoSite.id_base_site == TVisiteSFT.id_base_site)
-        .order_by(desc(func.to_char(TVisiteSFT.visit_date_min, "YYYY")))
-        .group_by(func.to_char(TVisiteSFT.visit_date_min, "YYYY"))
+        db.session.query(func.to_char(Visit.visit_date_min, "YYYY"))
+        .join(SiteInfos, SiteInfos.id_base_site == Visit.id_base_site)
+        .order_by(desc(func.to_char(Visit.visit_date_min, "YYYY")))
+        .group_by(func.to_char(Visit.visit_date_min, "YYYY"))
     )
     results = query.all()
 
@@ -380,10 +388,10 @@ def get_visits_years():
 @json_resp
 def get_municipalities():
     """
-    Retourne toutes les communes présents dans le module
+    Retourne toutes les communes liées au module.
     """
     query = (
-        DB.session.query(LAreas)
+        db.session.query(LAreas)
         .join(BibAreasTypes, BibAreasTypes.id_type == LAreas.id_type)
         .join(corSiteArea, LAreas.id_area == corSiteArea.c.id_area)
         .join(corSiteModule, corSiteModule.c.id_base_site == corSiteArea.c.id_base_site)
@@ -404,13 +412,13 @@ def get_municipalities():
 @json_resp
 def get_organisms():
     """
-    Retourne la liste de tous les organismes présents
+    Retourne la liste de tous les organismes liés au module.
     """
     query = (
-        DB.session.query(Organisme)
+        db.session.query(Organisme)
         .join(User, User.id_organisme == Organisme.id_organisme)
         .join(corVisitObserver, corVisitObserver.c.id_role == User.id_role)
-        .join(TVisiteSFT, TVisiteSFT.id_base_visit == corVisitObserver.c.id_base_visit)
+        .join(Visit, Visit.id_base_visit == corVisitObserver.c.id_base_visit)
     )
     results = query.all()
 

@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from '@angul
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { MapService } from '@geonature_common/map/map.service';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
 import { StoreService } from '../services/store.service';
@@ -16,19 +15,17 @@ import { ObserversService } from '../services/observers.service';
   styleUrls: ['./detail-visit.component.scss'],
 })
 export class DetailVisitComponent implements OnInit, AfterViewInit {
-  public zps;
-  public taxonName;
-  public date;
   public idVisit;
   public idSite;
-  public tabPertur = [];
+  public sciname;
+  public date;
+  public perturbationsDisplay: string = '';
   public visitGrid = [];
-  public observers = '';
-
+  public observersDisplay: string = '';
   public rows = [];
-
   public dataListVisit = [];
   public comments;
+  public meshes;
 
   @ViewChild('geojson')
   geojson: GeojsonComponent;
@@ -36,117 +33,134 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   observersCellTpl: TemplateRef<any>;
 
   constructor(
-    public mapService: MapService,
-    private _api: DataService,
     public activatedRoute: ActivatedRoute,
-    public storeService: StoreService,
+    private api: DataService,
+    public mapService: MapService,
+    private observersService: ObserversService,
     public router: Router,
-    public dataFormService: DataFormService,
-    private observersService: ObserversService
+    public storeService: StoreService
   ) {}
 
   ngOnInit() {
-    this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
+    this.activatedRoute.params.subscribe(params => {
+      this.idSite = params.idSite;
+      this.idVisit = params.idVisit;
+
+      this.initializeQueryString();
+      this.initializeDatatableCols();
+      this.loadSite();
+      this.loadVisit();
+      this.loadOthersVisits();
+    });
+  }
+
+  private initializeQueryString() {
+    this.storeService.queryString = this.storeService.queryString.set(
+      'id_base_visit',
+      this.idVisit
+    );
+  }
+
+  private initializeDatatableCols() {
+    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+      if (col.prop === 'observers') {
+        col.cellTemplate = this.observersCellTpl;
+      }
+    });
+  }
+
+  private loadSite() {
+    this.api.getInfoSite(this.idSite).subscribe(info => {
+      this.sciname = info.sciname.label;
+    });
+  }
+
+  private loadVisit() {
+    this.api.getOneVisit(this.idVisit).subscribe(visit => {
+      this.date = visit.visit_date_min;
+      this.idSite = visit.id_base_site;
+      this.comments = visit.comments;
+      this.visitGrid = visit.cor_visit_grid;
+      this.countGridTypes();
+      this.buildPertubationsDisplay(visit.cor_visit_perturbation);
+      this.buildObserversDisplay(visit.observers);
+    });
+  }
+
+  private countGridTypes() {
+    this.storeService.presence = 0;
+    this.storeService.absence = 0;
+    if (this.visitGrid !== undefined) {
+      this.visitGrid.forEach(grid => {
+        if (grid.presence == true) {
+          this.storeService.presence += 1;
+        } else {
+          this.storeService.absence += 1;
+        }
+      });
+    }
+  }
+
+  private buildPertubationsDisplay(visitPerturbations) {
+    let perturbationsLabels = visitPerturbations.map(
+      visitPerturbation => visitPerturbation.nomenclature.label_default
+    );
+    this.perturbationsDisplay = perturbationsLabels.join(', ') + '.';
+  }
+
+  private buildObserversDisplay(observers) {
+    this.observersDisplay = this.observersService
+      .initialize()
+      .addObservers(observers)
+      .getObserversFull();
+  }
+
+  private loadOthersVisits() {
+    this.api.getVisits({ id_base_site: this.idSite }).subscribe(data => {
+      data.forEach(visit => {
+        visit.observers = this.observersService
+          .initialize()
+          .addObservers(visit.observers)
+          .getObserversAbbr();
+        visit.observersFull = this.observersService.getObserversFull();
+
+        let pres = 0;
+        let abs = 0;
+        if (visit.cor_visit_grid !== undefined) {
+          visit.cor_visit_grid.forEach(maille => {
+            if (maille.presence) {
+              pres += 1;
+            } else {
+              abs += 1;
+            }
+          });
+        }
+        visit.state = pres + 'P / ' + abs + 'A ';
+      });
+
+      this.dataListVisit = data;
+
+      this.rows = this.dataListVisit.filter(data => {
+        return data.id_base_visit.toString() !== this.idVisit;
+      });
+    });
   }
 
   ngAfterViewInit() {
     this.mapService.map.doubleClickZoom.disable();
 
-    this.activatedRoute.params.subscribe(params => {
-      this.storeService.queryString = this.storeService.queryString.set(
-        'id_base_visit',
-        params.idVisit
-      );
-      this._api.getOneVisit(params.idVisit).subscribe(element => {
-        this.comments = element.comments;
-        this.visitGrid = element.cor_visit_grid;
-        this.storeService.presence = 0;
-        this.storeService.absence = 0;
-        if (this.visitGrid !== undefined) {
-          this.visitGrid.forEach(grid => {
-            if (grid.presence == true) {
-              this.storeService.presence += 1;
-            } else {
-              this.storeService.absence += 1;
-            }
-          });
-        }
-
-        let tabVisitPerturb = element.cor_visit_perturbation;
-        this.tabPertur = [];
-        if (tabVisitPerturb !== undefined) {
-          tabVisitPerturb.forEach(per => {
-            let typePer;
-            if (per == tabVisitPerturb[tabVisitPerturb.length - 1]) {
-              typePer = per.label_fr + '. ';
-            } else {
-              typePer = per.label_fr + ', ';
-            }
-            this.tabPertur.push(typePer);
-          });
-        }
-
-        this.observers = this.observersService
-          .initialize()
-          .addObservers(element.observers)
-          .getObserversFull();
-
-        this.date = element.visit_date_min;
-        this.idSite = element.id_base_site;
-
-        this._api
-          .getMaille(this.idSite, {
-            id_area_type: this.storeService.sftConfig.id_type_maille,
-          })
-          .subscribe(data => {
-            this.zps = data;
-            this.storeService.total = data.features.length;
-            this.storeService.getMailleNoVisit();
-            this.geojson.currentGeoJson$.subscribe(currentLayer => {
-              this.mapService.map.fitBounds(currentLayer.getBounds());
-            });
-          });
-
-        this._api.getInfoSite(this.idSite).subscribe(info => {
-          this.taxonName = info.sciname.label;
-        });
-
-        this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
-          if (col.prop === 'observers') {
-            col.cellTemplate = this.observersCellTpl;
-          }
-        });
-
-        this._api.getVisits({ id_base_site: this.idSite }).subscribe(donnee => {
-          donnee.forEach(visit => {
-            visit.observers = this.observersService
-              .initialize()
-              .addObservers(visit.observers)
-              .getObserversAbbr();
-            visit.observersFull = this.observersService.getObserversFull();
-
-            let pres = 0;
-            let abs = 0;
-            if (visit.cor_visit_grid !== undefined) {
-              visit.cor_visit_grid.forEach(maille => {
-                if (maille.presence) {
-                  pres += 1;
-                } else {
-                  abs += 1;
-                }
-              });
-            }
-            visit.state = pres + 'P / ' + abs + 'A ';
-          });
-
-          this.dataListVisit = donnee;
-
-          this.rows = this.dataListVisit.filter(dataa => {
-            return dataa.id_base_visit.toString() !== params.idVisit;
-          });
+    this.api
+      .getMaille(this.idSite, {
+        id_area_type: this.storeService.sftConfig.id_type_maille,
+      })
+      .subscribe(data => {
+        this.meshes = data;
+        this.storeService.total = data.features.length;
+        this.storeService.getMailleNoVisit();
+        this.geojson.currentGeoJson$.subscribe(currentLayer => {
+          this.mapService.map.fitBounds(currentLayer.getBounds());
         });
       });
-    });
   }
 
   onEachFeature(feature, layer) {

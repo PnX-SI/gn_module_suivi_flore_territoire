@@ -15,9 +15,6 @@ id_dataset = 1
 # Par défaut, id pour l'entrée avec type_name="Mailles25*25m" et type_code="M25m"
 # Sauf si modifié via les paramètre "meshes_code" et "meshes_name" du fichier config/settings.ini
 id_type_maille = 33
-# Valeur du champ `id_type` dans la table `ref_geo.bib_areas_types`.
-# Par défaut, id pour l'entrée avec type_name="Communes" et type_code="COM"
-id_type_commune = 25
 # Identifiant de la liste d'utilisateurs réalisant des visites pour SFT.
 # Valeur du champ `id_liste` dans la table `utilisateurs.t_listes`.
 # Devrait correspondre au paramètre "observers_list_id" du fichier config/settings.ini

@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
@@ -7,11 +8,9 @@ import { ToastrService } from 'ngx-toastr';
 import { CommonService } from '@geonature_common/service/common.service';
 import { MapService } from '@geonature_common/map/map.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { DataService } from '../services/data.service';
 import { StoreService } from '../services/store.service';
-import { FormService } from '../services/form.service';
 import { ModuleConfig } from '../module.config';
 
 @Component({
@@ -21,9 +20,8 @@ import { ModuleConfig } from '../module.config';
 })
 export class FormVisitComponent implements OnInit, AfterViewInit {
   public zps;
-
   public modifGrid;
-  public nomTaxon;
+  public sciname;
   public date;
   public idVisit;
   public idSite;
@@ -38,36 +36,33 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   geojson: GeojsonComponent;
 
   constructor(
-    public mapService: MapService,
-    public _api: DataService,
+    public api: DataService,
     public activatedRoute: ActivatedRoute,
-    public storeService: StoreService,
-    public router: Router,
-    public dataFormService: DataFormService,
     public dateParser: NgbDateParserFormatter,
+    public mapService: MapService,
+    public router: Router,
+    public storeService: StoreService,
     private toastr: ToastrService,
-    private _commonService: CommonService,
-    public formService: FormService
+    private commonService: CommonService,
+    public formBuilder: FormBuilder
   ) {}
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
 
-    // Get Taxon name
-    this._api.getInfoSite(this.idSite).subscribe(info => {
-      this.dataFormService.getTaxonInfo(info.cd_nom).subscribe(taxon => {
-        this.nomTaxon = taxon.nom_valide;
-      });
+    // Get Taxon name from site
+    this.api.getInfoSite(this.idSite).subscribe(info => {
+      this.sciname = info.sciname.label;
     });
 
     // Initialize
-    this.modifGrid = this.formService.initFormSFT();
+    this.modifGrid = this.initializeVisitForm();
     this.storeService.initialize();
 
     // Check if is an update or an insert
     if (this.idVisit !== undefined) {
-      this._api.getOneVisit(this.idVisit).subscribe(element => {
+      this.api.getOneVisit(this.idVisit).subscribe(element => {
         if (element.cor_visit_grid !== undefined) {
           this.visitGrid = element.cor_visit_grid;
         }
@@ -86,6 +81,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         // Date
         this.date = element.visit_date_min;
 
+        console.log("Perturbations:", element.cor_visit_perturbation)
         // Update data binded object
         this.modifGrid.patchValue({
           id_base_site: this.idSite,
@@ -93,7 +89,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
           visit_date_min: this.dateParser.parse(this.date),
           visit_date_max: this.dateParser.parse(this.date),
           cor_visit_observer: element.observers,
-          cor_visit_perturbation: element.cor_visit_perturbation,
+          cor_visit_perturbation: element.cor_visit_perturbation.map(
+            visitPerturbation => visitPerturbation.nomenclature
+          ),
           cor_visit_grid: this.visitGrid,
           comments: element.comments,
         });
@@ -102,7 +100,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       this.visitGrid = [];
     }
 
-    this._api
+    this.api
       .getMaille(this.idSite, { id_area_type: ModuleConfig.id_type_maille })
       .subscribe(data => {
         this.zps = data;
@@ -112,6 +110,20 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         this.storeService.total = this.zps.features.length;
         this.storeService.getMailleNoVisit();
       });
+  }
+
+  private initializeVisitForm(): FormGroup {
+    const formSuivi = this.formBuilder.group({
+      id_base_site: null,
+      id_base_visit: null,
+      visit_date_min: [null, Validators.required],
+      visit_date_max: null,
+      cor_visit_observer: [null, Validators.required],
+      cor_visit_perturbation: new Array(),
+      cor_visit_grid: new Array(),
+      comments: null,
+    });
+    return formSuivi;
   }
 
   ngAfterViewInit() {
@@ -184,7 +196,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   // display help toaster for filelayer
   displayFileLayerInfoMessage() {
     if (this.firstFileLayerMessage) {
-      this._commonService.translateToaster('info', 'Map.FileLayerInfoSynthese');
+      this.commonService.translateToaster('info', 'Map.FileLayerInfoSynthese');
     }
     this.firstFileLayerMessage = false;
   }
@@ -239,7 +251,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     formModif['comments'] = this.modifGrid.controls.comments.value;
 
-    this._api.postVisit(formModif).subscribe(
+    this.api.postVisit(formModif).subscribe(
       data => {
         this.toastr.success('Visite enregistrée', '', {
           positionClass: 'toast-top-center',
@@ -259,10 +271,10 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
               }
             );
           } else {
-            this._commonService.translateToaster('error', 'NotAllowed');
+            this.commonService.translateToaster('error', 'NotAllowed');
           }
         } else {
-          this._commonService.translateToaster('error', 'ErrorMessage');
+          this.commonService.translateToaster('error', 'ErrorMessage');
         }
       }
     );

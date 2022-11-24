@@ -15,7 +15,7 @@ export class StoreService {
   public absence;
   public total;
   public rest;
-  public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/export_visit`;
+  public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits/export`;
   public queryString = new HttpParams();
 
   constructor(private _modalService: NgbModal) {
