@@ -19,7 +19,7 @@ import { ModuleConfig } from '../module.config';
   styleUrls: ['./form-visit.component.scss'],
 })
 export class FormVisitComponent implements OnInit, AfterViewInit {
-  public zps;
+  public meshes;
   public modifGrid;
   public sciname;
   public date;
@@ -27,7 +27,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   public idSite;
   public namePertur = [];
   public visitGrid = []; // Data on meshes
-  public tabObserver = [];
+  private observers = [];
+  private perturbations;
+  private comments;
   public visitModif = {}; // Visited meshes object
   public disabledAfterPost = false;
   public firstFileLayerMessage = true;
@@ -62,51 +64,21 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     // Check if is an update or an insert
     if (this.idVisit !== undefined) {
-      this.api.getOneVisit(this.idVisit).subscribe(element => {
-        if (element.cor_visit_grid !== undefined) {
-          this.visitGrid = element.cor_visit_grid;
-
-          // Count absence and presence of existing meshes
-          this.visitGrid.forEach(grid => {
-            if (grid.presence == true) {
-              this.storeService.presence += 1;
-            } else {
-              this.storeService.absence += 1;
-            }
-          });
-        }
-
-        // Date
-        this.date = element.visit_date_min;
-
-        // Update data binded object
-        this.modifGrid.patchValue({
-          id_base_site: this.idSite,
-          id_base_visit: this.idVisit,
-          visit_date_min: this.dateParser.parse(this.date),
-          visit_date_max: this.dateParser.parse(this.date),
-          cor_visit_observer: element.observers,
-          cor_visit_perturbation: element.cor_visit_perturbation.map(
-            visitPerturbation => visitPerturbation.nomenclature
-          ),
-          cor_visit_grid: this.visitGrid,
-          comments: element.comments,
-        });
+      this.api.getOneVisit(this.idVisit).subscribe(visit => {
+        this.date = visit.visit_date_min;
+        this.visitGrid = visit.cor_visit_grid !== undefined ? visit.cor_visit_grid : [];
+        this.observers = visit.observers;
+        this.perturbations = visit.cor_visit_perturbation.map(
+          visitPerturbation => visitPerturbation.nomenclature
+        );
+        this.comments = visit.comments;
+        this.loadMeshes();
+        this.patchVisitForm();
       });
     } else {
       this.visitGrid = [];
+      this.loadMeshes();
     }
-
-    this.api
-      .getMeshes(this.idSite, { id_area_type: ModuleConfig.id_type_maille })
-      .subscribe(data => {
-        this.zps = data;
-        this.geojson.currentGeoJson$.subscribe(currentLayer => {
-          this.mapService.map.fitBounds(currentLayer.getBounds());
-        });
-        this.storeService.total = this.zps.features.length;
-        this.storeService.computeNoVisitedMeshes();
-      });
   }
 
   private initializeVisitForm(): FormGroup {
@@ -123,8 +95,48 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     return formSuivi;
   }
 
+  private loadMeshes() {
+    this.api
+      .getMeshes(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
+      .subscribe(data => {
+        this.meshes = data;
+        this.countGridTypes(this.meshes.features.length);
+      });
+  }
+
+  private countGridTypes(meshesTotal) {
+    if (this.visitGrid !== undefined) {
+      this.visitGrid.forEach(grid => {
+        if (grid.presence == true) {
+          this.storeService.presence += 1;
+        } else {
+          this.storeService.absence += 1;
+        }
+      });
+    }
+    this.storeService.total = meshesTotal;
+    this.storeService.computeNoVisitedMeshes();
+  }
+
+  private patchVisitForm() {
+    this.modifGrid.patchValue({
+      id_base_site: this.idSite,
+      id_base_visit: this.idVisit,
+      visit_date_min: this.dateParser.parse(this.date),
+      visit_date_max: this.dateParser.parse(this.date),
+      cor_visit_observer: this.observers,
+      cor_visit_perturbation: this.perturbations,
+      cor_visit_grid: this.visitGrid,
+      comments: this.comments,
+    });
+  }
+
   ngAfterViewInit() {
     this.mapService.map.doubleClickZoom.disable();
+
+    this.geojson.currentGeoJson$.subscribe(currentLayer => {
+      this.mapService.map.fitBounds(currentLayer.getBounds());
+    });
   }
 
   onEachFeature(feature, layer) {
