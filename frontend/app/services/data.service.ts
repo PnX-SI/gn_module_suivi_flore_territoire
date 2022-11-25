@@ -10,11 +10,7 @@ export class DataService {
 
   constructor(private _http: HttpClient) {}
 
-  getZp(wsParams) {
-    return this._http.get<any>(`${this.apiModule}/sites`, { params: wsParams });
-  }
-
-  getMaille(id_base_site: number, params?: any) {
+  getMeshes(id_base_site: number, params?: any) {
     let wsParams = new HttpParams();
 
     for (let key in params) {
@@ -25,12 +21,12 @@ export class DataService {
     });
   }
 
-  getInfoSite(id_base_site) {
-    return this._http.get<any>(`${this.apiModule}/sites/${id_base_site}`);
+  getSites(wsParams) {
+    return this._http.get<any>(`${this.apiModule}/sites`, { params: wsParams });
   }
 
-  postVisit(data: any) {
-    return this._http.post<any>(`${this.apiModule}/visits`, data);
+  getOneSite(id_base_site) {
+    return this._http.get<any>(`${this.apiModule}/sites/${id_base_site}`);
   }
 
   getVisits(params: any) {
@@ -45,6 +41,10 @@ export class DataService {
 
   getOneVisit(id_visit) {
     return this._http.get<any>(`${this.apiModule}/visits/${id_visit}`);
+  }
+
+  editVisit(data: any) {
+    return this._http.post<any>(`${this.apiModule}/visits`, data);
   }
 
   getVisitsYears() {

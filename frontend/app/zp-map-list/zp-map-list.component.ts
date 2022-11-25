@@ -268,7 +268,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   private onChargeList() {
     this.loadingIndicator = true;
-    this.api.getZp(this.storeService.queryString).subscribe(data => {
+    this.api.getSites(this.storeService.queryString).subscribe(data => {
       this.zps = data;
       this.mapListService.loadTableData(data);
       this.filteredData = this.mapListService.tableData;

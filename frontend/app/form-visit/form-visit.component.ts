@@ -52,7 +52,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
 
     // Get Taxon name from site
-    this.api.getInfoSite(this.idSite).subscribe(info => {
+    this.api.getOneSite(this.idSite).subscribe(info => {
       this.sciname = info.sciname.label;
     });
 
@@ -65,10 +65,8 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       this.api.getOneVisit(this.idVisit).subscribe(element => {
         if (element.cor_visit_grid !== undefined) {
           this.visitGrid = element.cor_visit_grid;
-        }
 
-        // Count absence and presence of existing meshes
-        if (this.visitGrid !== undefined) {
+          // Count absence and presence of existing meshes
           this.visitGrid.forEach(grid => {
             if (grid.presence == true) {
               this.storeService.presence += 1;
@@ -81,7 +79,6 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         // Date
         this.date = element.visit_date_min;
 
-        console.log("Perturbations:", element.cor_visit_perturbation)
         // Update data binded object
         this.modifGrid.patchValue({
           id_base_site: this.idSite,
@@ -101,14 +98,14 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     }
 
     this.api
-      .getMaille(this.idSite, { id_area_type: ModuleConfig.id_type_maille })
+      .getMeshes(this.idSite, { id_area_type: ModuleConfig.id_type_maille })
       .subscribe(data => {
         this.zps = data;
         this.geojson.currentGeoJson$.subscribe(currentLayer => {
           this.mapService.map.fitBounds(currentLayer.getBounds());
         });
         this.storeService.total = this.zps.features.length;
-        this.storeService.getMailleNoVisit();
+        this.storeService.computeNoVisitedMeshes();
       });
   }
 
@@ -158,7 +155,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
 
         feature.state = 1;
-        this.storeService.getMailleNoVisit();
+        this.storeService.computeNoVisitedMeshes();
         this.visitModif[feature.id] = true;
       },
 
@@ -174,7 +171,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
 
         feature.state = 2;
-        this.storeService.getMailleNoVisit();
+        this.storeService.computeNoVisitedMeshes();
         this.visitModif[feature.id] = false;
       },
 
@@ -187,7 +184,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
 
         feature.state = 0;
-        this.storeService.getMailleNoVisit();
+        this.storeService.computeNoVisitedMeshes();
         this.visitModif[feature.id] = false;
       },
     });
@@ -251,7 +248,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     formModif['comments'] = this.modifGrid.controls.comments.value;
 
-    this.api.postVisit(formModif).subscribe(
+    this.api.editVisit(formModif).subscribe(
       data => {
         this.toastr.success('Visite enregistrée', '', {
           positionClass: 'toast-top-center',

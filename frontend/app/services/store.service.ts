@@ -55,7 +55,7 @@ export class StoreService {
     this.sftConfig = ModuleConfig;
   }
 
-  getMailleNoVisit() {
+  computeNoVisitedMeshes() {
     this.rest = this.total - this.absence - this.presence;
   }
 

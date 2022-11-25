@@ -52,7 +52,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this._api.getInfoSite(this.idSite).subscribe(info => {
+    this._api.getOneSite(this.idSite).subscribe(info => {
       this.site = info;
 
       // Hide 'détail' tab if name and description are empty.
@@ -62,7 +62,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     });
 
     this._api
-      .getMaille(this.idSite, {
+      .getMeshes(this.idSite, {
         id_area_type: this.storeService.sftConfig.id_type_maille,
       })
       .subscribe(nbMaille => {
@@ -103,7 +103,7 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       id_base_site: this.idSite,
       id_application: ModuleConfig.MODULE_CODE,
     };
-    this._api.getZp(parameters).subscribe(data => {
+    this._api.getSites(parameters).subscribe(data => {
       this.zps = data;
       this.geojson.currentGeoJson$.subscribe(currentLayer => {
         this.mapService.map.fitBounds(currentLayer.getBounds());

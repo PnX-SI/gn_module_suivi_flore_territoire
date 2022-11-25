@@ -46,7 +46,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       this.idSite = params.idSite;
       this.idVisit = params.idVisit;
 
-      this.initializeQueryString();
+      this.initializeStoreService();
       this.initializeDatatableCols();
       this.loadSite();
       this.loadVisit();
@@ -54,7 +54,8 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private initializeQueryString() {
+  private initializeStoreService() {
+    this.storeService.initialize();
     this.storeService.queryString = this.storeService.queryString.set(
       'id_base_visit',
       this.idVisit
@@ -70,7 +71,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   }
 
   private loadSite() {
-    this.api.getInfoSite(this.idSite).subscribe(info => {
+    this.api.getOneSite(this.idSite).subscribe(info => {
       this.sciname = info.sciname.label;
     });
   }
@@ -81,31 +82,20 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       this.idSite = visit.id_base_site;
       this.comments = visit.comments;
       this.visitGrid = visit.cor_visit_grid;
-      this.countGridTypes();
       this.buildPertubationsDisplay(visit.cor_visit_perturbation);
       this.buildObserversDisplay(visit.observers);
+      this.loadMeshes();
     });
-  }
-
-  private countGridTypes() {
-    this.storeService.presence = 0;
-    this.storeService.absence = 0;
-    if (this.visitGrid !== undefined) {
-      this.visitGrid.forEach(grid => {
-        if (grid.presence == true) {
-          this.storeService.presence += 1;
-        } else {
-          this.storeService.absence += 1;
-        }
-      });
-    }
   }
 
   private buildPertubationsDisplay(visitPerturbations) {
     let perturbationsLabels = visitPerturbations.map(
       visitPerturbation => visitPerturbation.nomenclature.label_default
     );
-    this.perturbationsDisplay = perturbationsLabels.join(', ') + '.';
+    this.perturbationsDisplay = 'aucune';
+    if (perturbationsLabels.length > 0) {
+      this.perturbationsDisplay = perturbationsLabels.join(', ') + '.';
+    }
   }
 
   private buildObserversDisplay(observers) {
@@ -146,21 +136,37 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    this.mapService.map.doubleClickZoom.disable();
-
+  private loadMeshes() {
     this.api
-      .getMaille(this.idSite, {
+      .getMeshes(this.idSite, {
         id_area_type: this.storeService.sftConfig.id_type_maille,
       })
       .subscribe(data => {
         this.meshes = data;
-        this.storeService.total = data.features.length;
-        this.storeService.getMailleNoVisit();
-        this.geojson.currentGeoJson$.subscribe(currentLayer => {
-          this.mapService.map.fitBounds(currentLayer.getBounds());
-        });
+        this.countGridTypes(data.features.length);
       });
+  }
+
+  private countGridTypes(meshesTotal) {
+    if (this.visitGrid !== undefined) {
+      this.visitGrid.forEach(grid => {
+        if (grid.presence == true) {
+          this.storeService.presence += 1;
+        } else {
+          this.storeService.absence += 1;
+        }
+      });
+    }
+    this.storeService.total = meshesTotal;
+    this.storeService.computeNoVisitedMeshes();
+  }
+
+  ngAfterViewInit() {
+    this.mapService.map.doubleClickZoom.disable();
+
+    this.geojson.currentGeoJson$.subscribe(currentLayer => {
+      this.mapService.map.fitBounds(currentLayer.getBounds());
+    });
   }
 
   onEachFeature(feature, layer) {
