@@ -22,9 +22,10 @@ from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import cruved_scope_for_user_in_module
 from geonature.core.ref_geo.models import LAreas, BibAreasTypes
 from geonature.utils.env import db, ROOT_DIR
-from geonature.utils.utilsgeometry import FionaShapeService
+
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
+from utils_flask_sqla_geo.utilsgeometry import FionaShapeService
 
 
 from .models import (
@@ -142,9 +143,7 @@ def get_one_site(id_base_site):
     Retourne les infos d'un site à partir de l'id_base_site
     """
     base_site_infos = (
-        db.session.query(SiteInfos)
-        .filter(SiteInfos.id_base_site == id_base_site)
-        .first()
+        db.session.query(SiteInfos).filter(SiteInfos.id_base_site == id_base_site).first()
     )
     municipalities = (
         db.session.query(
@@ -153,8 +152,9 @@ def get_one_site(id_base_site):
             ).filter(LAreas.area_name != None),
         )
         .select_from(
-            SiteInfos.__table__
-            .outerjoin(corSiteArea, corSiteArea.c.id_base_site == SiteInfos.id_base_site)
+            SiteInfos.__table__.outerjoin(
+                corSiteArea, corSiteArea.c.id_base_site == SiteInfos.id_base_site
+            )
             .outerjoin(LAreas, LAreas.id_area == corSiteArea.c.id_area)
             .join(
                 BibAreasTypes,
@@ -270,7 +270,7 @@ def edit_visit(info_role):
     if idv:
         db.session.query(VisitPerturbation).filter_by(id_base_visit=idv).delete()
     for perturbation_id in perturbations_ids:
-        perturbation = { "id_nomenclature_perturbation": perturbation_id }
+        perturbation = {"id_nomenclature_perturbation": perturbation_id}
         if idv:
             perturbation["id_base_visit"] = idv
         fprint(perturbation)
@@ -344,7 +344,9 @@ def export_visits():
             feature = data.as_geofeature("geom", "id_area", False)
             features.append(feature)
         geojson = FeatureCollection(features)
-        return to_json_resp(geojson, as_file=True, filename=file_name, indent=4, extension="geojson")
+        return to_json_resp(
+            geojson, as_file=True, filename=file_name, indent=4, extension="geojson"
+        )
     elif export_format == "csv":
         visits = []
         for data in results:
@@ -357,7 +359,7 @@ def export_visits():
         return to_csv_resp(file_name, visits, headers, ";")
     else:
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
-        FionaShapeService.create_shapes_struct(
+        FionaShapeService.create_fiona_struct(
             db_cols=VisitsExport.__mapper__.c,
             srid=2154,
             dir_path=dir_path,
@@ -365,7 +367,7 @@ def export_visits():
         )
         for data in results:
             FionaShapeService.create_feature(data.as_dict(), data.geom)
-        FionaShapeService.save_and_zip_shapefiles()
+        FionaShapeService.save_files()
         return send_from_directory(dir_path, file_name + ".zip", as_attachment=True)
 
 
