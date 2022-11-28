@@ -19,7 +19,7 @@ from geonature.core.gn_monitoring.models import (
     TBaseVisits,
 )
 from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_permissions.tools import get_or_fetch_user_cruved
+from geonature.core.gn_permissions.tools import cruved_scope_for_user_in_module
 from geonature.core.ref_geo.models import LAreas, BibAreasTypes
 from geonature.utils.env import db, ROOT_DIR
 from geonature.utils.utilsgeometry import FionaShapeService
@@ -43,6 +43,7 @@ log = logging.getLogger(__name__)
 
 
 @blueprint.route("/sites", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_sites():
     """
@@ -134,6 +135,7 @@ def get_sites():
 
 
 @blueprint.route("/sites/<int:id_base_site>", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_one_site(id_base_site):
     """
@@ -174,6 +176,7 @@ def get_one_site(id_base_site):
 
 
 @blueprint.route("/visits", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_visits():
     """
@@ -189,6 +192,7 @@ def get_visits():
 
 
 @blueprint.route("/visits/<int:id_visit>", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_one_visit(id_visit):
     """
@@ -222,7 +226,7 @@ def get_visit_fields():
 
 # TODO: split this web into one for POST and one other for PATCH. See SHT module.
 @blueprint.route("/visits", methods=["POST", "PATCH"])
-@permissions.check_cruved_scope("R", True)
+@permissions.check_cruved_scope("C", True, module_code="SFT")
 @json_resp
 def edit_visit(info_role):
     """
@@ -233,6 +237,7 @@ def edit_visit(info_role):
     # if its not an update we check if there is not aleady a visit this year
     if not data["id_base_visit"]:
         check_year_visit(data["id_base_site"], data["visit_date_min"][0:4])
+        data["id_digitiser"] = info_role.id_role
 
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
@@ -286,12 +291,11 @@ def edit_visit(info_role):
 
     # Add/Update database
     if idv:
-        user_cruved = get_or_fetch_user_cruved(
-            session=session, id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
+        (user_cruved, is_herited) = cruved_scope_for_user_in_module(
+            id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
         )
         update_cruved = user_cruved["U"]
         check_user_cruved_visit(info_role, visit, update_cruved)
-        print(visit)
         visit = db.session.merge(visit)
     else:
         db.session.add(visit)
@@ -304,6 +308,7 @@ def edit_visit(info_role):
 
 
 @blueprint.route("/visits/export", methods=["GET"])
+@permissions.check_cruved_scope("E", module_code="SFT")
 def export_visits():
     """
     Télécharge les données d'une visite (ou des visites )
@@ -365,6 +370,7 @@ def export_visits():
 
 
 @blueprint.route("/visits/years", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_visits_years():
     """
@@ -385,6 +391,7 @@ def get_visits_years():
 
 
 @blueprint.route("/municipalities", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_municipalities():
     """
@@ -409,6 +416,7 @@ def get_municipalities():
 
 
 @blueprint.route("/organisms", methods=["GET"])
+@permissions.check_cruved_scope("R", module_code="SFT")
 @json_resp
 def get_organisms():
     """
