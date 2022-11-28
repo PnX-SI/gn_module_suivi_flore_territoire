@@ -270,9 +270,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       },
       error => {
         if (error.status === 403) {
-          if (error.error.raisedError === 'PostYearError') {
+          if (error.error.description.startsWith('PostYearError')) {
             this.toastr.warning(
-              'Veuillez plutôt éditer une ancienne visite ',
+              "Veuillez plutôt éditer l'ancienne visite.",
               'Une visite existe déjà sur ce site pour cette année !',
               {
                 positionClass: 'toast-top-center',

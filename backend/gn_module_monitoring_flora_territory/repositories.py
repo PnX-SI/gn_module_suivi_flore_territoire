@@ -1,47 +1,36 @@
 from sqlalchemy.sql.expression import func
 
+from werkzeug.exceptions import Forbidden
 
 from geonature.core.gn_monitoring.models import TBaseVisits
-from geonature.utils.env import DB
-from geonature.utils.errors import GeonatureApiError
-from pypnusershub.db.tools import InsufficientRightsError
-
-
-class PostYearError (GeonatureApiError):
-    pass
+from geonature.utils.env import db
 
 
 def check_user_cruved_visit(user, visit, cruved_level):
     """
-    Check if user have right on a visit object, related to his cruved
-    if not, raise 403 error
-    if allowed return void
+    Check if user have right on a visit object, related to his cruved.
+    If not, raise 403 error.
+    If allowed return void.
     """
-
     is_allowed = False
     # cruved level '1' => My data
-    if cruved_level == '1':
-
+    if cruved_level == "1":
         for role in visit.observers:
             if role.id_role == user.id_role:
-                print('même id ')
                 is_allowed = True
                 break
             elif visit.id_digitiser == user.id_role:
                 is_allowed = True
                 break
         if not is_allowed:
-            raise InsufficientRightsError(
-                ('User "{}" cannot update visit number {} ')
-                .format(user.id_role, visit.id_base_visit),
-                403
+            raise Forbidden(
+                f"User {user.id_role} cannot update visit number {visit.id_base_visit}"
             )
 
     # cruved level '2' => My organism data
-    elif cruved_level == '2':
+    elif cruved_level == "2":
         for role in visit.observers:
             if role.id_role == user.id_role:
-                print('même role')
                 is_allowed = True
                 break
             elif visit.id_digitiser == user.id_role:
@@ -51,32 +40,28 @@ def check_user_cruved_visit(user, visit, cruved_level):
                 is_allowed = True
                 break
         if not is_allowed:
-            raise InsufficientRightsError(
-                ('User "{}" cannot update visit number {} ')
-                .format(user.id_role, visit.id_base_visit),
-                403
+            raise Forbidden(
+                f"User {user.id_role} cannot update visit number {visit.id_base_visit}"
             )
 
 
 def check_year_visit(id_base_site, new_visit_date):
     """
     Check if there is already a visit of the same year.
-    If yes, observer is not allowed to post the new visit
+    If yes, observer is not allowed to post the new visit.
 
-    Raise a 403 if a visit already exist this year
-
+    Raise a FORBIDDEN 403 HTTP ERROR if a visit already exist this year.
     """
-    q_year = DB.session.query(
-        func.date_part('year', TBaseVisits.visit_date_min)).filter(
-        TBaseVisits.id_base_site == id_base_site)
-    tab_old_year = q_year.all()
-    year_new_visit = new_visit_date[0:4]
+    query = db.session.query(func.date_part("year", TBaseVisits.visit_date_min)).filter(
+        TBaseVisits.id_base_site == id_base_site
+    )
+    dates = query.all()
 
-    for y in tab_old_year:
-        year_old_visit = str(int(y[0]))
+    year_new_visit = new_visit_date[0:4]
+    for date in dates:
+        year_old_visit = str(int(date[0]))
         if year_old_visit == year_new_visit:
-            DB.session.rollback()
-            raise PostYearError(
-                ('ZP {} has already been visited in {} ')
-                .format(id_base_site, year_old_visit),
-                403)
+            db.session.rollback()
+            raise Forbidden(
+                f"PostYearError - Site {id_base_site} has already been visited in {year_old_visit}!"
+            )
