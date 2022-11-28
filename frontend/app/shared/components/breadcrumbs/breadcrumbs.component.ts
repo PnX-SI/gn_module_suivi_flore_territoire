@@ -12,7 +12,7 @@ import { IBreadCrumb } from './breadcrumb.interface';
  * See also: https://vsavkin.tumblr.com/post/146722301646/angular-router-empty-paths-componentless-routes
  */
 @Component({
-  selector: 'sft-breadcrumbs',
+  selector: 'mft-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
 })
 export class BreadcrumbsComponent implements OnInit {

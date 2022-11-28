@@ -1,14 +1,8 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Layer } from 'leaflet';
-import { AppConfig } from '@geonature_config/app.config';
-import { ModuleConfig } from '../module.config';
 
 @Injectable()
 export class StoreService {
-  public currentLayer: Layer;
-  public sftConfig;
   public presenceStyle;
   public absenceStyle;
   public originStyle;
@@ -16,17 +10,16 @@ export class StoreService {
   public absence;
   public total;
   public rest;
-  public urlLoad = `${AppConfig.API_ENDPOINT}/${ModuleConfig.MODULE_URL}/visits/export`;
+
   public queryString = new HttpParams();
 
-  constructor(private _modalService: NgbModal) {
+  constructor() {
     this.initialize();
   }
 
   initialize() {
     this.defineMeshesStyle();
     this.initialzeMeshesCounters();
-    this.initializeModuleConfig();
   }
 
   private defineMeshesStyle() {
@@ -59,26 +52,18 @@ export class StoreService {
     this.total = 0;
   }
 
-  private initializeModuleConfig() {
-    this.sftConfig = ModuleConfig;
-  }
-
   computeNoVisitedMeshes() {
     this.rest = this.total - this.absence - this.presence;
   }
 
-  openModal(content) {
-    this._modalService.open(content);
-  }
-
   loadQueryString() {
     this.queryString = new HttpParams({
-      fromString: localStorage.getItem('sft-filters-querystring'),
+      fromString: localStorage.getItem('mft-filters-querystring'),
     });
   }
 
   saveQueryString() {
-    localStorage.setItem('sft-filters-querystring', this.queryString.toString());
+    localStorage.setItem('mft-filters-querystring', this.queryString.toString());
   }
 
   clearQueryString() {

@@ -9,30 +9,25 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable/release';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
 
-import { DataService } from '../services/data.service';
-import { StoreService } from '../services/store.service';
+import { DataService } from '../shared/services/data.service';
+import { StoreService } from '../shared/services/store.service';
 import { ModuleConfig } from '../module.config';
+import { ConfigService } from '../shared/services/config.service';
 
 @Component({
-  selector: 'pnx-zp-map-list',
-  templateUrl: './zp-map-list.component.html',
-  styleUrls: ['./zp-map-list.component.scss'],
+  selector: 'mft-sites-map-list',
+  templateUrl: './sites-map-list.component.html',
+  styleUrls: ['./sites-map-list.component.scss'],
 })
-export class ZpMapListComponent implements OnInit, AfterViewInit {
-  @Input()
-  searchTaxon: string;
-  @Output()
-  onDeleteFilter = new EventEmitter<any>();
-  @ViewChild('dataTable')
-  dataTable: DatatableComponent;
-  public zps;
+export class SitesMapListComponent implements OnInit, AfterViewInit {
+  public sites;
   private dataTableLatestWidth: number;
   public loadingIndicator = false;
   // Height in pixel of a datatable row
@@ -46,13 +41,21 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   public organismsList = [];
   public municipalitiesList = [];
 
+  @Input()
+  searchTaxon: string;
+  @Output()
+  onDeleteFilter = new EventEmitter<any>();
+  @ViewChild('dataTable')
+  dataTable: DatatableComponent;
+
   constructor(
-    public mapService: MapService,
     private api: DataService,
-    public router: Router,
-    public storeService: StoreService,
-    public mapListService: MapListService,
+    public configService: ConfigService,
     private formBuilder: FormBuilder,
+    public mapListService: MapListService,
+    public mapService: MapService,
+    public router: Router,
+    public storeService: StoreService
   ) {}
 
   ngOnInit() {
@@ -76,7 +79,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   private initializeFilterForm() {
     this.filterForm = this.formBuilder.group({
-      taxonFilter: JSON.parse(localStorage.getItem('sft-filters-taxon')),
+      taxonFilter: JSON.parse(localStorage.getItem('mft-filters-taxon')),
       yearFilter: this.getInitialFilterValue('year'),
       organismFilter: this.getInitialFilterValue('organism'),
       municipalityFilter: this.getInitialFilterValue('municipality'),
@@ -233,13 +236,13 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
 
   onTaxonChanged(event) {
     this.setQueryString('cd_nom', event.item.cd_nom);
-    localStorage.setItem('sft-filters-taxon', JSON.stringify(event.item));
+    localStorage.setItem('mft-filters-taxon', JSON.stringify(event.item));
   }
 
   onTaxonDeleted(event) {
     this.deleteQueryString('cd_nom');
     this.onDeleteFilter.emit(event);
-    localStorage.removeItem('sft-filters-taxon');
+    localStorage.removeItem('mft-filters-taxon');
   }
 
   private onSearchYear(event) {
@@ -269,7 +272,7 @@ export class ZpMapListComponent implements OnInit, AfterViewInit {
   private onChargeList() {
     this.loadingIndicator = true;
     this.api.getSites(this.storeService.queryString).subscribe(data => {
-      this.zps = data;
+      this.sites = data;
       this.mapListService.loadTableData(data);
       this.filteredData = this.mapListService.tableData;
       this.loadingIndicator = false;

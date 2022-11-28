@@ -8,15 +8,15 @@
       <pnx-leaflet-filelayer
         [editMode]="false"
         (onLoad)="displayFileLayerInfoMessage()"
-        [style]="{ color: storeService.sftConfig.map_gpx_color }"
+        [style]="{ color: configService.get('map_gpx_color') }"
       >
       </pnx-leaflet-filelayer>
     </pnx-map>
   </div>
 
   <!-- FORMULAIRE  -->
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container form-sft">
-    <sft-breadcrumbs></sft-breadcrumbs>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm tab-container form-container">
+    <mft-breadcrumbs></mft-breadcrumbs>
 
     <h5 class="debLigne">
       <i class="fa fa-edit"></i>
@@ -54,7 +54,7 @@
         <pnx-observers
           [parentFormControl]="visitForm.controls.cor_visit_observer"
           [bindAllItem]="true"
-          [idMenu]="storeService.sftConfig.id_menu_list_user"
+          [idMenu]="configService.get('id_menu_list_user')"
         >
         </pnx-observers>
       </div>
@@ -123,7 +123,7 @@
       <button
         class="btn btn-info btn-sm clickable"
         matTooltip="Comment modifier ?"
-        (click)="storeService.openModal(content)"
+        (click)="onHelp(content)"
       >
         <i class="fa fa-question-circle"></i>
         Aide

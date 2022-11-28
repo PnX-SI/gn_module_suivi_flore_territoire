@@ -1,20 +1,21 @@
+import { HttpParams } from '@angular/common/http';
 import { Component, OnInit, ViewChild, AfterViewInit, TemplateRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { MapService } from '@geonature_common/map/map.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
+import { MapService } from '@geonature_common/map/map.service';
 
-import { StoreService } from '../services/store.service';
-import { ModuleConfig } from '../module.config';
-import { DataService } from '../services/data.service';
-import { ObserversService } from '../services/observers.service';
+import { ConfigService } from '../shared/services/config.service';
+import { DataService } from '../shared/services/data.service';
+import { ObserversService } from '../shared/services/observers.service';
+import { StoreService } from '../shared/services/store.service';
 
 @Component({
-  selector: 'pnx-detail-visit',
-  templateUrl: 'detail-visit.component.html',
-  styleUrls: ['./detail-visit.component.scss'],
+  selector: 'mft-visit-details',
+  templateUrl: 'visit-details.component.html',
+  styleUrls: ['./visit-details.component.scss'],
 })
-export class DetailVisitComponent implements OnInit, AfterViewInit {
+export class VisitDetailComponent implements OnInit, AfterViewInit {
   public idVisit;
   public idSite;
   public sciname;
@@ -25,6 +26,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   public rows = [];
   public dataListVisit = [];
   public comments;
+  public exportQueryString: HttpParams;
   public meshes;
 
   @ViewChild('geojson')
@@ -35,6 +37,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   constructor(
     public activatedRoute: ActivatedRoute,
     private api: DataService,
+    public configService: ConfigService,
     public mapService: MapService,
     private observersService: ObserversService,
     public router: Router,
@@ -46,7 +49,8 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       this.idSite = params.idSite;
       this.idVisit = params.idVisit;
 
-      this.initializeStoreService();
+      this.initializeServices();
+      this.initialiseExportQueryString();
       this.initializeDatatableCols();
       this.loadSite();
       this.loadVisit();
@@ -54,16 +58,17 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private initializeStoreService() {
+  private initializeServices() {
     this.storeService.initialize();
-    this.storeService.queryString = this.storeService.queryString.set(
-      'id_base_visit',
-      this.idVisit
-    );
+  }
+
+  private initialiseExportQueryString() {
+    this.exportQueryString = new HttpParams();
+    this.exportQueryString = this.exportQueryString.set('id_base_visit', this.idVisit);
   }
 
   private initializeDatatableCols() {
-    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+    this.configService.get('default_list_visit_columns').forEach(col => {
       if (col.prop === 'observers') {
         col.cellTemplate = this.observersCellTpl;
       }
@@ -139,7 +144,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   private loadMeshes() {
     this.api
       .getMeshes(this.idSite, {
-        id_area_type: this.storeService.sftConfig.id_type_maille,
+        id_area_type: this.configService.get('id_type_maille'),
       })
       .subscribe(data => {
         this.meshes = data;
@@ -186,7 +191,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   onEditHere() {
     this.activatedRoute.params.subscribe(params => {
       this.router.navigate([
-        `${ModuleConfig.MODULE_URL}/sites`,
+        `${this.configService.getFrontendModuleUrl()}/sites`,
         this.idSite,
         'visits',
         params.idVisit,
@@ -197,7 +202,7 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
 
   onEditOther(id_visit) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/sites`,
+      `${this.configService.getFrontendModuleUrl()}/sites`,
       this.idSite,
       'visits',
       id_visit,
@@ -206,6 +211,11 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
   }
 
   onInfo(id_visit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', id_visit]);
+    this.router.navigate([
+      `${this.configService.getFrontendModuleUrl()}/sites`,
+      this.idSite,
+      'visits',
+      id_visit,
+    ]);
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observer } from './observer';
+
+import { Observer } from '../models/observer';
 
 @Injectable({
   providedIn: 'root',

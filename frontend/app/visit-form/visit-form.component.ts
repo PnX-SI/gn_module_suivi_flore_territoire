@@ -2,23 +2,24 @@ import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateParserFormatter, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 
 import { CommonService } from '@geonature_common/service/common.service';
 import { MapService } from '@geonature_common/map/map.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { DataService } from '../services/data.service';
-import { StoreService } from '../services/store.service';
+import { DataService } from '../shared/services/data.service';
+import { StoreService } from '../shared/services/store.service';
 import { ModuleConfig } from '../module.config';
+import { ConfigService } from '../shared/services/config.service';
 
 @Component({
-  selector: 'pnx-form-visit',
-  templateUrl: 'form-visit.component.html',
-  styleUrls: ['./form-visit.component.scss'],
+  selector: 'mft-visit-form',
+  templateUrl: 'visit-form.component.html',
+  styleUrls: ['./visit-form.component.scss'],
 })
-export class FormVisitComponent implements OnInit, AfterViewInit {
+export class VisitFormComponent implements OnInit, AfterViewInit {
   public idVisit;
   public idSite;
   public sciname;
@@ -39,13 +40,15 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   constructor(
     public api: DataService,
     public activatedRoute: ActivatedRoute,
+    private commonService: CommonService,
+    public configService: ConfigService,
     public dateParser: NgbDateParserFormatter,
+    public formBuilder: FormBuilder,
     public mapService: MapService,
+    private modalService: NgbModal,
     public router: Router,
     public storeService: StoreService,
     private toastr: ToastrService,
-    private commonService: CommonService,
-    public formBuilder: FormBuilder
   ) {}
 
   ngOnInit() {
@@ -102,7 +105,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
   private loadMeshes() {
     this.api
-      .getMeshes(this.idSite, { id_area_type: this.storeService.sftConfig.id_type_maille })
+      .getMeshes(this.idSite, { id_area_type: this.configService.get('id_type_maille') })
       .subscribe(data => {
         this.meshes = data;
         this.countGridTypes(this.meshes.features.length);
@@ -214,6 +217,11 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     this.firstFileLayerMessage = false;
   }
 
+  onHelp(content) {
+    console.log(content);
+    this.modalService.open(content);
+  }
+
   onCancel() {
     this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
   }
@@ -266,11 +274,9 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   }
 
   private cleanFormDataPerturbations(perturbations) {
-    let output = []
+    let output = [];
     if (perturbations !== null && perturbations !== undefined) {
-     output = perturbations.map(
-        perturbation => perturbation.id_nomenclature
-      );
+      output = perturbations.map(perturbation => perturbation.id_nomenclature);
     }
     return output;
   }

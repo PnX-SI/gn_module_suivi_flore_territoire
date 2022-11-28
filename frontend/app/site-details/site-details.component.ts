@@ -6,39 +6,41 @@ import { MapListService } from '@geonature_common/map-list/map-list.service';
 import { MapService } from '@geonature_common/map/map.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
 
-import { DataService } from '../services/data.service';
+import { DataService } from '../shared/services/data.service';
 
-import { StoreService } from '../services/store.service';
+import { StoreService } from '../shared/services/store.service';
 import { ModuleConfig } from '../module.config';
-import { ObserversService } from '../services/observers.service';
+import { ObserversService } from '../shared/services/observers.service';
+import { ConfigService } from '../shared/services/config.service';
 
 @Component({
-  selector: 'pnx-list-visit',
-  templateUrl: 'list-visit.component.html',
-  styleUrls: ['./list-visit.component.scss'],
+  selector: 'mft-site-details',
+  templateUrl: 'site-details.component.html',
+  styleUrls: ['./site-details.component.scss'],
 })
-export class ListVisitComponent implements OnInit, AfterViewInit {
-  public zps;
-  public currentZp = {};
+export class SiteDetailsComponent implements OnInit, AfterViewInit {
   public idSite;
   public visitGrid: FormGroup;
   public idVisit;
   public visits = [];
   public showDetails = false;
   public site;
+  public siteGeoJson;
+
   @ViewChild('geojson')
   geojson: GeojsonComponent;
   @ViewChild('observersCellTpl')
   observersCellTpl: TemplateRef<any>;
 
   constructor(
-    public mapService: MapService,
-    private _api: DataService,
+    private api: DataService,
     public activatedRoute: ActivatedRoute,
-    public storeService: StoreService,
-    public router: Router,
+    public configService: ConfigService,
     public mapListService: MapListService,
-    private observersService: ObserversService
+    public mapService: MapService,
+    private observersService: ObserversService,
+    public router: Router,
+    public storeService: StoreService,
   ) {}
 
   ngOnInit() {
@@ -46,13 +48,13 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
     this.storeService.initialize();
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
-    this.storeService.sftConfig.default_list_visit_columns.forEach(col => {
+    this.configService.get('default_list_visit_columns').forEach(col => {
       if (col.prop === 'observers') {
         col.cellTemplate = this.observersCellTpl;
       }
     });
 
-    this._api.getOneSite(this.idSite).subscribe(info => {
+    this.api.getOneSite(this.idSite).subscribe(info => {
       this.site = info;
 
       // Hide 'détail' tab if name and description are empty.
@@ -61,15 +63,15 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this._api
+    this.api
       .getMeshes(this.idSite, {
-        id_area_type: this.storeService.sftConfig.id_type_maille,
+        id_area_type: this.configService.get('id_type_maille'),
       })
       .subscribe(nbMaille => {
         this.storeService.total = nbMaille.features.length;
       });
 
-    this._api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
+    this.api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
       this.computeVisitsInfos(visits);
       this.visits = visits;
     });
@@ -81,38 +83,36 @@ export class ListVisitComponent implements OnInit, AfterViewInit {
       visit.observers = this.observersService.getObserversAbbr();
       visit.observersFull = this.observersService.getObserversFull();
 
-      let pres = 0;
-      let abs = 0;
+      let presence = 0;
+      let absence = 0;
       if (visit.cor_visit_grid !== undefined) {
         visit.cor_visit_grid.forEach(maille => {
           if (maille.presence) {
-            pres += 1;
+            presence += 1;
           } else {
-            abs += 1;
+            absence += 1;
           }
         });
       }
-      visit.state = pres + 'P / ' + abs + 'A ';
+      visit.state = presence + 'P / ' + absence + 'A ';
     });
   }
 
   ngAfterViewInit() {
     this.mapService.map.doubleClickZoom.disable();
+    this.loadSiteGeojsonData();
+  }
 
-    const parameters = {
-      id_base_site: this.idSite,
-      id_application: ModuleConfig.MODULE_CODE,
-    };
-    this._api.getSites(parameters).subscribe(data => {
-      this.zps = data;
+  private loadSiteGeojsonData() {
+    const parameters = { id_base_site: this.idSite };
+
+    this.api.getSites(parameters).subscribe(geojsonData => {
+      this.siteGeoJson = geojsonData;
+
       this.geojson.currentGeoJson$.subscribe(currentLayer => {
         this.mapService.map.fitBounds(currentLayer.getBounds());
       });
     });
-  }
-
-  onEachFeature(feature, layer) {
-    this.currentZp = feature.id;
   }
 
   onEdit(id_visit) {

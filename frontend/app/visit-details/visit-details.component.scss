@@ -1,25 +1,21 @@
-.strong {
+.info {
+  font-size: 18px;
+  font-family: Verdana;
   font-weight: bold;
+}
+
+.detail-container {
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 5px;
 }
 
 .box-shadow {
   box-shadow: 4px 5px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.list-sft {
-  max-height: 94vh;
-  overflow-y: auto;
-  padding-bottom: 5px;
-}
-
-.list-group-item {
-  background-color: #fff;
-  color: #181818;
-  border: none;
-}
-
 #end-btn {
-  margin-top: 15px;
+  margin-top: 5px;
   margin-bottom: 30px;
 }
 
@@ -33,6 +29,11 @@
   margin-top: 5px;
   margin-right: 5px;
   padding: 5px;
+}
+
+.export-btn {
+  display: block;
+  margin: auto;
 }
 
 .format-btn {

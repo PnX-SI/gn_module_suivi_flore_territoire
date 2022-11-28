@@ -1,105 +1,29 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientXsrfModule } from '@angular/common/http';
-import { Routes, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { HttpClientXsrfModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
 
 import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 
-import { DataService } from './services/data.service';
-import { StoreService } from './services/store.service';
-import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
-import { ZpMapListComponent } from './zp-map-list/zp-map-list.component';
-import { ListVisitComponent } from './list-visit/list-visit.component';
-import { DetailVisitComponent } from './detail-visit/detail-visit.component';
-import { FormVisitComponent } from './form-visit/form-visit.component';
+import { ConfigService } from './shared/services/config.service';
+import { DataService } from './shared/services/data.service';
+import { StoreService } from './shared/services/store.service';
 
-// Module routing and breadcrumbs
-const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'sites',
-    pathMatch: 'full',
-  },
-  {
-    path: 'sites',
-    data: {
-      breadcrumb: {
-        label: 'Accueil SFT',
-        title: 'Liste des sites du module Suivi Flore Territoire.',
-        iconClass: 'fa fa-home',
-      },
-    },
-    children: [
-      {
-        path: '',
-        component: ZpMapListComponent,
-      },
-      {
-        path: ':idSite',
-        data: {
-          breadcrumb: {
-            label: 'Site: :idSite',
-            title: "Détail d'un site du module Suivi Flore Territoire.",
-            iconClass: 'fa fa-map-marker',
-          },
-        },
-        children: [
-          {
-            path: '',
-            component: ListVisitComponent,
-          },
-          {
-            path: 'visits/add',
-            component: FormVisitComponent,
-            data: {
-              breadcrumb: {
-                label: 'Ajout visite',
-                title: "Ajout d'une visite du module Suivi Flore Territoire.",
-                iconClass: 'fa fa-plus-circle',
-              },
-            },
-          },
-          {
-            path: 'visits/:idVisit',
-            data: {
-              breadcrumb: {
-                label: 'Visite : :idVisit',
-                title: "Détail d'une visite du module Suivi Flore Territoire.",
-                iconClass: 'fa fa-binoculars',
-              },
-            },
-            children: [
-              {
-                path: '',
-                component: DetailVisitComponent,
-              },
-              {
-                path: 'edit',
-                component: FormVisitComponent,
-                data: {
-                  breadcrumb: {
-                    label: 'Édition',
-                    title: "Édition d'une visite du module Suivi Flore Territoire.",
-                    iconClass: 'fa fa-pencil-square-o',
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
+import { BreadcrumbsComponent } from './shared/components/breadcrumbs/breadcrumbs.component';
+import { VisitDetailComponent } from './visit-details/visit-details.component';
+import { VisitFormComponent } from './visit-form/visit-form.component';
+import { routes } from './gnModule.routes';
+import { SiteDetailsComponent } from './site-details/site-details.component';
+import { SitesMapListComponent } from './sites-map-list/sites-map-list.component';
 
 @NgModule({
   declarations: [
     BreadcrumbsComponent,
-    ZpMapListComponent,
-    ListVisitComponent,
-    DetailVisitComponent,
-    FormVisitComponent,
+    SitesMapListComponent,
+    SiteDetailsComponent,
+    VisitDetailComponent,
+    VisitFormComponent,
   ],
   imports: [
     GN2CommonModule,
@@ -110,7 +34,7 @@ const routes: Routes = [
     RouterModule.forChild(routes),
     CommonModule,
   ],
-  providers: [HttpClient, DataService, StoreService],
+  providers: [HttpClient, ConfigService, DataService, StoreService],
   bootstrap: [],
 })
 export class GeonatureModule {}
