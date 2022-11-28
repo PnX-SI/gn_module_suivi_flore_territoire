@@ -174,9 +174,9 @@ export class DetailVisitComponent implements OnInit, AfterViewInit {
       this.visitGrid.forEach(maille => {
         if (maille.id_area == feature.id) {
           if (maille.presence) {
-            layer.setStyle(this.storeService.myStylePresent);
+            layer.setStyle(this.storeService.presenceStyle);
           } else {
-            layer.setStyle(this.storeService.myStyleAbsent);
+            layer.setStyle(this.storeService.absenceStyle);
           }
         }
       });

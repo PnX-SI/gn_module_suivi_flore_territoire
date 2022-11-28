@@ -9,8 +9,9 @@ import { ModuleConfig } from '../module.config';
 export class StoreService {
   public currentLayer: Layer;
   public sftConfig;
-  public myStylePresent;
-  public myStyleAbsent;
+  public presenceStyle;
+  public absenceStyle;
+  public originStyle;
   public presence;
   public absence;
   public total;
@@ -29,15 +30,22 @@ export class StoreService {
   }
 
   private defineMeshesStyle() {
-    this.myStylePresent = {
+    this.presenceStyle = {
       color: '#008000',
       fill: true,
       fillOpacity: 0.2,
       weight: 3,
     };
 
-    this.myStyleAbsent = {
+    this.absenceStyle = {
       color: '#8B0000',
+      fill: true,
+      fillOpacity: 0.2,
+      weight: 3,
+    };
+
+    this.originStyle = {
+      color: '#3388ff',
       fill: true,
       fillOpacity: 0.2,
       weight: 3,

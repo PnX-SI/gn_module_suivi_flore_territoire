@@ -19,18 +19,17 @@ import { ModuleConfig } from '../module.config';
   styleUrls: ['./form-visit.component.scss'],
 })
 export class FormVisitComponent implements OnInit, AfterViewInit {
-  public meshes;
-  public modifGrid;
-  public sciname;
-  public date;
   public idVisit;
   public idSite;
-  public namePertur = [];
+  public sciname;
+  public date;
+  public visitForm: FormGroup;
   public visitGrid = []; // Data on meshes
   private observers = [];
-  private perturbations;
+  private perturbations = [];
   private comments;
-  public visitModif = {}; // Visited meshes object
+  public meshes;
+  public updatedMeshes = {}; // Visited meshes object
   public disabledAfterPost = false;
   public firstFileLayerMessage = true;
 
@@ -53,36 +52,22 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
     this.idVisit = this.activatedRoute.snapshot.params['idVisit'];
 
-    // Get Taxon name from site
-    this.api.getOneSite(this.idSite).subscribe(info => {
-      this.sciname = info.sciname.label;
-    });
-
     // Initialize
-    this.modifGrid = this.initializeVisitForm();
-    this.storeService.initialize();
+    this.initializeVisitForm();
+    this.loadSite();
 
     // Check if is an update or an insert
     if (this.idVisit !== undefined) {
-      this.api.getOneVisit(this.idVisit).subscribe(visit => {
-        this.date = visit.visit_date_min;
-        this.visitGrid = visit.cor_visit_grid !== undefined ? visit.cor_visit_grid : [];
-        this.observers = visit.observers;
-        this.perturbations = visit.cor_visit_perturbation.map(
-          visitPerturbation => visitPerturbation.nomenclature
-        );
-        this.comments = visit.comments;
-        this.loadMeshes();
-        this.patchVisitForm();
-      });
+      this.loadVisit();
     } else {
-      this.visitGrid = [];
       this.loadMeshes();
     }
   }
 
-  private initializeVisitForm(): FormGroup {
-    const formSuivi = this.formBuilder.group({
+  private initializeVisitForm() {
+    this.storeService.initialize();
+
+    this.visitForm = this.formBuilder.group({
       id_base_site: null,
       id_base_visit: null,
       visit_date_min: [null, Validators.required],
@@ -92,7 +77,27 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
       cor_visit_grid: new Array(),
       comments: null,
     });
-    return formSuivi;
+  }
+
+  private loadSite() {
+    // Get Taxon name from site
+    this.api.getOneSite(this.idSite).subscribe(info => {
+      this.sciname = info.sciname.label;
+    });
+  }
+
+  private loadVisit() {
+    this.api.getOneVisit(this.idVisit).subscribe(visit => {
+      this.date = visit.visit_date_min;
+      this.visitGrid = visit.cor_visit_grid !== undefined ? visit.cor_visit_grid : [];
+      this.observers = visit.observers;
+      this.perturbations = visit.cor_visit_perturbation.map(
+        visitPerturbation => visitPerturbation.nomenclature
+      );
+      this.comments = visit.comments;
+      this.loadMeshes();
+      this.patchVisitForm();
+    });
   }
 
   private loadMeshes() {
@@ -119,7 +124,7 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   }
 
   private patchVisitForm() {
-    this.modifGrid.patchValue({
+    this.visitForm.patchValue({
       id_base_site: this.idSite,
       id_base_visit: this.idVisit,
       visit_date_min: this.dateParser.parse(this.date),
@@ -140,13 +145,17 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
   }
 
   onEachFeature(feature, layer) {
+    // Initialize feature and layer
+    feature.state = 'UNDEFINED';
     if (this.visitGrid !== undefined) {
-      this.visitGrid.forEach(maille => {
-        if (maille.id_area == feature.id) {
-          if (maille.presence) {
-            layer.setStyle(this.storeService.myStylePresent);
+      this.visitGrid.forEach(mesh => {
+        if (mesh.id_area == feature.id) {
+          if (mesh.presence) {
+            layer.setStyle(this.storeService.presenceStyle);
+            feature.state = 'PRESENCE';
           } else {
-            layer.setStyle(this.storeService.myStyleAbsent);
+            layer.setStyle(this.storeService.absenceStyle);
+            feature.state = 'ABSENCE';
           }
         }
       });
@@ -154,50 +163,45 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
 
     // Handle events on map meshes
     layer.on({
-      click: event1 => {
-        layer.setStyle(this.storeService.myStylePresent);
-
-        if (feature.state == 2) {
+      click: () => {
+        if (feature.state == 'ABSENCE') {
           this.storeService.absence -= 1;
           this.storeService.presence += 1;
-        } else if (feature.state == 1) {
-          this.storeService.presence += 0;
-        } else {
+        } else if (feature.state == 'UNDEFINED') {
           this.storeService.presence += 1;
         }
 
-        feature.state = 1;
+        feature.state = 'PRESENCE';
+        layer.setStyle(this.storeService.presenceStyle);
         this.storeService.computeNoVisitedMeshes();
-        this.visitModif[feature.id] = true;
+        this.updatedMeshes[feature.id] = true;
       },
 
-      contextmenu: event2 => {
-        layer.setStyle(this.storeService.myStyleAbsent);
-        if (feature.state == 1) {
+      contextmenu: () => {
+        if (feature.state == 'PRESENCE') {
           this.storeService.presence -= 1;
           this.storeService.absence += 1;
-        } else if (feature.state == 2) {
-          this.storeService.absence += 0;
-        } else {
+        } else if (feature.state == 'UNDEFINED') {
           this.storeService.absence += 1;
         }
 
-        feature.state = 2;
+        feature.state = 'ABSENCE';
+        layer.setStyle(this.storeService.absenceStyle);
         this.storeService.computeNoVisitedMeshes();
-        this.visitModif[feature.id] = false;
+        this.updatedMeshes[feature.id] = false;
       },
 
-      dblclick: event3 => {
-        layer.setStyle(this.mapService.originStyle);
-        if (feature.state == 1) {
+      dblclick: () => {
+        if (feature.state == 'PRESENCE') {
           this.storeService.presence -= 1;
-        } else if (feature.state == 2) {
+        } else if (feature.state == 'ABSENCE') {
           this.storeService.absence -= 1;
         }
 
-        feature.state = 0;
+        feature.state = 'UNDEFINED';
+        layer.setStyle(this.storeService.originStyle);
         this.storeService.computeNoVisitedMeshes();
-        this.visitModif[feature.id] = false;
+        this.updatedMeshes[feature.id] = null;
       },
     });
   }
@@ -210,57 +214,72 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
     this.firstFileLayerMessage = false;
   }
 
-  onVisual() {
+  onCancel() {
     this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
   }
 
-  onModif() {
-    const formModif = Object.assign({}, this.modifGrid.value);
-    formModif['id_base_site'] = this.idSite;
-
-    formModif['visit_date_min'] = this.dateParser.format(
-      this.modifGrid.controls.visit_date_min.value
+  onSave() {
+    const formData = Object.assign({}, this.visitForm.value);
+    formData['id_base_site'] = this.idSite;
+    formData['visit_date_min'] = this.dateParser.format(
+      this.visitForm.controls.visit_date_min.value
     );
-    formModif['visit_date_max'] = this.dateParser.format(
-      this.modifGrid.controls.visit_date_min.value
+    formData['visit_date_max'] = this.dateParser.format(
+      this.visitForm.controls.visit_date_min.value
     );
+    formData['cor_visit_grid'] = this.getUpdatedVisitGrid();
+    formData['cor_visit_observer'] = formData['cor_visit_observer'].map(obs => obs.id_role);
+    formData['cor_visit_perturbation'] = this.cleanFormDataPerturbations(
+      formData['cor_visit_perturbation']
+    );
+    formData['comments'] = this.visitForm.controls.comments.value;
+    this.sendFormData(formData);
+  }
 
-    for (let key in this.visitModif) {
+  private getUpdatedVisitGrid() {
+    // TODO: the loop below needs to be simplified
+    for (let key in this.updatedMeshes) {
       let idAreaUpdated = Number(key);
       let needToInsert = true;
+      let needToDelete = false;
       this.visitGrid.forEach(existingGrid => {
         if (existingGrid.id_area == idAreaUpdated) {
-          existingGrid.presence = this.visitModif[key];
           needToInsert = false;
+          if (this.updatedMeshes[key] !== null) {
+            existingGrid.presence = this.updatedMeshes[key];
+          } else {
+            needToDelete = true;
+          }
         }
       });
       if (needToInsert) {
         this.visitGrid.push({
           id_base_visit: Number(this.idVisit),
-          presence: this.visitModif[key],
+          presence: this.updatedMeshes[key],
           id_area: Number(key),
         });
+      } else if (needToDelete) {
+        this.visitGrid = this.visitGrid.filter(item => item.id_area != idAreaUpdated);
       }
     }
+    return this.visitGrid;
+  }
 
-    formModif['cor_visit_grid'] = this.visitGrid;
-
-    formModif['cor_visit_observer'] = formModif['cor_visit_observer'].map(obs => {
-      return obs.id_role;
-    });
-
-    if (
-      formModif['cor_visit_perturbation'] !== null &&
-      formModif['cor_visit_perturbation'] !== undefined
-    ) {
-      formModif['cor_visit_perturbation'] = formModif['cor_visit_perturbation'].map(
-        pertu => pertu.id_nomenclature
+  private cleanFormDataPerturbations(perturbations) {
+    let output = []
+    if (perturbations !== null && perturbations !== undefined) {
+     output = perturbations.map(
+        perturbation => perturbation.id_nomenclature
       );
     }
+    return output;
+  }
 
-    formModif['comments'] = this.modifGrid.controls.comments.value;
+  private sendFormData(formData) {
+    // Disable submit button after post
+    this.disabledAfterPost = true;
 
-    this.api.editVisit(formModif).subscribe(
+    this.api.editVisit(formData).subscribe(
       data => {
         this.toastr.success('Visite enregistrée', '', {
           positionClass: 'toast-top-center',
@@ -287,8 +306,5 @@ export class FormVisitComponent implements OnInit, AfterViewInit {
         }
       }
     );
-
-    // Disable submit button after post
-    this.disabledAfterPost = true;
   }
 }

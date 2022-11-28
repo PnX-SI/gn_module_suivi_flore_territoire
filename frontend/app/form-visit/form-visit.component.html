@@ -41,7 +41,7 @@
         Date de la visite :
       </div>
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
-        <pnx-date [parentFormControl]="modifGrid.controls.visit_date_min"></pnx-date>
+        <pnx-date [parentFormControl]="visitForm.controls.visit_date_min"></pnx-date>
       </div>
     </div>
 
@@ -52,7 +52,7 @@
       </div>
       <div class="col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-sm form" id="newObserver" requir>
         <pnx-observers
-          [parentFormControl]="modifGrid.controls.cor_visit_observer"
+          [parentFormControl]="visitForm.controls.cor_visit_observer"
           [bindAllItem]="true"
           [idMenu]="storeService.sftConfig.id_menu_list_user"
         >
@@ -67,7 +67,7 @@
       </div>
       <div class="col-xs-12 col-sm-12 col-md-10 col-lg-8 padding-sm form" id="newPerturs">
         <pnx-nomenclature
-          [parentFormControl]="modifGrid.controls.cor_visit_perturbation"
+          [parentFormControl]="visitForm.controls.cor_visit_perturbation"
           [multiSelect]="true"
           [bindAllItem]="true"
           keyValue="id_nomenclature"
@@ -88,7 +88,7 @@
           class="form-control"
           rows="2"
           id="commentaire"
-          [formControl]="modifGrid.controls.comments"
+          [formControl]="visitForm.controls.comments"
         ></textarea>
       </div>
     </div>
@@ -161,14 +161,17 @@
 
       <button
         class="btn btn-success btn-sm p-1 mx-2 mr-2 float-right"
-        (click)="onModif()"
-        [disabled]="modifGrid.invalid"
+        (click)="onSave()"
+        [disabled]="visitForm.invalid"
       >
         <i class="fa fa-floppy-o"></i>
         Enregistrer
       </button>
 
-      <button class="btn btn-primary btn-sm p-1 mx-2 mr-2 float-right" (click)="onVisual()">
+      <button
+        class="btn btn-primary btn-sm p-1 mx-2 mr-2 float-right"
+        (click)="onCancel()"
+      >
         <i class="fa fa-ban"></i>
         Annuler
       </button>
