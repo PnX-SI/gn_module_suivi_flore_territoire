@@ -224,20 +224,28 @@ def get_visit_fields():
     ]
 
 
-# TODO: split this web into one for POST and one other for PATCH. See SHT module.
-@blueprint.route("/visits", methods=["POST", "PATCH"])
+@blueprint.route("/visits", methods=["POST"])
 @permissions.check_cruved_scope("C", True, module_code="SFT")
 @json_resp
-def edit_visit(info_role):
+def add_visit(info_role):
+    return edit_visit(info_role)
+
+
+@blueprint.route("/visits/<int:id_visit>", methods=["PATCH"])
+@permissions.check_cruved_scope("U", True, module_code="SFT")
+@json_resp
+def update_visit(id_visit, info_role):
+    return edit_visit(info_role, id_visit)
+
+
+def edit_visit(info_role, id_visit=None):
     """
-    Poste une nouvelle visite ou édite une ancienne
+    Ajoute une nouvelle visite ou édite une ancienne
     """
     data = dict(request.get_json())
 
-    # if its not an update we check if there is not aleady a visit this year
-    if not data["id_base_visit"]:
-        check_year_visit(data["id_base_site"], data["visit_date_min"][0:4])
-        data["id_digitiser"] = info_role.id_role
+    # Check data
+    check_year_visit(data["id_base_site"], data["visit_date_min"][0:4], id_base_visit=id_visit)
 
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
@@ -246,6 +254,8 @@ def edit_visit(info_role):
         .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
         .scalar()
     )
+    if not id_visit:
+        data["id_digitiser"] = info_role.id_role
 
     # Extract data
     perturbations_ids = []
@@ -261,25 +271,19 @@ def edit_visit(info_role):
     # Create visit object
     visit = Visit(**data)
 
-    # Manage mode (update/insert)
-    idv = None
-    if visit.id_base_visit:
-        idv = visit.id_base_visit
-
     # Add/Update perturbations
-    if idv:
-        db.session.query(VisitPerturbation).filter_by(id_base_visit=idv).delete()
+    if id_visit:
+        db.session.query(VisitPerturbation).filter_by(id_base_visit=id_visit).delete()
     for perturbation_id in perturbations_ids:
         perturbation = {"id_nomenclature_perturbation": perturbation_id}
-        if idv:
-            perturbation["id_base_visit"] = idv
-        fprint(perturbation)
+        if id_visit:
+            perturbation["id_base_visit"] = id_visit
         visit_perturbation = VisitPerturbation(**perturbation)
         visit.cor_visit_perturbation.append(visit_perturbation)
 
     # Add/Update grids
-    if idv:
-        db.session.query(VisitGrid).filter_by(id_base_visit=idv).delete()
+    if id_visit:
+        db.session.query(VisitGrid).filter_by(id_base_visit=id_visit).delete()
     for grid in visit_grids:
         visit_grid = VisitGrid(**grid)
         visit.cor_visit_grid.append(visit_grid)
@@ -290,7 +294,7 @@ def edit_visit(info_role):
         visit.observers.append(observer)
 
     # Add/Update database
-    if idv:
+    if id_visit:
         (user_cruved, is_herited) = cruved_scope_for_user_in_module(
             id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
         )
@@ -301,7 +305,7 @@ def edit_visit(info_role):
         db.session.add(visit)
 
     db.session.commit()
-    if not idv:
+    if not id_visit:
         db.session.refresh(visit)
 
     return get_visit_details(visit.id_base_visit)

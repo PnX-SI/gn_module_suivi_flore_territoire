@@ -112,7 +112,7 @@
       <div class="mx-0 mb-0 mt-3">
         <ngx-datatable
           #dataTable
-          class="material striped margin-top-xs table-size expandable"
+          class="material striped"
           [loadingIndicator]="loadingIndicator"
           [rows]="filteredData"
           [headerHeight]="35"
@@ -123,24 +123,14 @@
           [selectionType]="'single'"
           (select)="mapListService.onRowSelect($event)"
           [rowClass]="mapListService.getRowClass"
+          [messages]="configService.get('sites_list_messages')"
           [count]="filteredData.length"
           [limit]="rowNumber"
-          [messages]="configService.get('zp_message')"
+          [sorts]="[{prop: 'date_max', dir: 'desc'}]"
         >
           <ngx-datatable-column
-            *ngFor="let col of configService.get('default_zp_columns')"
-            [name]="col.name"
-            [prop]="col.prop"
-            [maxWidth]="col.width"
-          >
-            <ng-template let-column="col" ngx-datatable-header-template>
-              <span [title]="col.title">{{ col.name }}</span>
-            </ng-template>
-          </ngx-datatable-column>
-
-          <ngx-datatable-column
             cellClass="actions-cell"
-            maxWidth="90"
+            maxWidth="80"
             name="Voir"
             title="Accéder aux visites du site"
           >
@@ -151,6 +141,17 @@
                 (click)="onInfo(row.id_base_site)"
                 title="Visualiser"
               ></button>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column
+            *ngFor="let col of configService.get('sites_datatable_columns')"
+            [name]="col.name"
+            [prop]="col.prop"
+            [maxWidth]="col.width"
+          >
+            <ng-template let-column="col" ngx-datatable-header-template>
+              <span [title]="col.title">{{ col.name }}</span>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>

@@ -68,7 +68,7 @@ export class VisitDetailComponent implements OnInit, AfterViewInit {
   }
 
   private initializeDatatableCols() {
-    this.configService.get('default_list_visit_columns').forEach(col => {
+    this.configService.get('visits_datatable_columns').forEach(col => {
       if (col.prop === 'observers') {
         col.cellTemplate = this.observersCellTpl;
       }

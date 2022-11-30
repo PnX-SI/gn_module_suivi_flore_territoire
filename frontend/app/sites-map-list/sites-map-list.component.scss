@@ -1,7 +1,5 @@
 :host /deep/ .ngx-datatable.material {
-  //max-height: 79vh !important;
   box-shadow: none !important;
-  //overflow-y: auto;
 
   .datatable-body {
     .progress-linear {
@@ -41,7 +39,6 @@ fieldset {
   border: 1px solid silver !important;
   margin: 0 2px !important;
   border-radius: 3px;
-  // background-color: #f3f3f3;
 }
 
 legend {

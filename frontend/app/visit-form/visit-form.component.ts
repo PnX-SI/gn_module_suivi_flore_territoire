@@ -22,6 +22,7 @@ import { ConfigService } from '../shared/services/config.service';
 export class VisitFormComponent implements OnInit, AfterViewInit {
   public idVisit;
   public idSite;
+  private updateMode: boolean = false;
   public sciname;
   public date;
   public visitForm: FormGroup;
@@ -48,7 +49,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
     private modalService: NgbModal,
     public router: Router,
     public storeService: StoreService,
-    private toastr: ToastrService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -61,6 +62,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
 
     // Check if is an update or an insert
     if (this.idVisit !== undefined) {
+      this.updateMode = true;
       this.loadVisit();
     } else {
       this.loadMeshes();
@@ -218,7 +220,6 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
   }
 
   onHelp(content) {
-    console.log(content);
     this.modalService.open(content);
   }
 
@@ -285,32 +286,44 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
     // Disable submit button after post
     this.disabledAfterPost = true;
 
-    this.api.editVisit(formData).subscribe(
-      data => {
-        this.toastr.success('Visite enregistrée', '', {
-          positionClass: 'toast-top-center',
-        });
+    if (this.updateMode) {
+      this.api.updateVisit(this.idVisit, formData).subscribe(
+        result => this.onDataSavedSuccess(result),
+        error => this.onDataSavedError(error)
+      );
+    } else {
+      this.api.addVisit(formData).subscribe(
+        result => this.onDataSavedSuccess(result),
+        error => this.onDataSavedError(error)
+      );
+    }
+  }
 
-        this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
-      },
-      error => {
-        if (error.status === 403) {
-          if (error.error.description.startsWith('PostYearError')) {
-            this.toastr.warning(
-              "Veuillez plutôt éditer l'ancienne visite.",
-              'Une visite existe déjà sur ce site pour cette année !',
-              {
-                positionClass: 'toast-top-center',
-                timeOut: 5000,
-              }
-            );
-          } else {
-            this.commonService.translateToaster('error', 'NotAllowed');
-          }
-        } else {
-          this.commonService.translateToaster('error', 'ErrorMessage');
-        }
+  private onDataSavedSuccess(result) {
+    this.toastr.success('Visite enregistrée', '', {
+      positionClass: 'toast-top-center',
+    });
+
+    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
+  }
+
+  private onDataSavedError(error) {
+    if (error.status === 403) {
+      if (error.error.description.startsWith('PostYearError')) {
+        const title = 'Une visite existe déjà sur ce site pour cette année !';
+        const msg = this.updateMode
+          ? "Veuiller corriger l'année de la date de cette visite."
+          : "Veuillez plutôt éditer l'ancienne visite.";
+        const options = {
+          positionClass: 'toast-top-center',
+          timeOut: 5000,
+        };
+        this.toastr.warning(msg, title, options);
+      } else {
+        this.commonService.translateToaster('error', 'NotAllowed');
       }
-    );
+    } else {
+      this.commonService.translateToaster('error', 'ErrorMessage');
+    }
   }
 }

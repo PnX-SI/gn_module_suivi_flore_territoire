@@ -46,8 +46,12 @@ export class DataService {
     return this.http.get<any>(`${this.apiModule}/visits/${id_visit}`);
   }
 
-  editVisit(data: any) {
+  addVisit(data: any) {
     return this.http.post<any>(`${this.apiModule}/visits`, data);
+  }
+
+  updateVisit(visitId: string, data: any) {
+    return this.http.patch<any>(`${this.apiModule}/visits/${visitId}`, data);
   }
 
   getVisitsYears() {

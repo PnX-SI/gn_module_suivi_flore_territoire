@@ -48,7 +48,7 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
     this.storeService.initialize();
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
-    this.configService.get('default_list_visit_columns').forEach(col => {
+    this.configService.get('visits_datatable_columns').forEach(col => {
       if (col.prop === 'observers') {
         col.cellTemplate = this.observersCellTpl;
       }

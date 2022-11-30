@@ -9,7 +9,7 @@ Module GeoNature du protocole Suivi flore territoire.
 
 ![SFT démo](http://geonature.fr/docs/img/2019-01-geonature-sft-demo.gif)
 
-À partir de Zones de Prospection (ZP) prospectées dans le protocole d'inventaire répété Bilan Stationnel (ex-Flore prioritaire), des ZP sont selectionnées pour faire office d'un suivi. Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
+À partir de Zones de Prospection (ZP) prospectées dans le protocole d'inventaire répété Bilan Stationnel (ex-Flore prioritaire), des ZP sont selectionnées pour faire office d'un suivi. Sur chacun de ces sites, une espèce est prospectée régulièrement par mailles de 25m et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
 
 ## Présentation
 

@@ -88,17 +88,18 @@
 
     <div>
       <ngx-datatable
-        class="material"
-        [columnMode]="'force'"
+        class="material striped"
         [rows]="visits"
-        [headerHeight]="50"
-        [footerHeight]="50"
+        [columnMode]="'force'"
+        [headerHeight]="35"
+        [footerHeight]="40"
         [rowHeight]="'auto'"
-        [messages]="configService.get('list_visit_message')"
+        [messages]="configService.get('visits_list_messages')"
         [offset]="mapListService.page.pageNumber"
         [limit]="mapListService.page.size"
+        [sorts]="[{prop: 'visit_date_min', dir: 'desc'}]"
       >
-        <ngx-datatable-column name="Voir" maxWidth="90">
+        <ngx-datatable-column name="Voir" maxWidth="80">
           <ng-template let-row="row" ngx-datatable-cell-template>
             <button
               type="button"
@@ -109,7 +110,7 @@
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="Éditer" maxWidth="90">
+        <ngx-datatable-column name="Éditer" maxWidth="80">
           <ng-template let-row="row" ngx-datatable-cell-template>
             <button
               type="button"
@@ -121,11 +122,11 @@
         </ngx-datatable-column>
 
         <ngx-datatable-column
-          *ngFor="let col of configService.get('default_list_visit_columns')"
+          *ngFor="let col of configService.get('visits_datatable_columns')"
           [name]="col.name"
           [prop]="col.prop"
           [cellTemplate]="col.cellTemplate"
-          maxWidth="220"
+          [maxWidth]="col.width"
         >
         </ngx-datatable-column>
 

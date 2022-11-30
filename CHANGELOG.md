@@ -6,6 +6,29 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [NonPublié]
 
+## [1.1.2] - 2022-11-30
+
+### Changements
+
+* La vérification du CRUVED est maintenant réalisé au niveau de tous les web services.
+* Renommage de tous les composants du frontend pour clarifier leur utilisation. Utilisation du préfixe "mft", abréviation de "Monitoring Flora Territory".
+* Les routes du module sont maintenant dans un fichier à part.
+* Rassemblement de tous les fichiers partagés du frontend dans un dossier *shared/*.
+* Mise à jour du code permettant l'export au format Shape. Utilisation des noms de méthodes non dépréciés.
+* Refactorisation de la majorité du code du frontend.
+* Le bouton d'accès au site occupe maintenant la première colonne de la liste afin d'éviter qu'il ne soit pas accessible sur les petits écrans.
+* La liste des sites est maintenant triés sur la colonne de dernière visite. Les sites ayant eu les visites les plus récentes sont affichés en premier.
+* Sur les grands écrans, les listes occupent maintenant toute l'espace disponible.
+
+### Corrections
+
+* Les mailles de la carte lors de l'édition d'une visite sont maintenant correctement initialisé avec les présences et abscences (#67).
+* Les mailles de présence et abscence sont correctement comptés lors de l'édition d'une visite.
+* Le contenu des attributs des fichiers Shape d'export sont maintenant correctement encodé en UTF-8. Il n'y a plus de problème avec les caractères accentués.
+* La vérification de l'année de la visite est maintenant correctement réalisé et génère une pop-up d'information.
+* Utilisation du format REST pour les chemins des web services.
+* La vérification des droits autorisant un utilisateur à éditer une visite est à nouveau fonctionnelle.
+
 ## [1.1.1] - 2022-11-22
 
 ### Changements
@@ -13,6 +36,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 * Changement du chemin du web service `/export_visit` pour `/visits/export` afin de mieux respecter les principes REST.
 * Les paramètres du web service `/visits/export` peuvent maintenant être utilisé de manière combinés.
 * ⚠️ La vue `pr_monitoring_flora_territory.export_visits` a été corrigé afin de supporter les sites sans commune. Nous n'avons pas utilisé de révision Alembic pour la mise à jour. Il est nécessaire de mettre à jour cette vue manuellement à l'aide de Psql par exemple. Voir le code SQL de la vue dans le fichier [schema.sql](backend/gn_module_monitoring_flora_territory/migrations/data/schema.sql).
+* Ajout de la sauvegarde du filtre taxon entre deux utilisations des filtres sur la vue liste des sites.
 
 
 ### Corrections
@@ -105,16 +129,16 @@ Première version du module GeoNature du protocole Suivi flore territoire du ré
 
 Démonstration : http://geonature.fr/docs/img/2018-10-geonature-sft-demo.gif
 
-Sur chacune de ces ZP, une espèce est prospectée régulièrement par mailles de 25m, et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
+Sur chacun de ces sites, une espèce est prospectée régulièrement par mailles de 25m, et l'absence ou la présence de l'espèce est renseignée pour chaque maille.
 
 ### Fonctionnalités
 
 * MCD stabilisé et basé sur le schéma générique ``gn_monitoring`` (#1)
-* Liste des ZP filtrable par taxon, année de visite, commune et organisme
-* Fiche détail d'une ZP avec la liste de ses visites
+* Liste des sites filtrable par taxon, année de visite, commune et organisme
+* Fiche détail d'un site avec la liste de ses visites
 * Fiche détail de chaque visite
 * Formulaire d'ajout ou de modification d'une visite, avec saisie simplifiée des présences/absences en clic droit ou gauche sur les mailles affichées sur la carte
-* Export des visites par ZP ou par recherche globale
+* Export des visites par site ou par recherche globale
 * Automatisation de l'installation de la BDD avec possibilité d'intégrer ou non des données exemple
 * Documentation de l'installation et de l'intégration de données
 * Paramètres de l'application surcouchables

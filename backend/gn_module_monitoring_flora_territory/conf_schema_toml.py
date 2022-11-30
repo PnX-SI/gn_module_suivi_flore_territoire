@@ -8,57 +8,69 @@ from marshmallow import Schema, fields
 
 export_available_format = ["geojson", "csv", "shapefile"]
 
-zp_message = {
-    "emptyMessage": "Aucune zone à afficher ",
-    "totalMessage": "zone(s) de prospection au total",
+sites_list_messages = {
+    "emptyMessage": "Aucun site à afficher.",
+    "totalMessage": "site(s) au total",
 }
-list_visit_message = {
-    "emptyMessage": "Aucune visite sur ce site ",
-    "totalMessage": "visites au total",
+visits_list_messages = {
+    "emptyMessage": "Aucune visite sur ce site.",
+    "totalMessage": "visite(s) au total",
 }
-detail_list_visit_message = {
-    "emptyMessage": "Aucune autre visite sur ce site ",
-    "totalMessage": "visites au total",
+other_visits_list_messages = {
+    "emptyMessage": "Aucune autre visite sur ce site.",
+    "totalMessage": "visite(s) au total",
 }
 
-default_zp_columns = [
-    {"name": "Id", "title": "Identifiant du site", "prop": "id_base_site", "width": 90},
+sites_datatable_columns = [
+    {"name": "Id", "title": "Identifiant du site", "prop": "id_base_site", "width": 50},
     {"name": "Taxon", "title": "Nom du taxon", "prop": "nom_taxon", "width": 350},
-    {"name": "Nombre visites", "title": "Nombre de visites", "prop": "nb_visit", "width": 120},
+    {"name": "Nombre visites", "title": "Nombre de visites", "prop": "nb_visit", "width": 110},
     {
         "name": "Dernière visite",
         "title": "Date de la dernière visite",
         "prop": "date_max",
-        "width": 160,
+        "width": 120,
     },
     {
         "name": "Organismes",
         "title": "Organismes des observateurs des visites",
         "prop": "organisme",
-        "width": 200,
+        "width": "",
     },
 ]
 
-default_list_visit_columns = [
-    {"name": "Date", "prop": "visit_date_min"},
-    {"name": "Observateur(s)", "prop": "observers"},
-    {"name": "Présence/ Absence ? ", "prop": "state"},
+visits_datatable_columns = [
+    {
+        "name": "Date",
+        "prop": "visit_date_min",
+        "width": 200,
+    },
+    {
+        "name": "Observateur(s)",
+        "prop": "observers",
+        "width": 350,
+    },
+    {
+        "name": "Présence/ Absence ? ",
+        "prop": "state",
+        "width": "",
+    },
 ]
 
 zoom_center = [44.982667966765845, 6.062455200884894]
 
 
 class GnModuleSchemaConf(Schema):
-    zp_message = fields.Dict(load_default=zp_message)
-    list_visit_message = fields.Dict(load_default=list_visit_message)
-    detail_list_visit_message = fields.Dict(load_default=detail_list_visit_message)
-    export_available_format = fields.List(fields.String(), load_default=export_available_format)
-    default_zp_columns = fields.List(fields.Dict(), load_default=default_zp_columns)
-    default_list_visit_columns = fields.List(fields.Dict(), load_default=default_list_visit_columns)
+    sites_datatable_columns = fields.List(fields.Dict(), load_default=sites_datatable_columns)
+    sites_list_messages = fields.Dict(load_default=sites_list_messages)
+    visits_datatable_columns = fields.List(fields.Dict(), load_default=visits_datatable_columns)
+    visits_list_messages = fields.Dict(load_default=visits_list_messages)
+    other_visits_list_messages = fields.Dict(load_default=other_visits_list_messages)
     id_dataset = fields.Integer(load_default=1)
     id_type_maille = fields.Integer(load_default=33)
     id_menu_list_user = fields.Integer(load_default=1)
     id_list_taxon = fields.Integer(load_default=30)
+    export_available_format = fields.List(fields.String(), load_default=export_available_format)
     export_srid = fields.Integer(load_default=2154)
     zoom_center = fields.List(fields.Float(), load_default=zoom_center)
     zoom_level = fields.Integer(load_default=12)

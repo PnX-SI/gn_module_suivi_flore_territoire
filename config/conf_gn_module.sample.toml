@@ -29,12 +29,12 @@ export_srid = 2154
 export_available_format = ["geojson", "csv", "shapefile"]
 
 # Gestion des messages configurables
-zp_message = {emptyMessage = "Aucune zone à afficher ", totalMessage = "zone(s) de prospection au total"}
-list_visit_message = {emptyMessage = "Aucune visite sur ce site ", totalMessage = "visites au total"}
-detail_list_visit_message = {emptyMessage = "Aucune autre visite sur ce site ", totalMessage = "visites au total"}
+sites_list_messages = {emptyMessage = "Aucun site à afficher.", totalMessage = "sites(s) au total"}
+visits_list_messages = {emptyMessage = "Aucune visite sur ce site.", totalMessage = "visite(s) au total"}
+other_visits_list_messages = {emptyMessage = "Aucune autre visite sur ce site.", totalMessage = "visite(s) au total"}
 
 # Colonnes à afficher dans la table des sites sur la page d'accueil
-default_zp_columns = [
+sites_datatable_columns = [
     { name = "Id", title = "Identifiant du site", prop = "id_base_site", width = "90"},
     { name = "Taxon", title = "Nom du taxon", prop = "nom_taxon", width = "350"},
     { name = "Nombre visites", title = "Nombre de visites", prop = "nb_visit", width = "120"},
@@ -42,7 +42,7 @@ default_zp_columns = [
     { name = "Organisme", title = "Organismes des observateurs des visites", prop = "organisme", width = "200"}
 ]
 # Colonnes à afficher dans la table des visites sur la page d'un site
-default_list_visit_columns = [
+visits_datatable_columns = [
     {name = "Date", prop = "visit_date_min"},
     {name = "Observateur(s)", prop = "observers"},
     {name = "Présence/ Absence ?", prop = "state"}
