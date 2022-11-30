@@ -114,7 +114,7 @@
           #dataTable
           class="material striped"
           [loadingIndicator]="loadingIndicator"
-          [rows]="filteredData"
+          [rows]="mapListService.tableData"
           [headerHeight]="35"
           [footerHeight]="40"
           [rowHeight]="rowHeight"
@@ -124,7 +124,7 @@
           (select)="mapListService.onRowSelect($event)"
           [rowClass]="mapListService.getRowClass"
           [messages]="configService.get('sites_list_messages')"
-          [count]="filteredData.length"
+          [count]="mapListService.tableData.length"
           [limit]="rowNumber"
           [sorts]="[{prop: 'date_max', dir: 'desc'}]"
         >

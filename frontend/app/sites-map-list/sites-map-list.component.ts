@@ -35,7 +35,6 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
   // Minimal number of rows in datable
   public defaultRowNumber: number = 5;
   public rowNumber: number;
-  public filteredData = [];
   public filterForm: FormGroup;
   public yearsList = [];
   public organismsList = [];
@@ -63,7 +62,6 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
     this.initializeRowNumber();
     this.initializeFilterForm();
     this.initializeFilterControls();
-    this.initializeMapList();
   }
 
   private initializeRowNumber() {
@@ -138,21 +136,8 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private initializeMapList() {
-    this.mapListService.idName = 'id_infos_site';
-
-    // Observable on mapListService.currentIndexRow to find the current page
-    this.mapListService.currentIndexRow$.subscribe(indexRow => {
-      const currentPage = Math.trunc(indexRow / this.rowNumber);
-      this.dataTable.offset = currentPage;
-    });
-
-    this.storeService.initialize();
-  }
-
   ngAfterViewInit() {
-    this.mapListService.enableMapListConnexion(this.mapService.getMap());
-
+    this.initializeMapList();
     this.loadYears();
     this.loadOrganisms();
     this.loadMunicipalities();
@@ -160,6 +145,26 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
     // WARNING: use Promise to avoid ExpressionChangedAfterItHasBeenCheckedError
     // See: https://angular.io/errors/NG0100
     Promise.resolve(null).then(() => this.recalculateDataTableSize());
+  }
+
+  private initializeMapList() {
+    this.mapListService.enableMapListConnexion(this.mapService.getMap());
+
+    this.mapListService.idName = 'id_infos_site';
+
+    // Observable on mapListService.currentIndexRow to find the current page
+    this.mapListService.currentIndexRow$.subscribe(indexRow => {
+      // Get actual sorted data !
+      let sortedData = Array.from(this.dataTable.bodyComponent.rows);
+      let selectedRow = this.mapListService.selectedRow[0];
+      const index = sortedData.findIndex(object => {
+        return object.id_base_site === selectedRow.id_base_site;
+      });
+      const currentPage = Math.trunc(index / this.rowNumber);
+      this.dataTable.offset = currentPage;
+    });
+
+    this.storeService.initialize();
   }
 
   private loadYears() {
@@ -274,7 +279,6 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
     this.api.getSites(this.storeService.queryString).subscribe(data => {
       this.sites = data;
       this.mapListService.loadTableData(data);
-      this.filteredData = this.mapListService.tableData;
       this.loadingIndicator = false;
     });
   }
