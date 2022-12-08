@@ -334,7 +334,7 @@ def export_visits():
         query = query.filter(VisitsExport.area_name == parameters["commune"])
 
     if "year" in parameters:
-        query = query.filter(func.date_part("year", VisitsExport.visit_date) == parameters["year"])
+        query = query.filter(func.date_part("year", VisitsExport.visit_date_min) == parameters["year"])
 
     if "cd_nom" in parameters:
         query = query.filter(VisitsExport.cd_nom == parameters["cd_nom"])
