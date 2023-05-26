@@ -35,6 +35,12 @@ INSERT INTO :moduleSchema.t_infos_site (id_base_site, cd_nom)
     FROM gn_monitoring.t_base_sites AS bs
         JOIN :moduleSchema.:sitesTmpTable AS tmp
             ON (tmp.:siteCodeColumn::character varying = bs.base_site_code)
+    WHERE NOT EXISTS (
+        SELECT 'X'
+        FROM :moduleSchema.t_infos_site AS tbs
+        WHERE tbs.id_base_site = bs.id_base_site
+            AND tbs.cd_nom = tmp.:siteTaxonColumn
+    )
 ON CONFLICT ON CONSTRAINT pk_id_t_infos_site DO NOTHING ;
 
 
