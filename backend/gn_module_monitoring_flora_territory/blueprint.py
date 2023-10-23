@@ -2,12 +2,13 @@ import datetime
 import logging
 
 
-from flask import Blueprint, request, session, send_from_directory
+from flask import Blueprint, request, send_from_directory, g
 from geoalchemy2.shape import to_shape
 from geojson import FeatureCollection
 from sqlalchemy import and_, distinct, desc
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func
+from werkzeug.exceptions import Forbidden, BadRequest
 
 
 from apptax.taxonomie.models import Taxref
@@ -19,15 +20,17 @@ from geonature.core.gn_monitoring.models import (
     TBaseVisits,
 )
 from geonature.core.gn_permissions import decorators as permissions
-from geonature.core.gn_permissions.tools import cruved_scope_for_user_in_module
-from geonature.core.ref_geo.models import LAreas, BibAreasTypes
+from geonature.core.gn_permissions.tools import get_scopes_by_action
+from ref_geo.models import LAreas, BibAreasTypes
 from geonature.utils.env import db, ROOT_DIR
+
 
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
 from utils_flask_sqla_geo.utilsgeometry import FionaShapeService
 
 
+from gn_module_monitoring_flora_territory import MODULE_CODE
 from .models import (
     VisitGrid,
     VisitPerturbation,
@@ -35,7 +38,6 @@ from .models import (
     SiteInfos,
     Visit,
 )
-from .repositories import check_user_cruved_visit, check_year_visit
 from .utils import prepare_output, prepare_input, fprint
 
 
@@ -225,27 +227,26 @@ def get_visit_fields():
 
 
 @blueprint.route("/visits", methods=["POST"])
-@permissions.check_cruved_scope("C", True, module_code="SFT")
+@permissions.check_cruved_scope("C", get_scope=True, module_code="SFT")
 @json_resp
-def add_visit(info_role):
-    return edit_visit(info_role)
+def add_visit(scope):
+    return edit_visit()
 
 
 @blueprint.route("/visits/<int:id_visit>", methods=["PATCH"])
-@permissions.check_cruved_scope("U", True, module_code="SFT")
+@permissions.check_cruved_scope("U", get_scope=True, module_code="SFT")
 @json_resp
-def update_visit(id_visit, info_role):
-    return edit_visit(info_role, id_visit)
+def update_visit(id_visit, scope):
+    return edit_visit(id_visit)
 
 
-def edit_visit(info_role, id_visit=None):
+def edit_visit(id_visit=None):
     """
     Ajoute une nouvelle visite ou édite une ancienne
     """
     data = dict(request.get_json())
 
     # Check data
-    check_year_visit(data["id_base_site"], data["visit_date_min"][0:4], id_base_visit=id_visit)
 
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
@@ -255,7 +256,7 @@ def edit_visit(info_role, id_visit=None):
         .scalar()
     )
     if not id_visit:
-        data["id_digitiser"] = info_role.id_role
+        data["id_digitiser"] = g.current_user.id_role
 
     # Extract data
     perturbations_ids = []
@@ -270,6 +271,9 @@ def edit_visit(info_role, id_visit=None):
 
     # Create visit object
     visit = Visit(**data)
+    if visit.has_visit_for_this_year(data["visit_date_min"][0:4]):
+        raise BadRequest(f"Already a visit for this site in {data['visit_date_min'][0:4]} ")
+
 
     # Add/Update perturbations
     if id_visit:
@@ -295,11 +299,14 @@ def edit_visit(info_role, id_visit=None):
 
     # Add/Update database
     if id_visit:
-        (user_cruved, is_herited) = cruved_scope_for_user_in_module(
-            id_role=info_role.id_role, module_code=blueprint.config["MODULE_CODE"]
+        user_scopes = get_scopes_by_action(
+         id_role=g.current_user.id_role,
+         module_code=MODULE_CODE
         )
-        update_cruved = user_cruved["U"]
-        check_user_cruved_visit(info_role, visit, update_cruved)
+        update_scope = user_scopes["U"]
+
+        if not visit.has_instance_permission(update_scope):
+            raise Forbidden(f"User {g.current_user.id_role}  has not right to update this visit")
         visit = db.session.merge(visit)
     else:
         db.session.add(visit)

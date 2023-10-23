@@ -1,7 +1,10 @@
+from flask import g
 from geoalchemy2 import Geometry
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql.expression import func
 from sqlalchemy.ext.associationproxy import association_proxy
+
 
 from apptax.taxonomie.models import Taxref
 from geonature.core.gn_monitoring.models import (
@@ -9,7 +12,7 @@ from geonature.core.gn_monitoring.models import (
     TBaseVisits,
     corVisitObserver,
 )
-from geonature.core.ref_geo.models import LAreas
+from ref_geo.models import LAreas
 from geonature.utils.env import db
 from geonature.utils.utilsgeometry import shapeserializable
 from pypnnomenclature.models import TNomenclatures
@@ -33,6 +36,51 @@ class MonitoringFloraTerritory(db.Model):
         return str(self.__class__) + ": " + str(self.__dict__)
 
 
+class VisitAuthMixin(object):
+    def user_is_observer_or_digitizer(self, user):
+        return self.id_digitizer == user.id_role or user in self.observers
+
+    def user_is_in_organism_of_observers(self, user):
+        for obs in self.observers:
+            if obs.id_organisme == user.id_organism:
+                return True
+        return False
+
+    def has_instance_permission(self, scope):
+        """
+        Fonction permettant de dire si un utilisateur
+        peu ou non agir sur une donnée
+        """
+        # Si l'utilisateur n'a pas de droit d'accès aux données
+        if scope == 0 or scope not in (1, 2, 3):
+            return False
+
+        # Si l'utilisateur à le droit d'accéder à toutes les données
+        if scope == 3:
+            return True
+
+        # Si l'utilisateur est propriétaire de la données
+        if self.user_is_observer_or_digitizer(g.current_user):
+            return True
+
+        # Si l'utilisateur appartient à un organisme
+        # qui a un droit sur la données et
+        # que son niveau d'accès est 2 ou 3
+        if scope in (2, 3) and self.user_is_in_organism_of_observers(g.current_user) :
+            return True
+        return False
+
+    def get_instance_perms(self, scopes):
+        """
+        Return the user's perms for a model instance for each action.
+        Use in the map-list interface to allow or not an action
+        params:
+            - scopes:  the scope of the user for each action
+        """
+        return {
+            action: self.has_instance_permission(scope)
+            for action, scope in scopes.items()
+        }
 
 @serializable
 @geoserializable
@@ -88,9 +136,10 @@ class VisitGrid(MonitoringFloraTerritory):
 
 @serializable
 @shapeserializable
-class Visit(TBaseVisits):
+class Visit(TBaseVisits, VisitAuthMixin):
     __tablename__ = "t_base_visits"
     __table_args__ = {"schema": "gn_monitoring", "extend_existing": True}
+    
 
     def __repr__(self):
         return str(self.__class__) + ": " + str(self.__dict__)
@@ -98,7 +147,6 @@ class Visit(TBaseVisits):
     def __str__(self):
         return str(self.__class__) + ": " + str(self.__dict__)
 
-    #id_base_visit = db.Column(db.Integer, primary_key=True)
     cor_visit_grid = db.relationship(
         VisitGrid,
         primaryjoin=(VisitGrid.id_base_visit == TBaseVisits.id_base_visit),
@@ -112,6 +160,13 @@ class Visit(TBaseVisits):
         secondaryjoin=(corVisitObserver.c.id_role == User.id_role),
         foreign_keys=[corVisitObserver.c.id_base_visit, corVisitObserver.c.id_role],
     )
+
+    def has_visit_for_this_year(self, year):
+        visit = db.session.query(Visit.id_base_site).filter_by(id_base_site=self.id_base_site).filter(func.date_part("year", TBaseVisits.visit_date_min) == year).one_or_none()
+        if visit :
+            return True
+        return False
+
 
 
 @serializable
