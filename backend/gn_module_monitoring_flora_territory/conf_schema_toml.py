@@ -69,7 +69,7 @@ class GnModuleSchemaConf(Schema):
     id_dataset = fields.Integer(load_default=1)
     id_type_maille = fields.Integer(load_default=33)
     id_menu_list_user = fields.Integer(load_default=1)
-    id_list_taxon = fields.Integer(load_default=30)
+    id_list_taxon = fields.Integer()
     export_available_format = fields.List(fields.String(), load_default=export_available_format)
     export_srid = fields.Integer(load_default=2154)
     zoom_center = fields.List(fields.Float(), load_default=zoom_center)

@@ -1,16 +1,13 @@
 import { Injectable, Inject } from '@angular/core';
 
-import { APP_CONFIG_TOKEN } from '@geonature_config/app.config';
-import { ModuleConfig } from '../../module.config';
+import { ConfigService as GnConfigService } from '@geonature/services/config.service';
+
 
 @Injectable()
 export class ConfigService {
 
-  constructor(@Inject(APP_CONFIG_TOKEN) private cfg) {}
+  constructor(public cfg: GnConfigService) {}
 
-  getModuleCode() {
-    return ModuleConfig.MODULE_CODE;
-  }
 
   getApplicationUrl() {
     return `${this.cfg.URL_APPLICATION}`;
@@ -21,11 +18,11 @@ export class ConfigService {
   }
 
   getBackendModuleUrl() {
-    return `${this.cfg.API_ENDPOINT}${ModuleConfig.MODULE_URL}`;
+    return `${this.cfg.API_ENDPOINT}/sft`;
   }
 
   getFrontendModuleUrl() {
-    return ModuleConfig.MODULE_URL;
+    return "/sft";
   }
 
   getExportUrl() {
@@ -35,7 +32,7 @@ export class ConfigService {
   get(param) {
     let value = param.split('.').reduce((a, b) => a[b], this.cfg);
     if (value === undefined) {
-      value = param.split('.').reduce((a, b) => a[b], ModuleConfig);
+      value = param.split('.').reduce((a, b) => a[b], this.cfg["SFT"]);
     }
     return value;
   }
