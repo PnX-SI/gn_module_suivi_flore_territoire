@@ -1,4 +1,4 @@
-:host /deep/ .ngx-datatable.material {
+:host ::ng-deep .ngx-datatable.material {
   box-shadow: none !important;
 
   .datatable-body {
@@ -30,7 +30,7 @@
   }
 }
 
-:host /deep/ .single-selection .datatable-body-row.active .datatable-row-group {
+:host ::ng-deep .single-selection .datatable-body-row.active .datatable-row-group {
   background-color: rgb(154, 217, 247) !important;
 }
 

@@ -10,15 +10,15 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormBuilder } from '@angular/forms';
+import { filter } from "rxjs/operators"
 
-import { DatatableComponent } from '@swimlane/ngx-datatable/release';
+import { DatatableComponent } from '@swimlane/ngx-datatable';
 
 import { MapService } from '@geonature_common/map/map.service';
 import { MapListService } from '@geonature_common/map-list/map-list.service';
 
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
-import { ModuleConfig } from '../module.config';
 import { ConfigService } from '../shared/services/config.service';
 
 @Component({
@@ -59,15 +59,29 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loadInitialData();
-    this.initializeRowNumber();
     this.initializeFilterForm();
     this.initializeFilterControls();
   }
+  ngAfterViewInit() {
+    this.initializeRowNumber();
+    
+    
+    this.initializeMapList();
+    this.loadYears();
+    this.loadOrganisms();
+    this.loadMunicipalities();
+
+    // WARNING: use Promise to avoid ExpressionChangedAfterItHasBeenCheckedError
+    // See: https://angular.io/errors/NG0100
+    Promise.resolve(null).then(() => this.recalculateDataTableSize());
+  }
+
 
   private initializeRowNumber() {
     // Get wiewport height to set the number of rows in datatable
     const screenHeight = document.documentElement.clientHeight;
     this.rowNumber = this.calculateRowNumber(screenHeight);
+    
   }
 
   private loadInitialData() {
@@ -94,58 +108,54 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
 
   private initializeFilterControls() {
     // Year
-    this.filterForm.controls.yearFilter.valueChanges
-      .filter(select => !select || select !== null)
+    this.filterForm.controls.yearFilter.valueChanges.pipe(
+      filter(select => !select || select !== null)
+    )
       .subscribe(item => {
         this.onSearchYear(item);
       });
 
-    this.filterForm.controls.yearFilter.valueChanges
-      .filter(input => !input || input === null)
+    this.filterForm.controls.yearFilter.valueChanges.pipe(
+      filter(input => !input || input === null)
+    )
       .subscribe(item => {
         this.deleteQueryString('year');
         this.onDeleteFilter.emit(item);
       });
 
     // Organism
-    this.filterForm.controls.organismFilter.valueChanges
-      .filter(select => !select || select !== null)
+    this.filterForm.controls.organismFilter.valueChanges.pipe(
+      filter(select => !select || select !== null)
+    )
       .subscribe(item => {
         this.onSearchOrganism(item);
       });
 
-    this.filterForm.controls.organismFilter.valueChanges
-      .filter(input => !input || input === null)
+    this.filterForm.controls.organismFilter.valueChanges.pipe(
+      filter(input => !input || input === null)
+    )
       .subscribe(item => {
         this.deleteQueryString('organism');
         this.onDeleteFilter.emit(item);
       });
 
     // Municipality
-    this.filterForm.controls.municipalityFilter.valueChanges
-      .filter(select => !select || select !== null)
+    this.filterForm.controls.municipalityFilter.valueChanges.pipe(
+      filter(select => !select || select !== null)
+    )
       .subscribe(item => {
         this.onSearchMunicipality(item);
       });
 
-    this.filterForm.controls.municipalityFilter.valueChanges
-      .filter(input => !input || input === null)
+    this.filterForm.controls.municipalityFilter.valueChanges.pipe(
+      filter(input => !input || input === null)
+    )
       .subscribe(item => {
         this.deleteQueryString('municipality');
         this.onDeleteFilter.emit(item);
       });
   }
 
-  ngAfterViewInit() {
-    this.initializeMapList();
-    this.loadYears();
-    this.loadOrganisms();
-    this.loadMunicipalities();
-
-    // WARNING: use Promise to avoid ExpressionChangedAfterItHasBeenCheckedError
-    // See: https://angular.io/errors/NG0100
-    Promise.resolve(null).then(() => this.recalculateDataTableSize());
-  }
 
   private initializeMapList() {
     this.mapListService.enableMapListConnexion(this.mapService.getMap());
@@ -175,7 +185,9 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
   }
 
   private loadMunicipalities() {
-    this.api.getMunicipalities().subscribe(data => {
+    this.api.getMunicipalities().pipe(
+      filter(muni => muni != null)
+    ).subscribe(data => {
       this.municipalitiesList = data;
       this.municipalitiesList.sort((a, b) => {
         return a.name.localeCompare(b.name);
@@ -184,7 +196,9 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
   }
 
   private loadOrganisms() {
-    this.api.getOrganisms().subscribe(data => {
+    this.api.getOrganisms().pipe(
+      filter(org => org != null)
+    ).subscribe(data => {
       this.organismsList = data;
       this.organismsList.sort();
       this.organismsList.sort((a, b) => {
@@ -236,7 +250,7 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
   }
 
   onInfo(id_base_site) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, id_base_site]);
+    this.router.navigate(["sft/sites", id_base_site]);
   }
 
   onTaxonChanged(event) {
