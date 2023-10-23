@@ -9,7 +9,6 @@ import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.componen
 import { DataService } from '../shared/services/data.service';
 
 import { StoreService } from '../shared/services/store.service';
-import { ModuleConfig } from '../module.config';
 import { ObserversService } from '../shared/services/observers.service';
 import { ConfigService } from '../shared/services/config.service';
 
@@ -117,7 +116,7 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
 
   onEdit(id_visit) {
     this.router.navigate([
-      `${ModuleConfig.MODULE_URL}/sites`,
+      "sft/sites",
       this.idSite,
       'visits',
       id_visit,
@@ -126,10 +125,10 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
   }
 
   onInfo(id_visit) {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', id_visit]);
+    this.router.navigate(["sft/sites", this.idSite, 'visits', id_visit]);
   }
 
   onAdd() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite, 'visits', 'add']);
+    this.router.navigate(["sft/sites", this.idSite, 'visits', 'add']);
   }
 }

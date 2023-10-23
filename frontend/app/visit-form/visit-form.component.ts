@@ -11,7 +11,6 @@ import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.componen
 
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
-import { ModuleConfig } from '../module.config';
 import { ConfigService } from '../shared/services/config.service';
 
 @Component({
@@ -224,7 +223,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
   }
 
   onCancel() {
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
+    this.router.navigate(["sft/sites", this.idSite]);
   }
 
   onSave() {
@@ -304,7 +303,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
       positionClass: 'toast-top-center',
     });
 
-    this.router.navigate([`${ModuleConfig.MODULE_URL}/sites`, this.idSite]);
+    this.router.navigate(["sft/sites", this.idSite]);
   }
 
   private onDataSavedError(error) {
