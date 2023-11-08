@@ -134,7 +134,6 @@ function importVisits() {
             -v visitsHasObserversTmpTable="${visits_table_tmp_has_observers}" \
             -v visitsObserversTmpTable="${visits_table_tmp_observers}" \
             -v moduleCode="${module_code}" \
-            -v meshesCode="${meshes_code}" \
             -v observersListId="${observers_list_id}" \
             -v importDate="${import_date}" \
             -f "${data_dir}/import_visits.sql"

@@ -94,6 +94,8 @@ function importMeshes() {
             -v sridLocal="${srid_local}" \
             -v meshGeomColumn="${meshes_geom_column}" \
             -v meshNameColumn="${meshes_name_column}" \
+            -v meshTypeColumn="${meshes_type_column}" \
+            -v meshActionColumn="${meshes_action_column}" \
             -v meshesSource="${meshes_source}" \
             -v meshesCode="${meshes_code}" \
             -v moduleSchema="${module_schema}" \
@@ -110,6 +112,8 @@ function deleteMeshes() {
             -v meshesTmpTable="${meshes_tmp_table}" \
             -v meshesCode="${meshes_code}" \
             -v meshNameColumn="${meshes_name_column}" \
+            -v meshTypeColumn="${meshes_type_column}" \
+            -v meshActionColumn="${meshes_action_column}" \
             -v importDate="${import_date}" \
             -f "${data_dir}/delete_meshes.sql"
 }

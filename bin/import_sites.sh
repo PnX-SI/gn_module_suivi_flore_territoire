@@ -104,6 +104,7 @@ function importSites() {
             -v siteCodeColumn="${site_code_column}" \
             -v siteTaxonColumn="${site_taxon_column}" \
             -v siteDescColumn="${site_desc_column}" \
+            -v siteActionColumn="${site_action_column}" \
             -v importDate="${import_date}" \
             -f "${data_dir}/import_sites.sql"
 }
@@ -118,6 +119,7 @@ function deleteSites() {
             -v sitesTmpTable="${sites_tmp_table}" \
             -v siteCodeColumn="${site_code_column}" \
             -v siteTaxonColumn="${site_taxon_column}" \
+            -v siteActionColumn="${site_action_column}" \
             -v importDate="${import_date}" \
             -f "${data_dir}/delete_sites.sql"
 }
@@ -125,7 +127,7 @@ function deleteSites() {
 function loadShapeToPostgresql() {
     printMsg "Export sites SHP to PostGis and create sites temporary table « ${module_schema}.${sites_tmp_table} »"
     export PGPASSWORD="${user_pg_pass}"; \
-        shp2pgsql -c -s ${srid_local} "${sites_shape_path}" "${module_schema}.${sites_tmp_table}" \
+        shp2pgsql -d -s ${srid_local} "${sites_shape_path}" "${module_schema}.${sites_tmp_table}" \
         | psql -h "${db_host}" -U "${user_pg}" -d "${db_name}"
 }
 

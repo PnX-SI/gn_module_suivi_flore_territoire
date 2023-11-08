@@ -17,8 +17,8 @@ Avant de lancer les scripts, il est nécessaires de correctement les paramètrer
  - pour les fichiers source de type Shape (mailles, sites), les noms des champs des attributs des objets géographiques
  - pour les fichiers source de type CSV (visites), les noms des colonnes
 
- Enfin, pour chaque import le paramètre *import_date* doit être correctement renseigné avec une date au format `yyyy-mm-dd` distincte. Cette date permet d'associer dans la base de données, les mailles, sites, visites mais aussi utilisateurs (=`role`) et organismes à l'import courant.  
- Laisser en commentaire dans le fichier `imports_settings.ini` les dates utilisées pour chaque import.  
+ Enfin, pour chaque import le paramètre *import_date* doit être correctement renseigné avec une date au format `yyyy-mm-dd` distincte. Cette date permet d'associer dans la base de données, les mailles, sites, visites mais aussi utilisateurs (=`role`) et organismes à l'import courant.
+ Laisser en commentaire dans le fichier `imports_settings.ini` les dates utilisées pour chaque import.
  L'utilisation de la date courante n'est pas obligatoire. Vous êtes libre de choisir celle qui vous convient le mieux.
 
 ## Format des données
@@ -55,6 +55,8 @@ Description des paramètres de configuration permettant d'indiquer les noms des 
 
 Autres paramètres :
 - **meshes_geom_column** : nom du champ contenant la géométrie de la maille dans la table temporaire créé dans Postgresql. Ce champ n'a pas à apparaitre dans les attributs des objets géographique. Par défaut, l'utilitaire employé par le script (*shp2pgsql*) créé une colonne ayant pour libellé *geom* en se basant sur les infos géographiques du fichier Shape.
+- **meshes_type_column** : nom du champ indiquant le type de maille. La présence de ce champ n'est pas obligatoire dans les attributs des objets géographiques du fichier Shape. Par défaut la valeur du parametre `meshes_code` du fichier `settings.default.ini` est utilisée. Ce dernier paramètre doit correspondre au paramètre de config `id_type_maille`. Pour l'instant l'interface du module supporte seulement un unique type de maille . Du coup, même si des mailles d'autres dimenssions sont utilisées il faut les associer à ce type maille... Voir le ticket [#74](https://github.com/PnX-SI/gn_module_suivi_flore_territoire/issues/74).
+- **meshes_action_column** : nom du champ indiquant le type d'action à effectuer sur l'objet géographique. La présence de ce champ n'est pas obligatoire dans les attributs des objets géographiques du fichier Shape. Valeurs possibles : `A` = ajout (par défaut), `M` = modification et `S` = suppression.
  - **meshes_tmp_table** : nom de la table temporaire contenant les mailles créée dans Postgresql.
  - **meshes_source** : permet d'indiquer l'organisme fournissant la géométrie des mailles.
 
@@ -69,6 +71,7 @@ Description des paramètres de configuration permettant d'indiquer les noms des 
  - **site_code_column** : nom du champ contenant le code du site.
  - **site_taxon_column** : nom du champ contenant le code TaxRef du nom (*cd_nom*) du taxon étudié sur ce site.
  - **site_desc_column** : nom du champ contenant la description du site.
+ - **site_action_column** : nom du champ indiquant le type d'action à effectuer sur l'objet géographique (= le site). La présence de ce champ n'est pas obligatoire dans les attributs des objets géographiques du fichier Shape. Valeurs possibles : `A` = ajout (par défaut), `M` = modification et `S` = suppression.
 
 Autres paramètres :
  - **site_geom_column** : nom du champ contenant la géométrie du site dans la table temporaire créé dans Postgresql. Ce champ n'a pas à apparaitre dans les attributs des objets géographique. Par défaut, l'utilitaire employé par le script (*shp2pgsql*) créé une colonne ayant pour libellé *geom* en se basant sur les infos géographiques du fichier Shape.
@@ -109,7 +112,7 @@ Afin que les triggers présents sur les tables soient déclenchés dans le bon o
  4. sites : `import_sites.sh`
  5. visites : `import_visits.sh`
 
-La désinstallation des données importées se fait dans le sens inverse. Il faut commencer par les visites puis passer aux sites...  
+La désinstallation des données importées se fait dans le sens inverse. Il faut commencer par les visites puis passer aux sites...
 
 **ATTENTION :** concernant la désinstallation, il s'agit d'une manipulation délicate à utiliser principalement sur une base de données de test ou lors du développement du module. En production, nous vous conseillons fortement d'éviter son utilisation. Si vous y êtes contraint, veuillez sauvegarder votre base de données auparavant.
 
@@ -147,7 +150,7 @@ WHERE vtlf1.ctid < vtlf2.ctid
 ### Lister les sites possédant des mailles communes
 
 ```sql
-SELECT DISTINCT tbs0.id_base_site, tbs0.base_site_code 
+SELECT DISTINCT tbs0.id_base_site, tbs0.base_site_code
 FROM gn_monitoring.cor_site_area AS csa0
 	INNER JOIN gn_monitoring.t_base_sites AS tbs0
 			ON (tbs0.id_base_site = csa0.id_base_site)
@@ -155,8 +158,8 @@ WHERE id_area IN (
 	SELECT csa.id_area
 	FROM gn_monitoring.cor_site_area AS csa
 		INNER JOIN ref_geo.l_areas AS la
-			ON (csa.id_area = la.id_area) 
-	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m') 
+			ON (csa.id_area = la.id_area)
+	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m')
 	GROUP BY csa.id_area
 	HAVING COUNT(csa.id_area) > 1
 );
@@ -168,13 +171,13 @@ Au préalable, exécuter le SQL permettant d'ajouer la fonction *st_dilate* dont
 
 Exemple, liste des mailles non comprisent entièrement dans la géométrie de leur site pour les sites 5, 13, 128 et 176 :
 ```sql
-SELECT DISTINCT tbs.id_base_site, tbs.base_site_code, tbs.geom, la.geom, la.id_area 
+SELECT DISTINCT tbs.id_base_site, tbs.base_site_code, tbs.geom, la.geom, la.id_area
 FROM gn_monitoring.t_base_sites AS tbs
 	INNER JOIN gn_monitoring.cor_site_area AS csa
 		ON (tbs.id_base_site = csa.id_base_site)
 	INNER JOIN ref_geo.l_areas AS la
-		ON (csa.id_area = la.id_area) 
-	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m') 
+		ON (csa.id_area = la.id_area)
+	WHERE la.id_type = (SELECT id_type FROM ref_geo.bib_areas_types WHERE type_code = 'M25m')
 	AND tbs.id_base_site IN (5, 13, 128, 176)
 	AND NOT public.ST_ContainsProperly(st_dilate(tbs.geom_local, 1.1), public.st_transform(la.geom, 2154)) ;
 ```
