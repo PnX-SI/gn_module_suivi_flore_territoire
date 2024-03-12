@@ -34,7 +34,7 @@
               <pnx-taxonomy
                 #taxon
                 [parentFormControl]="filterForm.controls.taxonFilter"
-                [idList]="configService.get('id_list_taxon')"
+                [idList]="configService.cfg['SFT']['id_list_taxon']"
                 [charNumber]="3"
                 [listLength]="20"
                 (onChange)="onTaxonChanged($event)"
