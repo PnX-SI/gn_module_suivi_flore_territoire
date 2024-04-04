@@ -14,7 +14,7 @@ from geonature.core.gn_monitoring.models import (
 )
 from ref_geo.models import LAreas
 from geonature.utils.env import db
-from geonature.utils.utilsgeometry import shapeserializable
+from utils_flask_sqla_geo.serializers import shapeserializable
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
 from utils_flask_sqla.serializers import serializable
@@ -139,7 +139,7 @@ class VisitGrid(MonitoringFloraTerritory):
 class Visit(TBaseVisits, VisitAuthMixin):
     __tablename__ = "t_base_visits"
     __table_args__ = {"schema": "gn_monitoring", "extend_existing": True}
-    
+
 
     def __repr__(self):
         return str(self.__class__) + ": " + str(self.__dict__)
