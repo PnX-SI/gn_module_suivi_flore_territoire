@@ -2,7 +2,7 @@ from flask import g
 from geoalchemy2 import Geometry
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func, select
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
@@ -162,7 +162,12 @@ class Visit(TBaseVisits, VisitAuthMixin):
     )
 
     def has_visit_for_this_year(self, year):
-        visit = db.session.query(Visit.id_base_site).filter_by(id_base_site=self.id_base_site).filter(func.date_part("year", TBaseVisits.visit_date_min) == year).one_or_none()
+        visit = db.session.execute(
+            select(Visit.id_base_site)
+            .filter_by(id_base_site=self.id_base_site)
+            .where(func.date_part("year", TBaseVisits.visit_date_min) == year)
+            ).one_or_none()
+
         if visit :
             return True
         return False

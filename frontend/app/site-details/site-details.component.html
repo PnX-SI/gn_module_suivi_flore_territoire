@@ -14,75 +14,77 @@
       Informations du site
     </h3>
 
-    <ul class="nav nav-tabs" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#infoGen" role="tab">
+    <ul ngbNav #nav="ngbNav" class="nav-tabs">
+      <li ngbNavItem>
+        <a ngbNavLink>
           <i class="fa fa-info-circle"> </i>
           Informations générales
         </a>
+        <ng-template ngbNavContent>
+            <div class="tab-pane active list-group-item">
+              <p>
+                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                <span> Nom du site : </span>
+                <span class="strong"> {{ site?.name }} </span>
+              </p>
+              <p>
+                <i class="fa fa-tag" aria-hidden="true"></i>
+                <span> Code du site : </span>
+                <span class="strong"> {{ site?.code }} </span>
+              </p>
+              <p>
+                <i class="fa fa-leaf" aria-hidden="true"></i>
+                <span> Espèce suivie : </span>
+                <span
+                  class="strong"
+                  [matTooltip]="site?.sciname?.code"
+                  [innerHTML]="site?.sciname?.label"
+                ></span>
+              </p>
+              <p>
+                <i class="fa fa-map" aria-hidden="true"></i>
+                <span> Commune : </span>
+                <span class="strong" *ngIf="site && site.municipalities; else noMunicipality">
+                  {{ site?.municipalities }}
+                </span>
+                <ng-template #noMunicipality>inconnue</ng-template>
+              </p>
+              <p>
+                <i class="fa fa-th" aria-hidden="true"></i>
+                <span> Nombre de mailles : </span>
+                <span class="strong"> {{ storeService.total }} </span>
+              </p>
+            </div>
+        </ng-template>
       </li>
-      <li class="nav-item" *ngIf="showDetails">
-        <a class="nav-link" data-toggle="tab" href="#details" role="tab">
+      <li ngbNavItem *ngIf="showDetails">
+        <a ngbNavLink>
           <i class="fa fa-search-plus police"> </i>
           Détails
         </a>
+        <ng-template ngbNavContent>
+            <div class="tab-pane list-group-item">
+              <p>
+                <i class="fa fa-key" aria-hidden="true"></i>
+                <span> Identifiant du site : </span>
+                <span class="strong"> {{ site?.id }} </span>
+              </p>
+              <p>
+                <i class="fa fa-barcode" aria-hidden="true"></i>
+                <span> Identifiant unique du site : </span>
+                <span class="strong"> {{ site?.uuid }} </span>
+              </p>
+              <p>
+                <i class="fa fa-align-justify" aria-hidden="true"></i>
+                <span> Description du site : </span>
+                <span class="strong"> {{ site?.description }} </span>
+              </p>
+            </div>
+        </ng-template>
       </li>
     </ul>
+    <div [ngbNavOutlet]="nav"></div>
 
-    <div class="tab-content">
-      <div class="tab-pane active modal-header list-group-item" id="infoGen" role="tabpanel">
-        <p>
-          <i class="fa fa-map-marker" aria-hidden="true"></i>
-          <span> Nom du site : </span>
-          <span class="strong"> {{ site?.name }} </span>
-        </p>
-        <p>
-          <i class="fa fa-tag" aria-hidden="true"></i>
-          <span> Code du site : </span>
-          <span class="strong"> {{ site?.code }} </span>
-        </p>
-        <p>
-          <i class="fa fa-leaf" aria-hidden="true"></i>
-          <span> Espèce suivie : </span>
-          <span
-            class="strong"
-            [matTooltip]="site?.sciname?.code"
-            [innerHTML]="site?.sciname?.label"
-          ></span>
-        </p>
-        <p>
-          <i class="fa fa-map" aria-hidden="true"></i>
-          <span> Commune : </span>
-          <span class="strong" *ngIf="site && site.municipalities; else noMunicipality">
-            {{ site?.municipalities }}
-          </span>
-          <ng-template #noMunicipality>inconnue</ng-template>
-        </p>
-        <p>
-          <i class="fa fa-th" aria-hidden="true"></i>
-          <span> Nombre de mailles : </span>
-          <span class="strong"> {{ storeService.total }} </span>
-        </p>
-      </div>
-
-      <div class="tab-pane modal-header list-group-item " id="details" role="tabpanel">
-        <p>
-          <i class="fa fa-key" aria-hidden="true"></i>
-          <span> Identifiant du site : </span>
-          <span class="strong"> {{ site?.id }} </span>
-        </p>
-        <p>
-          <i class="fa fa-barcode" aria-hidden="true"></i>
-          <span> Identifiant unique du site : </span>
-          <span class="strong"> {{ site?.uuid }} </span>
-        </p>
-        <p>
-          <i class="fa fa-align-justify" aria-hidden="true"></i>
-          <span> Description du site : </span>
-          <span class="strong"> {{ site?.description }} </span>
-        </p>
-      </div>
-    </div>
 
     <hr />
 
