@@ -5,9 +5,9 @@ import logging
 from flask import Blueprint, request, send_from_directory, g
 from geoalchemy2.shape import to_shape
 from geojson import FeatureCollection
-from sqlalchemy import and_, distinct, desc
+from sqlalchemy import and_, distinct, desc, delete
 from sqlalchemy.orm import joinedload
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func, select
 from werkzeug.exceptions import Forbidden, BadRequest
 
 
@@ -23,8 +23,6 @@ from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.tools import get_scopes_by_action
 from ref_geo.models import LAreas, BibAreasTypes
 from geonature.utils.env import db, ROOT_DIR
-
-
 from pypnusershub.db.models import Organisme, User
 from utils_flask_sqla.response import json_resp, to_json_resp, to_csv_resp
 from utils_flask_sqla_geo.utilsgeometry import FionaShapeService
@@ -38,7 +36,7 @@ from .models import (
     SiteInfos,
     Visit,
 )
-from .utils import prepare_output, prepare_input, fprint
+from .utils import prepare_output
 
 
 blueprint = Blueprint("pr_monitoring_flora_territory", __name__)
@@ -74,30 +72,33 @@ def get_sites():
     )
 
     # Query to get Sites id
-    query = db.session.query(distinct(SiteInfos.id_infos_site)).select_from(from_clause)
+    query = select(
+            func.distinct(SiteInfos.id_infos_site)
+        ).select_from(from_clause)
 
     if "id_base_site" in parameters:
-        query = query.filter(SiteInfos.id_base_site == parameters["id_base_site"])
+        query = query.where(SiteInfos.id_base_site == parameters["id_base_site"])
 
     if "cd_nom" in parameters:
-        query = query.filter(SiteInfos.cd_nom == parameters["cd_nom"])
+        query = query.where(SiteInfos.cd_nom == parameters["cd_nom"])
 
     if "organism" in parameters and parameters["organism"] != "null":
-        query = query.filter(Organisme.id_organisme == parameters["organism"])
+        query = query.where(Organisme.id_organisme == parameters["organism"])
 
     if "municipality" in parameters and parameters["municipality"] != "null":
-        query = query.filter(LAreas.id_area == parameters["municipality"])
+        query = query.where(LAreas.id_area == parameters["municipality"])
 
     if "year" in parameters and parameters["year"] != "null":
-        query = query.filter(
+        query = query.where(
             func.date_part("year", TBaseVisits.visit_date_min) == parameters["year"]
         )
 
-    id_site_list = query.all()
+    id_site_list = db.session.scalars(query).all()
 
     # Query to get Sites data with previous id
-    query = (
-        db.session.query(
+    data = (
+        db.session.execute(
+            select(
             SiteInfos,
             func.max(TBaseVisits.visit_date_min),
             Taxref.nom_complet,
@@ -106,10 +107,10 @@ def get_sites():
             func.string_agg(distinct(LAreas.area_name), ", "),
         )
         .select_from(from_clause.outerjoin(Taxref, SiteInfos.cd_nom == Taxref.cd_nom))
-        .filter(SiteInfos.id_infos_site.in_(id_site_list))
+        .where(SiteInfos.id_infos_site.in_(id_site_list))
         .group_by(SiteInfos, Taxref.nom_complet)
+        ).all()
     )
-    data = query.all()
 
     features = []
     for d in data:
@@ -144,11 +145,13 @@ def get_one_site(id_base_site):
     """
     Retourne les infos d'un site à partir de l'id_base_site
     """
-    base_site_infos = (
-        db.session.query(SiteInfos).filter(SiteInfos.id_base_site == id_base_site).first()
-    )
-    municipalities = (
-        db.session.query(
+    base_site_infos = db.session.scalars(
+        select(SiteInfos)
+        .where(SiteInfos.id_base_site == id_base_site)
+    ).first()
+
+    municipalities = db.session.execute(
+            select(
             func.string_agg(
                 distinct(func.concat(LAreas.area_name, " (", LAreas.area_code, ")")), ", "
             ).filter(LAreas.area_name != None),
@@ -163,9 +166,8 @@ def get_one_site(id_base_site):
                 and_(BibAreasTypes.id_type == LAreas.id_type, BibAreasTypes.type_code == "COM"),
             )
         )
-        .filter(SiteInfos.id_base_site == id_base_site)
-        .scalar()
-    )
+        .where(SiteInfos.id_base_site == id_base_site)
+        ).scalar()
 
     infos_site = base_site_infos.as_dict(fields=["base_site", "sciname"])
     output = infos_site["base_site"]
@@ -185,10 +187,10 @@ def get_visits():
     Retourne toutes les visites du module
     """
     parameters = request.args
-    query = db.session.query(Visit)
+    query = select(Visit)
     if "id_base_site" in parameters:
-        query = query.filter(Visit.id_base_site == parameters["id_base_site"])
-    data = query.all()
+        query = query.where(Visit.id_base_site == parameters["id_base_site"])
+    data = db.session.scalars(query).unique().all()
     fields = get_visit_fields()
     return [d.as_dict(fields=fields) for d in data]
 
@@ -204,12 +206,11 @@ def get_one_visit(id_visit):
 
 
 def get_visit_details(id_visit):
-    data = (
-        db.session.query(Visit)
+    data = db.session.scalars(
+        select(Visit)
         .options(joinedload(Visit.cor_visit_perturbation))
-        .filter(Visit.id_base_visit == id_visit)
-        .first()
-    )
+        .where(Visit.id_base_visit == id_visit)
+        ).first()
     fields = get_visit_fields()
     return data.as_dict(fields=fields)
 
@@ -250,11 +251,10 @@ def edit_visit(id_visit=None):
 
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
-    data["id_module"] = (
-        db.session.query(TModules.id_module)
-        .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
-        .scalar()
-    )
+    data["id_module"] = select(
+        TModules.id_module
+        ).where(TModules.module_code == blueprint.config["MODULE_CODE"])
+
     if not id_visit:
         data["id_digitiser"] = g.current_user.id_role
 
@@ -277,7 +277,8 @@ def edit_visit(id_visit=None):
 
     # Add/Update perturbations
     if id_visit:
-        db.session.query(VisitPerturbation).filter_by(id_base_visit=id_visit).delete()
+        delete_visit_perturbations = delete(VisitPerturbation).where(VisitPerturbation.id_base_visit == id_visit)
+        db.session.execute(delete_visit_perturbations)
     for perturbation_id in perturbations_ids:
         perturbation = {"id_nomenclature_perturbation": perturbation_id}
         if id_visit:
@@ -287,13 +288,15 @@ def edit_visit(id_visit=None):
 
     # Add/Update grids
     if id_visit:
-        db.session.query(VisitGrid).filter_by(id_base_visit=id_visit).delete()
+        delete_visit_grids = delete(VisitGrid).where(VisitGrid.id_base_visit == id_visit)
+        db.session.execute(delete_visit_grids)
+
     for grid in visit_grids:
         visit_grid = VisitGrid(**grid)
         visit.cor_visit_grid.append(visit_grid)
 
     # Add/Update observers
-    observers = db.session.query(User).filter(User.id_role.in_(observers_ids)).all()
+    observers = db.session.scalars(select(User).where(User.id_role.in_(observers_ids))).all()
     for observer in observers:
         visit.observers.append(observer)
 
@@ -327,26 +330,26 @@ def export_visits():
     parameters = request.args
     export_format = parameters["export_format"] if "export_format" in request.args else "shapefile"
 
-    query = db.session.query(VisitsExport)
+    query = select(VisitsExport)
     if "id_base_visit" in parameters:
-        query = query.filter(VisitsExport.id_base_visit == parameters["id_base_visit"])
+        query = query.where(VisitsExport.id_base_visit == parameters["id_base_visit"])
 
     if "id_base_site" in parameters:
-        query = query.filter(VisitsExport.id_base_site == parameters["id_base_site"])
+        query = query.where(VisitsExport.id_base_site == parameters["id_base_site"])
 
     if "organisme" in parameters:
-        query = query.filter(VisitsExport.organisme == parameters["organisme"])
+        query = query.where(VisitsExport.organisme == parameters["organisme"])
 
     if "commune" in parameters:
-        query = query.filter(VisitsExport.area_name == parameters["commune"])
+        query = query.where(VisitsExport.area_name == parameters["commune"])
 
     if "year" in parameters:
-        query = query.filter(func.date_part("year", VisitsExport.visit_date_min) == parameters["year"])
+        query = query.where(func.date_part("year", VisitsExport.visit_date_min) == parameters["year"])
 
     if "cd_nom" in parameters:
-        query = query.filter(VisitsExport.cd_nom == parameters["cd_nom"])
+        query = query.where(VisitsExport.cd_nom == parameters["cd_nom"])
 
-    results = query.all()
+    results = db.session.scalars(query).unique().all()
 
     file_name = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
     if export_format == "geojson":
@@ -389,13 +392,17 @@ def get_visits_years():
     """
     Retourne toutes les années de visites du module.
     """
-    query = (
-        db.session.query(func.to_char(Visit.visit_date_min, "YYYY"))
+    results = (
+        db.session.execute(
+            select(
+            func.to_char(Visit.visit_date_min, "YYYY")
+            )
         .join(SiteInfos, SiteInfos.id_base_site == Visit.id_base_site)
         .order_by(desc(func.to_char(Visit.visit_date_min, "YYYY")))
         .group_by(func.to_char(Visit.visit_date_min, "YYYY"))
+        ).unique()
+        .all()
     )
-    results = query.all()
 
     years = []
     for row in results:
@@ -410,16 +417,17 @@ def get_municipalities():
     """
     Retourne toutes les communes liées au module.
     """
-    query = (
-        db.session.query(LAreas)
+    results = (
+        db.session.scalars(
+            select(LAreas)
         .join(BibAreasTypes, BibAreasTypes.id_type == LAreas.id_type)
         .join(corSiteArea, LAreas.id_area == corSiteArea.c.id_area)
         .join(corSiteModule, corSiteModule.c.id_base_site == corSiteArea.c.id_base_site)
         .join(TModules, TModules.id_module == corSiteModule.c.id_module)
-        .filter(TModules.module_code == blueprint.config["MODULE_CODE"])
-        .filter(BibAreasTypes.type_code == "COM")
+        .where(TModules.module_code == blueprint.config["MODULE_CODE"])
+        .where(BibAreasTypes.type_code == "COM")
+        ).unique().all()
     )
-    results = query.all()
 
     output = []
     for area in results:
@@ -435,13 +443,14 @@ def get_organisms():
     """
     Retourne la liste de tous les organismes liés au module.
     """
-    query = (
-        db.session.query(Organisme)
+    results = (
+        db.session.scalars(
+            select(Organisme)
         .join(User, User.id_organisme == Organisme.id_organisme)
         .join(corVisitObserver, corVisitObserver.c.id_role == User.id_role)
         .join(Visit, Visit.id_base_visit == corVisitObserver.c.id_base_visit)
+        ).unique().all()
     )
-    results = query.all()
 
     output = []
     for organism in results:
