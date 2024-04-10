@@ -1,6 +1,6 @@
 import datetime
 import logging
-
+import os
 
 from flask import Blueprint, request, send_from_directory, g
 from geoalchemy2.shape import to_shape
@@ -373,6 +373,8 @@ def export_visits():
         return to_csv_resp(file_name, visits, headers, ";")
     else:
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
         FionaShapeService.create_fiona_struct(
             db_cols=VisitsExport.__mapper__.c,
             srid=2154,
