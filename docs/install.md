@@ -52,6 +52,11 @@ Une fois le module installé, vous pouvez régler les droits du module pour votr
   - `E` (Export) à `3` (Toutes les données)
   - `D` (Supprimer) à `1` (Mes données)
 
+Vous pouvez aussi utiliser la commande suivante pour attribuer tous les droits à un groupe spécifique (ici groupe admin) :
+    ```bash
+    geonature permissions supergrant --group --nom "Grp_admin" --yes
+    ```
+
 
 ## Désinstallation
 
