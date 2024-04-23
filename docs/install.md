@@ -37,7 +37,7 @@
     - Les valeurs par défaut dans : `backend/gn_module_monitoring_flora_territory/conf_schema_toml.py`
 7. Mettre à jour le frontend :
     ```bash
-    geonature update-configuration --build false && geonature generate-frontend-module-config
+    geonature update-configuration --build false && geonature generate-frontend-module-config SFT
     ```
 8. Vous pouvez sortir du venv en lançant la commande : `deactivate`
 
