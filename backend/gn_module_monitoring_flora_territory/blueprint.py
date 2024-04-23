@@ -381,15 +381,18 @@ def export_visits():
         dir_path = str(ROOT_DIR / "backend/static/shapefiles")
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
-        FionaShapeService.create_fiona_struct(
+        FionaShapeService.create_shapes_struct(
             db_cols=VisitsExport.__mapper__.c,
             srid=2154,
             dir_path=dir_path,
             file_name=file_name,
         )
-        for data in results:
-            FionaShapeService.create_feature(data.as_dict(), data.geom)
-        FionaShapeService.save_files()
+
+        for row in results:
+            FionaShapeService.create_feature(row.as_dict(), row.geom)
+
+        FionaShapeService.save_and_zip_shapefiles()
+
         return send_from_directory(dir_path, file_name + ".zip", as_attachment=True)
 
 
