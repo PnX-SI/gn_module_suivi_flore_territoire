@@ -337,8 +337,14 @@ def export_visits():
     if "id_base_site" in parameters:
         query = query.where(VisitsExport.id_base_site == parameters["id_base_site"])
 
-    if "organisme" in parameters:
-        query = query.where(VisitsExport.organisme == parameters["organisme"])
+    if "organism" in parameters:
+        query = (
+            query.join(
+                corVisitObserver, corVisitObserver.c.id_base_visit == VisitsExport.id_base_visit
+            )
+            .join(User, User.id_role == corVisitObserver.c.id_role)
+            .where(User.id_organisme == parameters["organism"])
+        )
 
     if "commune" in parameters:
         query = query.where(VisitsExport.area_name == parameters["commune"])
