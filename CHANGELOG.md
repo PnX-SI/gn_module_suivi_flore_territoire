@@ -7,7 +7,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [NonPublié]
 
-## [1.2.0] - 2024-07-15
+## [1.2.0] - 2024-08-20
 
 ### Fonctionnalités
 
