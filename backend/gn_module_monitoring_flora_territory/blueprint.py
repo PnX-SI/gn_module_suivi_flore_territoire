@@ -8,7 +8,7 @@ from geojson import FeatureCollection
 from sqlalchemy import and_, distinct, desc, delete
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func, select
-from werkzeug.exceptions import Forbidden, BadRequest
+from werkzeug.exceptions import Forbidden, Conflict
 
 
 from apptax.taxonomie.models import Taxref
@@ -271,9 +271,13 @@ def edit_visit(id_visit=None):
 
     # Create visit object
     visit = Visit(**data)
-    if visit.has_visit_for_this_year(data["visit_date_min"][0:4]):
-        raise BadRequest(f"Already a visit for this site in {data['visit_date_min'][0:4]} ")
 
+    if visit.has_visit_for_this_year():
+        year = data["visit_date_min"][0:4]
+        id_base_site = data["id_base_site"]
+        db.session.rollback()
+        msg = f"PostYearError - Site {id_base_site} has already been visited in {year}"
+        raise Conflict(msg)
 
     # Add/Update perturbations
     if id_visit:

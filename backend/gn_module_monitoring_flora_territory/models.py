@@ -161,15 +161,21 @@ class Visit(TBaseVisits, VisitAuthMixin):
         foreign_keys=[corVisitObserver.c.id_base_visit, corVisitObserver.c.id_role],
     )
 
-    def has_visit_for_this_year(self, year):
-        visit = db.session.execute(
-            select(Visit.id_base_site)
-            .filter_by(id_base_site=self.id_base_site)
-            .where(func.date_part("year", TBaseVisits.visit_date_min) == year)
-            ).one_or_none()
+    def has_visit_for_this_year(self):
+        year_new_visit = self.visit_date_min[0:4]
 
-        if visit :
-            return True
+        query = select(func.date_part("year", TBaseVisits.visit_date_min)).where(
+            TBaseVisits.id_base_site == self.id_base_site
+        )
+        if self.id_base_visit is not None:
+            query = query.where(TBaseVisits.id_base_visit != self.id_base_visit)
+        old_years = db.session.execute(query).all()
+
+        for year in old_years:
+            year_old_visit = str(int(year[0]))
+            if year_old_visit == year_new_visit:
+                return True
+
         return False
 
 
