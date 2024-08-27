@@ -162,18 +162,30 @@ class Visit(TBaseVisits, VisitAuthMixin):
     )
 
     def has_visit_for_this_year(self):
-        year_new_visit = self.visit_date_min[0:4]
+        year_new_visit_min = int(self.visit_date_min[0:4])
+        year_new_visit_max = int(self.visit_date_max[0:4])
 
-        query = select(func.date_part("year", TBaseVisits.visit_date_min)).where(
-            TBaseVisits.id_base_site == self.id_base_site
-        )
+        # Query to get all the years from visit_date_min and visit_date_max
+        query = select(
+            [
+                func.date_part("year", TBaseVisits.visit_date_min),
+                func.date_part("year", TBaseVisits.visit_date_max),
+            ]
+        ).where(TBaseVisits.id_base_site == self.id_base_site)
+
         if self.id_base_visit is not None:
             query = query.where(TBaseVisits.id_base_visit != self.id_base_visit)
+
         old_years = db.session.execute(query).all()
 
-        for year in old_years:
-            year_old_visit = str(int(year[0]))
-            if year_old_visit == year_new_visit:
+        for year_min, year_max in old_years:
+            year_old_visit_min = int(year_min)
+            year_old_visit_max = int(year_max)
+
+            # Check if any year overlaps with the new visit's years
+            if (year_new_visit_min <= year_old_visit_max) and (
+                year_new_visit_max >= year_old_visit_min
+            ):
                 return True
 
         return False
