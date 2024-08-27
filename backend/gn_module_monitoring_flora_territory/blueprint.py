@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 
+import sqlalchemy as sa
 from flask import Blueprint, request, send_from_directory, g
 from geoalchemy2.shape import to_shape
 from geojson import FeatureCollection
@@ -90,7 +91,8 @@ def get_sites():
 
     if "year" in parameters and parameters["year"] != "null":
         query = query.where(
-            func.date_part("year", TBaseVisits.visit_date_min) == parameters["year"]
+            func.date_part("year", TBaseVisits.visit_date_min) <= parameters["year"],
+            func.date_part("year", TBaseVisits.visit_date_max) >= parameters["year"]
         )
 
     id_site_list = db.session.scalars(query).all()
@@ -405,16 +407,21 @@ def export_visits():
 @json_resp
 def get_visits_years():
     """
-    Retourne toutes les années de visites du module.
+    Retourne toutes les années de visites du module, en prenant en compte toutes les années entre
+    visit_date_min et visit_date_max.
     """
     results = (
         db.session.execute(
             select(
-            func.to_char(Visit.visit_date_min, "YYYY")
+                func.generate_series(
+                    func.extract('year', Visit.visit_date_min).cast(sa.Integer),
+                    func.extract('year', Visit.visit_date_max).cast(sa.Integer),
+                    1
+                ).label('year')
             )
-        .join(SiteInfos, SiteInfos.id_base_site == Visit.id_base_site)
-        .order_by(desc(func.to_char(Visit.visit_date_min, "YYYY")))
-        .group_by(func.to_char(Visit.visit_date_min, "YYYY"))
+            .join(SiteInfos, SiteInfos.id_base_site == Visit.id_base_site)
+            .order_by(desc('year'))
+            .distinct()
         ).unique()
         .all()
     )
