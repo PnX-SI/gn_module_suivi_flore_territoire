@@ -23,7 +23,8 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
   public idSite;
   private updateMode: boolean = false;
   public sciname;
-  public date;
+  public date_min;
+  public date_max;
   public visitForm: FormGroup;
   public visitGrid = []; // Data on meshes
   private observers = [];
@@ -49,7 +50,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
     public router: Router,
     public storeService: StoreService,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.idSite = this.activatedRoute.snapshot.params['idSite'];
@@ -81,6 +82,16 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
       cor_visit_grid: new Array(),
       comments: null,
     });
+
+    // Set visit_date_max to visit_date_min value if visit_date_max is not registered
+    this.visitForm.get('visit_date_min').valueChanges.subscribe((visit_date_min) => {
+      let visit_date_max = this.visitForm.get('visit_date_max').value;
+      if (!visit_date_max) {
+        this.visitForm.patchValue({
+          visit_date_max: visit_date_min,
+        });
+      }
+    });
   }
 
   private loadSite() {
@@ -92,7 +103,8 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
 
   private loadVisit() {
     this.api.getOneVisit(this.idVisit).subscribe(visit => {
-      this.date = visit.visit_date_min;
+      this.date_min = visit.visit_date_min;
+      this.date_max = visit.visit_date_max;
       this.visitGrid = visit.cor_visit_grid !== undefined ? visit.cor_visit_grid : [];
       this.observers = visit.observers;
       this.perturbations = visit.cor_visit_perturbation.map(
@@ -131,8 +143,8 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
     this.visitForm.patchValue({
       id_base_site: this.idSite,
       id_base_visit: this.idVisit,
-      visit_date_min: this.dateParser.parse(this.date),
-      visit_date_max: this.dateParser.parse(this.date),
+      visit_date_min: this.dateParser.parse(this.date_min),
+      visit_date_max: this.dateParser.parse(this.date_max),
       cor_visit_observer: this.observers,
       cor_visit_perturbation: this.perturbations,
       cor_visit_grid: this.visitGrid,
@@ -233,7 +245,7 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
       this.visitForm.controls.visit_date_min.value
     );
     formData['visit_date_max'] = this.dateParser.format(
-      this.visitForm.controls.visit_date_min.value
+      this.visitForm.controls.visit_date_max.value
     );
     formData['cor_visit_grid'] = this.getUpdatedVisitGrid();
     formData['cor_visit_observer'] = formData['cor_visit_observer'].map(obs => obs.id_role);

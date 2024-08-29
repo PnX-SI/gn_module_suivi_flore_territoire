@@ -38,10 +38,20 @@
     <div class=" list-group-item modif">
       <div>
         <i class="fa fa-hourglass-2 fa-lg"></i>
-        Date de la visite :
+        Date de début de la visite :
       </div>
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
         <pnx-date [parentFormControl]="visitForm.controls.visit_date_min"></pnx-date>
+      </div>
+    </div>
+
+        <div class=" list-group-item modif">
+      <div>
+        <i class="fa fa-hourglass-2 fa-lg"></i>
+        Date de fin de la visite :
+      </div>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
+        <pnx-date [parentFormControl]="visitForm.controls.visit_date_max"></pnx-date>
       </div>
     </div>
 
