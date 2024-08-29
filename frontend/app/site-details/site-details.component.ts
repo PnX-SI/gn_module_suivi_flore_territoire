@@ -22,6 +22,7 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
   public visitGrid: FormGroup;
   public idVisit;
   public visits = [];
+  public filteredColumns = [];
   public showDetails = false;
   public site;
   public siteGeoJson;
@@ -47,12 +48,6 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
     this.storeService.initialize();
     this.storeService.queryString = this.storeService.queryString.set('id_base_site', this.idSite);
 
-    this.configService.get('visits_datatable_columns').forEach(col => {
-      if (col.prop === 'observers') {
-        col.cellTemplate = this.observersCellTpl;
-      }
-    });
-
     this.api.getOneSite(this.idSite).subscribe(info => {
       this.site = info;
 
@@ -73,6 +68,22 @@ export class SiteDetailsComponent implements OnInit, AfterViewInit {
     this.api.getVisits({ id_base_site: this.idSite }).subscribe(visits => {
       this.computeVisitsInfos(visits);
       this.visits = visits;
+
+      let shouldHideColumn = this.visits.every(visit => visit.visit_date_max === visit.visit_date_min);
+      // If all visits have visit_date_max same as visit_date_min, we don't display visit_date_max
+      if (shouldHideColumn) {
+        this.filteredColumns = this.configService.get('visits_datatable_columns')
+          .filter(column => column.prop !== "visit_date_max"); // Remove visit_date_max from column configuration
+      }
+      else {
+        this.filteredColumns = this.configService.get('visits_datatable_columns')
+      }
+
+      this.filteredColumns.forEach(col => {
+        if (col.prop === 'observers') {
+          col.cellTemplate = this.observersCellTpl;
+        }
+      });
     });
   }
 

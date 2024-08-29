@@ -41,8 +41,13 @@ sites_datatable_columns = [
 
 visits_datatable_columns = [
     {
-        "name": "Date",
+        "name": "Date de début",
         "prop": "visit_date_min",
+        "width": 200,
+    },
+    {
+        "name": "Date de fin",
+        "prop": "visit_date_max",
         "width": 200,
     },
     {

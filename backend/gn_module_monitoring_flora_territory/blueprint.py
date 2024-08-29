@@ -222,6 +222,7 @@ def get_visit_fields():
         "id_base_visit",
         "id_base_site",
         "visit_date_min",
+        "visit_date_max",
         "comments",
         "cor_visit_grid",
         "cor_visit_perturbation.nomenclature",

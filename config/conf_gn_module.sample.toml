@@ -43,7 +43,8 @@ sites_datatable_columns = [
 ]
 # Colonnes à afficher dans la table des visites sur la page d'un site
 visits_datatable_columns = [
-    {name = "Date", prop = "visit_date_min"},
+    {name = "Date début", prop = "visit_date_min"},
+    {name = "Date fin", prop = "visit_date_max"},
     {name = "Observateur(s)", prop = "observers"},
     {name = "Présence/ Absence ?", prop = "state"}
     # {name = "Id", prop = "id_base_visit"}

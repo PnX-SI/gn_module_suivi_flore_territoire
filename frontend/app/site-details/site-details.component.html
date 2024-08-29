@@ -124,7 +124,7 @@
         </ngx-datatable-column>
 
         <ngx-datatable-column
-          *ngFor="let col of configService.get('visits_datatable_columns')"
+          *ngFor="let col of filteredColumns"
           [name]="col.name"
           [prop]="col.prop"
           [cellTemplate]="col.cellTemplate"
