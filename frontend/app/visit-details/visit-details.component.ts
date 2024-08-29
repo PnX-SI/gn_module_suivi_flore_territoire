@@ -19,7 +19,8 @@ export class VisitDetailComponent implements OnInit, AfterViewInit {
   public idVisit;
   public idSite;
   public sciname;
-  public date;
+  public date_min;
+  public date_max;
   public perturbationsDisplay: string = '';
   public visitGrid = [];
   public observersDisplay: string = '';
@@ -83,7 +84,8 @@ export class VisitDetailComponent implements OnInit, AfterViewInit {
 
   private loadVisit() {
     this.api.getOneVisit(this.idVisit).subscribe(visit => {
-      this.date = visit.visit_date_min;
+      this.date_min = visit.visit_date_min;
+      this.date_max = visit.visit_date_max;
       this.idSite = visit.id_base_site;
       this.comments = visit.comments;
       this.visitGrid = visit.cor_visit_grid;

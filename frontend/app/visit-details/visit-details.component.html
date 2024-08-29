@@ -35,8 +35,13 @@
         </li>
         <li class="list-group-item">
           <i class="fa fa-calendar" aria-hidden="true"></i>
-          Date de la visite :
-          <span class="info"> {{ date }} </span>
+          Date de début de la visite :
+          <span class="info"> {{ date_min }} </span>
+        </li>
+        <li class="list-group-item" *ngIf="date_max !== date_min">
+          <i class="fa fa-calendar" aria-hidden="true"></i>
+          Date de fin de la visite :
+          <span class="info"> {{ date_max }} </span>
         </li>
         <li class="list-group-item">
           <i class="fa fa-warning" aria-hidden="true"></i>
