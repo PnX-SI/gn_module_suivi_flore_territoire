@@ -53,6 +53,9 @@
       <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-sm form">
         <pnx-date [parentFormControl]="visitForm.controls.visit_date_max"></pnx-date>
       </div>
+      <div *ngIf="visitForm.hasError('invalidDate')" class="error" style="color: red">
+        {{ 'Releve.Errors.DateMaxError' | translate }}
+      </div>
     </div>
 
     <div class=" list-group-item">

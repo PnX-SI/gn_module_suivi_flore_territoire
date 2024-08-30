@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { CommonService } from '@geonature_common/service/common.service';
 import { MapService } from '@geonature_common/map/map.service';
 import { GeojsonComponent } from '@geonature_common/map/geojson/geojson.component';
+import { FormService } from '@geonature_common/form/form.service';
 
 import { DataService } from '../shared/services/data.service';
 import { StoreService } from '../shared/services/store.service';
@@ -49,7 +50,8 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
     private modalService: NgbModal,
     public router: Router,
     public storeService: StoreService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private formService: FormService,
   ) { }
 
   ngOnInit() {
@@ -82,6 +84,10 @@ export class VisitFormComponent implements OnInit, AfterViewInit {
       cor_visit_grid: new Array(),
       comments: null,
     });
+    // Check if visit_date_min > visit_date_max
+    this.visitForm.setValidators([
+      this.formService.dateValidator(this.visitForm.get('visit_date_min'), this.visitForm.get('visit_date_max'))
+    ]);
 
     // Set visit_date_max to visit_date_min value if visit_date_max is not registered
     this.visitForm.get('visit_date_min').valueChanges.subscribe((visit_date_min) => {
