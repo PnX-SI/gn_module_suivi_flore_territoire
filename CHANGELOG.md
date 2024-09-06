@@ -12,14 +12,18 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fonctionnalités
 
 - Compatible GeoNature 2.14
-- Declaration des permissions CRUVED du module dans une branche alembic. Les droits sont les mêmes pour les visites et observations.
+- Declaration des permissions CRUVED du module dans une branche Alembic. Les droits sont les mêmes pour les visites et observations
 - Ajout des paramètres `meshes_source`, `site_code_column` et `site_desc_column` dans `bin/config/imports_settings.sample.ini`
+- Ajout de la gestion de la date de fin des visites à l'interface (fiche détaillée et formulaire de saisie d'une visite)
 
 ### Changements
 
 - Mise à jour du README.md et install.md
 - Les paramètres `dataset_id` et `observers_list_id` dans `settings.ini` deviennent respectivement `id_dataset` et `id_menu_list_user` dans `conf_gn_module.toml` (voir `config/conf_gn_module.sample.toml` pour les valeurs par défaut)
 - Les fonctions `check_user_cruved_visit` et `cruved_scope_for_user_in_module` sont remplacées par la classe `VisitAuthMixin` contenant des méthodes qui permettent de récupérer les droits des utilisateurs sur les données (action CRUVED + portée)
+- La liste des visites d'un site affiche mainteant la date de fin de visite si au moins une des visites possède une date de fin de visite différente de sa date de début de visite.
+- Une visite peut maintenant avoir lieu sur plusieurs années
+- ⚠️ La vue `pr_monitoring_flora_territory.export_visits` a été corrigé afin d'exporter la date de fin de visite. Nous n'avons pas utilisé de révision Alembic pour la mise à jour. Il est nécessaire de mettre à jour cette vue manuellement à l'aide de Psql par exemple. Voir le code SQL de la vue dans le fichier [schema.sql](backend/gn_module_monitoring_flora_territory/migrations/data/schema.sql).
 
 ## [1.1.2] - 2022-11-30
 
