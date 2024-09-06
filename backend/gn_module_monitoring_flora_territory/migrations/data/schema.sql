@@ -146,6 +146,7 @@ SELECT
     grid.presence,
     visits.id_digitiser,
     visits.visit_date_min,
+    visits.visit_date_max,
     visits.comments,
     visits.uuid_base_visit,
     ar.geom,
