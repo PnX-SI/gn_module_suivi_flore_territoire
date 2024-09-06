@@ -9,11 +9,12 @@ import importlib
 from alembic import op
 from sqlalchemy.sql import text
 
+from gn_module_monitoring_flora_territory import MODULE_CODE, MODULE_DB_BRANCH
 
 # revision identifiers, used by Alembic.
 revision = "661986d31dc6"
 down_revision = None
-branch_labels = "sft"
+branch_labels = MODULE_DB_BRANCH
 depends_on = (
     "0a97fffb151c",  # Add nomenclatures shared in conservation modules
     "97d30ecf0cb1",  # Add_M25m_mesh
@@ -37,7 +38,7 @@ def downgrade():
     )
     op.get_bind().execute(operations)
 
-    delete_module("SFT")
+    delete_module(MODULE_CODE)
 
 
 def delete_module(module_code):
