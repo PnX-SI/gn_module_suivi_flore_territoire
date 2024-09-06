@@ -9,7 +9,7 @@ from geojson import FeatureCollection
 from sqlalchemy import and_, distinct, desc, delete
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func, select
-from werkzeug.exceptions import Forbidden, Conflict
+from werkzeug.exceptions import Forbidden, Conflict, BadRequest
 
 
 from apptax.taxonomie.models import Taxref
@@ -251,6 +251,17 @@ def edit_visit(id_visit=None):
     data = dict(request.get_json())
 
     # Check data
+    if "cor_visit_observer" not in data or len(data["cor_visit_observer"]) == 0:
+        msg = f"MandatoryObserver - At least one observer must be defined"
+        raise BadRequest(msg)
+
+    if "visit_date_min" not in data or data["visit_date_min"] == "":
+        msg = f"MandatoryVisitDateMin - Visit start date is mandatory"
+        raise BadRequest(msg)
+
+    # Define default values
+    if data["visit_date_max"] is None or data["visit_date_max"] == "":
+        data["visit_date_max"] = data["visit_date_min"]
 
     # Set generic infos got from config
     data["id_dataset"] = blueprint.config["id_dataset"]
@@ -276,10 +287,14 @@ def edit_visit(id_visit=None):
     visit = Visit(**data)
 
     if visit.has_visit_for_this_year():
-        year = data["visit_date_min"][0:4]
+        year_min = data["visit_date_min"][0:4]
+        year_max = data["visit_date_max"][0:4]
         id_base_site = data["id_base_site"]
         db.session.rollback()
-        msg = f"PostYearError - Site {id_base_site} has already been visited in {year}"
+        if year_min != year_max:
+            msg = f"PostYearError - Site {id_base_site} has already been visited between {year_min} and  {year_max}"
+        else:
+            msg = f"PostYearError - Site {id_base_site} has already been visited in {year_min}"
         raise Conflict(msg)
 
     # Add/Update perturbations
