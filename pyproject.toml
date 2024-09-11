@@ -1,6 +1,6 @@
 [project]
 name = "gn-module-monitoring-flora-territory"
-description = "GeoNature Monitoring Flora Territory module for conservation."
+description = "GeoNature Monitoring Flora Territory module for Conservation."
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["conservation", "monitoring", "flora", "territory"]
@@ -18,8 +18,8 @@ authors = [
     {name = "Nicolas ROUYER"},
 ]
 classifiers = [
-    "Development Status :: 1 - Planning",
-    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU Affero General Public License v3",
