@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated README.md and install.md
+- Updated `README.md` and `install.md`
 - The `dataset_id` and `observers_list_id` parameters in `settings.ini` become respectively `id_dataset` and `id_menu_list_user` in `conf_gn_module.toml` (see `config/conf_gn_module.sample.toml` for default values)
 - The `check_user_cruved_visit` and `cruved_scope_for_user_in_module` functions are replaced by the `VisitAuthMixin` class containing methods that allow to retrieve user rights on data (CRUVED action + scope)
 - The list of visits of a site now displays the end date of the visit if at least one of the visits has a different end date of the visit than its start date of the visit.

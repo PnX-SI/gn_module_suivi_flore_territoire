@@ -7,7 +7,7 @@ zoom_level = 12
 # Couleur des traces et points du fichier GPX chargé sur la carte lors de l'édition d'une visite
 map_gpx_color = "green"
 
-# Identifiant du datasaet à utiliser pour les données SFT.
+# Identifiant du dataset à utiliser pour les données SFT.
 # Valeur du champ `id_dataset` de la table `gn_meta.t_datasets`.
 # Devrait correspondre au paramètre "dataset_id" du fichier config/settings.ini
 id_dataset = 1
