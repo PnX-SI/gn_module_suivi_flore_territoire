@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { filter } from "rxjs/operators"
+import { filter } from "@librairies/rxjs/operators"
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
@@ -62,10 +62,9 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
     this.initializeFilterForm();
     this.initializeFilterControls();
   }
+
   ngAfterViewInit() {
     this.initializeRowNumber();
-    
-    
     this.initializeMapList();
     this.loadYears();
     this.loadOrganisms();
@@ -73,15 +72,14 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
 
     // WARNING: use Promise to avoid ExpressionChangedAfterItHasBeenCheckedError
     // See: https://angular.io/errors/NG0100
+    // WARNING: Don't work with ngx-databalse, try to use Angular Material datatable
     Promise.resolve(null).then(() => this.recalculateDataTableSize());
   }
-
 
   private initializeRowNumber() {
     // Get wiewport height to set the number of rows in datatable
     const screenHeight = document.documentElement.clientHeight;
     this.rowNumber = this.calculateRowNumber(screenHeight);
-    
   }
 
   private loadInitialData() {
@@ -229,7 +227,7 @@ export class SitesMapListComponent implements OnInit, AfterViewInit {
   /** Calculate the number of row with the client screen height */
   private calculateRowNumber(screenHeight: number): number {
     const dataTableTop = this.dataTable.element.getBoundingClientRect().top;
-    const footerHeight = document.querySelector('#after-datatable').getBoundingClientRect().height;
+    const footerHeight = this.dataTable.element.getBoundingClientRect().height;
     const outerheight =
       dataTableTop + this.dataTable.headerHeight + this.dataTable.footerHeight + footerHeight;
 
