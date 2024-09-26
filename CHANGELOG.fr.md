@@ -9,6 +9,11 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Inédit]
 
 
+### 🐛 Corrigé
+
+- Correction des noms d'attributs erronnés dans la classe gérant les droits des visites.
+
+
 ## [1.2.0] - 2024-08-20
 
 ### 🚀 Ajouté

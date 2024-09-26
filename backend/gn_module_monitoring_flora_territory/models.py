@@ -38,11 +38,11 @@ class MonitoringFloraTerritory(db.Model):
 
 class VisitAuthMixin(object):
     def user_is_observer_or_digitizer(self, user):
-        return self.id_digitizer == user.id_role or user in self.observers
+        return self.id_digitiser == user.id_role or user in self.observers
 
     def user_is_in_organism_of_observers(self, user):
         for obs in self.observers:
-            if obs.id_organisme == user.id_organism:
+            if obs.id_organisme == user.id_organisme:
                 return True
         return False
 
