@@ -24,8 +24,14 @@ WHERE tmp.:siteCodeColumn::VARCHAR = bs.base_site_code
 \echo '--------------------------------------------------------------------------------'
 \echo 'Insert data in `t_base_sites` with data in temporary table'
 \echo 'WARNING: your Shape file must used the same SRID than you database (usually 2154)'
-INSERT INTO gn_monitoring.t_base_sites
-    (id_nomenclature_type_site, base_site_name, base_site_description, base_site_code, first_use_date, geom)
+INSERT INTO gn_monitoring.t_base_sites (
+    id_nomenclature_type_site,
+    base_site_name,
+    base_site_description,
+    base_site_code,
+    first_use_date,
+    geom
+)
     SELECT
         ref_nomenclatures.get_id_nomenclature('TYPE_SITE', :'siteTypeCode'),
         CONCAT(:'siteTypeCode', '-', :siteCodeColumn::character varying),

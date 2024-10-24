@@ -86,7 +86,7 @@ Description des colonnes attendues dans le fichier CSV contenant la liste des vi
  - **organismes** (*visits_column_organism*) : liste des organimes séparés par des pipes "|". L'ordre doit correspondre à l'ordre des observateurs du champ *observateu*.
  - **date_deb** (*visits_column_date_start*) : date de début de la visite.
  - **date_fin** (*visits_column_date_end*) : date de fin de la visite. Elle sera identique à *date_deb* si la visite a eu lieu sur un seul jour.
- - **presence** (*visits_column_status*) : permet d'indiquer la 'presence' (pr), l'absence (ab) ou l nom observation (na) du taxon sur la maille.
+ - **presence** (*visits_column_status*) : permet d'indiquer la presence (pr), l'absence (ab) ou la non observation (na) du taxon sur la maille.
 
  Autres paramètres :
  - **visits_table_tmp_visits** : nom de la table temporaire contenant les visites par maille.
